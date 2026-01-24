@@ -1,0 +1,69 @@
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import TopBar from './components/TopBar';
+import Header from './components/Header';
+import BrowseCategories from './components/BrowseCategories';
+import Footer from './components/Footer';
+import '../globals.css'; // Assuming you have global styles
+import WhatsAppButton from './components/whatsappbutton';
+
+const CustomerLayout = ({ children }) => {
+  // State to ensure consistent rendering between server and client
+  const [isClient, setIsClient] = useState(false);
+  const [pixelCode, setPixelCode] = useState('');
+
+  useEffect(() => {
+    // Mark that the component has been mounted
+    setIsClient(true);
+
+    // Fetch the first Facebook Pixel code
+    const fetchPixelCode = async () => {
+      try {
+        const response = await fetch('/api/pixels');
+        const data = await response.json();
+        if (data?.data?.length > 0) {
+          setPixelCode(data.data[0].pixelCode); // Set the first pixel code
+        }
+      } catch (error) {
+        console.error('Error fetching pixel code:', error);
+      }
+    };
+
+    fetchPixelCode();
+  }, []);
+
+  return (
+    <>
+      {pixelCode && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              !function(f,b,e,v,n,t,s)
+              {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+              n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+              if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+              n.queue=[];t=b.createElement(e);t.async=!0;
+              t.src=v;s=b.getElementsByTagName(e)[0];
+              s.parentNode.insertBefore(t,s)}(window,document,'script',
+              'https://connect.facebook.net/en_US/fbevents.js');
+              fbq('init', '${pixelCode}'); 
+              fbq('track', 'PageView');
+            `,
+          }}
+        />
+      )}
+      <div className="min-h-screen bg-white flex flex-col">
+        <TopBar />
+        <Header />
+        <main className="flex-grow">
+          {isClient && <WhatsAppButton />}
+          {children}
+        </main>
+        <Footer />
+      </div>
+    </>
+  );
+};
+
+export default CustomerLayout;
