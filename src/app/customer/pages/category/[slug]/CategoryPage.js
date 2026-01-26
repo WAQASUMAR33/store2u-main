@@ -76,7 +76,7 @@ const CategoryPage = () => {
   };
 
   const handleProductClick = (productSlug) => {
-    router.push(`/customer/pages/product/${productSlug}`);
+    router.push(`/customer/pages/products/${productSlug}`);
   };
 
   if (loading) return (

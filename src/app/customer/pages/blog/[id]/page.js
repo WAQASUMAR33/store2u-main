@@ -1,12 +1,16 @@
 import React from "react";
 import BlogDetailPage from "./mainpage"; // Ensure you are importing the correct component
+import { headers } from "next/headers";
 
 export async function generateMetadata({ params }) {
-  // const baseUrl = 'http://solveandwins.com';
-  const baseUrl = 'http://localhost:3000';
   try {
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+    const baseUrl = `${protocol}://${host}`;
+
     const res = await fetch(`${baseUrl}/api/blog/${params.id}`);
-    
+
     if (!res.ok) {
       console.error(`Error: ${res.status} ${res.statusText}`);
       throw new Error('Failed to fetch blog data');
@@ -35,9 +39,9 @@ export async function generateMetadata({ params }) {
 export default function Home({ params }) {
   return (
     <>
-   
+
       <BlogDetailPage id={params.id} />
-    
+
     </>
   );
 }

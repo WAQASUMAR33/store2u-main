@@ -17,14 +17,14 @@ async function getProductData(slug) {
   try {
     // Decode the slug to handle special characters properly
     const decodedSlug = decodeURIComponent(slug);
-    
+
     // Get headers for server-side fetch (Next.js 15+)
     const headersList = await headers();
-    
+
     // Get host - check x-forwarded-host first (Vercel/proxy), then host
     const forwardedHost = headersList.get('x-forwarded-host');
     const host = forwardedHost || headersList.get('host') || 'localhost:3000';
-    
+
     // Get protocol - check x-forwarded-proto first (Vercel/proxy), then determine from env
     const forwardedProto = headersList.get('x-forwarded-proto');
     let protocol = 'http';
@@ -33,15 +33,21 @@ async function getProductData(slug) {
     } else if (process.env.NODE_ENV === 'production' || host.includes('store2u.ca')) {
       protocol = 'https';
     }
-    
-    // Construct base URL - prefer NEXT_PUBLIC_API_URL if set, otherwise build from headers
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || `${protocol}://${host}`;
-    
+
+    // Construct base URL - prefer dynamic host from headers in production
+    // to avoid issues with hardcoded NEXT_PUBLIC_API_URL (like localhost:3000)
+    let baseUrl = `${protocol}://${host}`;
+
+    // Fallback or override if specifically configured and not localhost in production
+    if (process.env.NEXT_PUBLIC_API_URL && (!host.includes('vercel.app') && !host.includes('store2u.ca'))) {
+      baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    }
+
     // Build the API URL - use the decoded slug directly
     const apiUrl = `${baseUrl}/api/products/${decodedSlug}`;
-    
+
     // Use ISR (Incremental Static Regeneration) for better performance
-    const res = await fetch(apiUrl, { 
+    const res = await fetch(apiUrl, {
       next: { revalidate: 60 }, // Cache for 60 seconds
       headers: {
         'Content-Type': 'application/json',
@@ -58,7 +64,7 @@ async function getProductData(slug) {
     }
 
     const data = await res.json();
-    
+
     if (!data?.data) {
       console.error('Product data structure is invalid:', data);
       return null;
@@ -92,7 +98,7 @@ export async function generateMetadata({ params }) {
 
   const { product } = productData;
   const title = product.meta_title || product.name || 'Product Details';
-  const description = product.meta_description || 
+  const description = product.meta_description ||
     `Shop ${product.name} at Store2U. ${product.description ? product.description.substring(0, 150) : 'Quality products at great prices.'}`;
 
   return {
@@ -105,8 +111,8 @@ export async function generateMetadata({ params }) {
       type: 'website',
       images: product.images?.[0]?.url ? [
         {
-          url: product.images[0].url.startsWith('http') 
-            ? product.images[0].url 
+          url: product.images[0].url.startsWith('http')
+            ? product.images[0].url
             : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`,
           alt: product.name,
         }

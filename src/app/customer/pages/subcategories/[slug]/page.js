@@ -1,6 +1,7 @@
 // Fetch subcategory data server-side
 import { notFound } from 'next/navigation';
-import SubcategoryPage from './SubcategoryPage'; // Adjust the import path if necessary
+import SubcategoryPage from './SubcategoryPage';
+import { headers } from 'next/headers';
 
 // Fetch subcategory data server-side
 async function getSubcategoryData(slug) {
@@ -9,11 +10,22 @@ async function getSubcategoryData(slug) {
   }
 
   try {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    const apiUrl = baseUrl ? `${baseUrl}/api/subcatdetail/${slug}` : `/api/subcatdetail/${slug}`;
-    
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+
+    // Construct base URL
+    let baseUrl = `${protocol}://${host}`;
+
+    // Fallback or override if specifically configured
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app') && !host.includes('store2u.ca')) {
+      baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    }
+
+    const apiUrl = `${baseUrl}/api/subcatdetail/${slug}`;
+
     // Use ISR (Incremental Static Regeneration) for better performance
-    const res = await fetch(apiUrl, { 
+    const res = await fetch(apiUrl, {
       next: { revalidate: 300 }, // Cache for 5 minutes
       headers: {
         'Content-Type': 'application/json',

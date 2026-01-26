@@ -1,5 +1,6 @@
 import { notFound } from 'next/navigation';
 import CategoryPage from './CategoryPage';
+import { headers } from 'next/headers';
 
 /**
  * Fetches category data from the API
@@ -12,12 +13,22 @@ async function getCategoryData(slug) {
   }
 
   try {
-    // Use relative URL for better compatibility
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL || '';
-    const apiUrl = baseUrl ? `${baseUrl}/api/categories/${slug}` : `/api/categories/${slug}`;
-    
+    const headersList = await headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+
+    // Construct base URL
+    let baseUrl = `${protocol}://${host}`;
+
+    // Fallback or override if specifically configured
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app') && !host.includes('store2u.ca')) {
+      baseUrl = process.env.NEXT_PUBLIC_API_URL;
+    }
+
+    const apiUrl = `${baseUrl}/api/categories/${slug}`;
+
     // Use ISR (Incremental Static Regeneration) for better performance
-    const res = await fetch(apiUrl, { 
+    const res = await fetch(apiUrl, {
       next: { revalidate: 300 }, // Cache for 5 minutes
       headers: {
         'Content-Type': 'application/json',
@@ -32,7 +43,7 @@ async function getCategoryData(slug) {
     }
 
     const data = await res.json();
-    
+
     if (!data?.data) {
       return null;
     }
@@ -52,7 +63,7 @@ async function getCategoryData(slug) {
  */
 export async function generateMetadata({ params }) {
   const { slug } = await params;
-  
+
   if (!slug) {
     return {
       title: 'Category Not Found | Store2U',
@@ -74,7 +85,7 @@ export async function generateMetadata({ params }) {
   }
 
   const title = category.meta_title || category.name || 'Category';
-  const description = category.meta_description || 
+  const description = category.meta_description ||
     `Browse ${category.name} products at Store2U. Find quality products in this category.`;
 
   return {
