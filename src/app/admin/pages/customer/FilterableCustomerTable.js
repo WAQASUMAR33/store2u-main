@@ -92,15 +92,15 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
 
       const response = newCustomer.id
         ? await fetch(`/api/users/${newCustomer.id}`, {
-            method: 'PUT',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(customerToSubmit),
-          })
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(customerToSubmit),
+        })
         : await fetch(endpoint, {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(customerToSubmit),
-          });
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(customerToSubmit),
+        });
 
       if (response.ok) {
         fetchCustomers();
@@ -136,11 +136,16 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
       });
       if (response.ok) {
         fetchCustomers();
+        alert('Customer deleted successfully');
       } else {
-        console.error('Failed to delete customer');
+        const errorData = await response.json();
+        const errorMessage = errorData.message || 'Failed to delete customer';
+        console.error('Failed to delete customer:', errorMessage);
+        alert(errorMessage);
       }
     } catch (error) {
       console.error('Error deleting customer:', error);
+      alert('An unexpected error occurred while deleting the customer.');
     }
     setIsLoading(false);
   };
@@ -167,12 +172,15 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
       });
       if (response.ok) {
         fetchCustomers();
+        alert(`Customer status updated successfully`); // Optional confirmation
       } else {
         const errorData = await response.json();
         console.error('Failed to update customer status:', errorData.message);
+        alert(`Failed to update status: ${errorData.message}`);
       }
     } catch (error) {
       console.error('Error updating customer status:', error);
+      alert('An unexpected error occurred while updating status.');
     }
     setIsLoading(false);
   };
