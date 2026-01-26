@@ -297,7 +297,7 @@ const AllProducts = () => {
         </div>
 
         {/* Newsletter Section */}
-        <div className="mt-32 bg-white border border-gray-100 rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden group text-center shadow-xl shadow-gray-200/50">
+        <div className="mt-32 p-12 md:p-20 relative overflow-hidden group text-center">
           <div className="relative z-10 max-w-2xl mx-auto">
             <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h2>
             <p className="text-gray-500 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
