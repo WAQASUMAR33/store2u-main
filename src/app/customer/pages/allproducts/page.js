@@ -158,28 +158,31 @@ const AllProducts = () => {
             {displayProducts.map(product => {
               const originalPrice = calculateOriginalPrice(product.price, product.discount);
               return (
-                <div key={product.id} className="group flex flex-col">
+                <div
+                  key={product.id}
+                  className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  onClick={() => handleProductClick(product.slug)}
+                >
                   <div
-                    className="relative aspect-square bg-[#F3F4FB] rounded-[2rem] overflow-hidden mb-6 transition-all duration-500 group-hover:shadow-2xl cursor-pointer"
-                    onClick={() => handleProductClick(product.slug)}
+                    className="relative aspect-square bg-[#F3F4FB] overflow-hidden transition-all duration-500"
                   >
                     {/* Badge */}
                     {product.discount > 0 && (
-                      <div className="absolute top-4 left-4 z-20 bg-[#1E4C2F] text-white text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-tight shadow-md">
+                      <div className="absolute top-3 left-3 z-20 bg-[#1E4C2F] text-white text-[9px] font-bold px-2.5 py-1 rounded-full uppercase tracking-tight shadow-md">
                         {product.discount.toFixed(0)}% OFF
                       </div>
                     )}
 
                     {/* Floating Icons */}
-                    <div className="absolute top-4 right-4 z-30 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                      <button className="bg-white p-2.5 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110">
-                        <FiMaximize2 size={18} />
+                    <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                      <button className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110">
+                        <FiMaximize2 size={14} />
                       </button>
                       <button
-                        className="bg-white p-2.5 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110"
+                        className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
-                        <FiShoppingBag size={18} />
+                        <FiShoppingBag size={14} />
                       </button>
                     </div>
 
@@ -194,39 +197,38 @@ const AllProducts = () => {
                     )}
                   </div>
 
-                  <div className="px-2">
+                  <div className="p-4 flex flex-col flex-grow">
                     <div className="flex justify-between items-center mb-2">
-                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest truncate max-w-[60%]">
+                      <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest truncate max-w-[60%]">
                         {product.category?.name || 'Shop Collection'}
                       </p>
-                      <div className="flex items-center gap-1 bg-yellow-50 text-yellow-600 px-2 py-0.5 rounded text-[10px] font-bold">
+                      <div className="flex items-center gap-1 bg-yellow-50 text-yellow-600 px-1.5 py-0.5 rounded text-[9px] font-bold">
                         <GoStarFill size={10} /> 4.9
                       </div>
                     </div>
 
                     <h3
-                      className="text-base md:text-lg font-bold mb-2 line-clamp-2 text-[#2D2D2D] group-hover:text-blue-600 transition-colors cursor-pointer leading-snug h-[2.8em]"
-                      onClick={() => handleProductClick(product.slug)}
+                      className="text-sm font-bold mb-2 line-clamp-2 text-[#2D2D2D] group-hover:text-black transition-colors leading-snug h-[2.8em] overflow-hidden"
                     >
                       {product.name}
                     </h3>
 
-                    <div className="flex flex-col mb-4">
-                      <p className="text-xl font-bold text-black leading-none">Rs.{formatPrice(product.price)}</p>
+                    <div className="flex flex-col mt-auto justify-end mb-3">
+                      <p className="text-base font-bold text-black leading-none">Rs.{formatPrice(product.price)}</p>
                       {product.discount > 0 && (
-                        <p className="text-xs text-gray-400 line-through mt-1">Rs.{formatPrice(originalPrice)}</p>
+                        <p className="text-[9px] text-gray-400 line-through mt-1">Rs.{formatPrice(originalPrice)}</p>
                       )}
                     </div>
 
-                    <div className="flex flex-col sm:flex-row gap-2">
+                    <div className="grid grid-cols-2 gap-2">
                       <button
-                        className="flex-1 border-2 border-black text-black text-[9px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-black hover:text-white transition-all flex items-center justify-center gap-2"
+                        className="flex-1 border border-black text-black text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:bg-black hover:text-white transition-all flex items-center justify-center gap-1.5"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
-                        <FiShoppingCart size={14} /> Cart
+                        <FiShoppingCart size={12} /> <span className="hidden sm:inline">Add</span>
                       </button>
                       <button
-                        className="flex-1 bg-black text-white text-[9px] font-black uppercase tracking-widest py-3 rounded-xl hover:bg-gray-800 transition-all shadow-lg active:scale-95"
+                        className="flex-1 bg-black text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:bg-gray-800 transition-all shadow-lg active:scale-95 shadow-black/10"
                         onClick={(e) => handleBuyNow(product, e)}
                       >
                         Buy Now

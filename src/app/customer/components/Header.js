@@ -305,7 +305,7 @@ const Header = () => {
 
         {/* Center: Desktop Menu - Hidden when search is open */}
         {!isSearchOpen && (
-          <nav className="hidden lg:flex items-center space-x-4 xl:space-x-8 text-[11px] xl:text-[12px] font-black uppercase tracking-widest text-gray-700">
+          <nav className="hidden lg:flex items-center space-x-2 xl:space-x-4 text-[11px] xl:text-[12px] font-black uppercase tracking-widest text-gray-700">
             {/* Department Dropdown */}
             <div className="relative group/dept">
               <button
@@ -352,13 +352,9 @@ const Header = () => {
               <Link
                 key={category.slug}
                 href={`/customer/pages/category/${category.slug}`}
-                className="relative group py-2 h-14 flex items-center hover:text-black transition-colors text-center leading-tight"
+                className="relative group py-2 h-14 flex items-center hover:text-black transition-colors text-center whitespace-nowrap"
               >
-                <div className="flex flex-col items-center">
-                  {category.name.split(' ').map((word, i) => (
-                    <span key={i} className="block">{word}</span>
-                  ))}
-                </div>
+                {category.name}
                 <span className="absolute bottom-3 left-0 w-0 h-[3px] bg-black transition-all duration-300 group-hover:w-full rounded-full"></span>
               </Link>
             ))}

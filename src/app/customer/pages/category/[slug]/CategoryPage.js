@@ -199,72 +199,74 @@ const CategoryPage = () => {
               {filteredProductsList.map((product) => {
                 const originalPrice = product.price / (1 - product.discount / 100);
                 return (
-                  <div key={product.id} className="group flex flex-col">
+                  <div
+                    key={product.id}
+                    className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+                    onClick={() => handleProductClick(product.slug)}
+                  >
                     <div
-                      className="relative aspect-square bg-[#F9FAFB] rounded-[1.5rem] md:rounded-[2rem] overflow-hidden mb-4 border border-gray-100/50 transition-all duration-700 group-hover:shadow-xl group-hover:-translate-y-2 cursor-pointer"
-                      onClick={() => handleProductClick(product.slug)}
+                      className="relative aspect-square bg-[#F9FAFB] overflow-hidden transition-all duration-700"
                     >
                       {product.images?.[0] && (
                         <Image
                           fill
                           src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
                           alt={product.name}
-                          className="object-contain p-4 md:p-6 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
+                          className="object-contain p-4 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                           unoptimized
                         />
                       )}  {product.discount > 0 && (
-                        <div className="absolute top-6 right-6 md:top-8 md:right-8 bg-orange-500 text-white text-[9px] md:text-[11px] font-black px-3 py-1 md:px-4 md:py-1.5 rounded-full uppercase tracking-tighter shadow-lg shadow-orange-500/20">
+                        <div className="absolute top-3 right-3 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg">
                           -{product.discount.toFixed(0)}%
                         </div>
                       )}
 
                       {/* Floating Actions for Desktop */}
-                      <div className="absolute top-6 left-6 md:top-8 md:left-8 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                        <button className="bg-white p-2.5 rounded-full shadow-lg text-gray-700 hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110">
-                          <FiMaximize2 size={16} />
+                      <div className="absolute top-3 left-3 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
+                        <button className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110">
+                          <FiMaximize2 size={14} />
                         </button>
                       </div>
                     </div>
-                    <div className="px-2 md:px-4 flex flex-col flex-1">
-                      <div className="flex items-center justify-between mb-4">
+                    <div className="p-4 flex flex-col flex-1">
+                      <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-0.5 text-yellow-500">
-                          <GoStarFill size={10} className="md:w-3.5 md:h-3.5" />
-                          <GoStarFill size={10} className="md:w-3.5 md:h-3.5" />
-                          <GoStarFill size={10} className="md:w-3.5 md:h-3.5" />
-                          <GoStarFill size={10} className="md:w-3.5 md:h-3.5" />
-                          <GoStarFill size={10} className="md:w-3.5 md:h-3.5 text-gray-200" />
+                          <GoStarFill size={10} />
+                          <GoStarFill size={10} />
+                          <GoStarFill size={10} />
+                          <GoStarFill size={10} />
+                          <GoStarFill size={10} className="text-gray-200" />
                         </div>
-                        <div className="flex items-center gap-1 bg-gray-50 text-gray-400 px-1.5 py-0.5 rounded text-[8px] md:text-[10px] font-black uppercase tracking-widest">
-                          <GoStarFill size={10} /> 4.9
+                        <div className="flex items-center gap-1 bg-gray-50 text-gray-400 px-1.5 py-0.5 rounded text-[8px] font-black uppercase tracking-widest">
+                          4.9
                         </div>
                       </div>
                       <h3
-                        className="text-[11px] md:text-sm font-bold mb-1.5 line-clamp-2 text-[#2D2D2D] group-hover:text-orange-500 transition-colors cursor-pointer leading-tight h-[2.5em] overflow-hidden"
-                        onClick={() => handleProductClick(product.slug)}
+                        className="text-[11px] md:text-sm font-bold mb-1.5 line-clamp-2 text-[#2D2D2D] group-hover:text-orange-500 transition-colors leading-tight h-[2.5em] overflow-hidden"
                       >
                         {product.name}
                       </h3>
 
                       {/* Reinforced Price Container for Alignment */}
-                      <div className="flex flex-col mb-4 min-h-[40px] md:min-h-[45px] justify-center">
+                      <div className="flex flex-col mt-auto justify-end mb-3">
                         <p className="text-sm md:text-base font-black text-black leading-none">Rs.{formatPrice(product.price)}</p>
                         {product.discount > 0 ? (
-                          <p className="text-[9px] md:text-[10px] text-gray-400 line-through mt-1 font-bold">Rs.{formatPrice(originalPrice)}</p>
+                          <p className="text-[9px] text-gray-400 line-through mt-1 font-bold">Rs.{formatPrice(originalPrice)}</p>
                         ) : (
-                          <div className="h-[14px] md:h-[18px]"></div> // Placeholder for alignment
+                          <div className="h-[14px]"></div> // Placeholder
                         )}
                       </div>
 
                       {/* Actions */}
-                      <div className="mt-auto grid grid-cols-2 gap-2">
+                      <div className="grid grid-cols-2 gap-2 mt-2">
                         <button
-                          className="flex-1 border-2 border-orange-500 text-orange-500 text-[8px] md:text-[9px] font-black uppercase tracking-widest py-3 md:py-3.5 rounded-xl md:rounded-2xl hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-2"
+                          className="flex-1 border border-orange-500 text-orange-500 text-[8px] font-black uppercase tracking-widest py-2 rounded-lg hover:bg-orange-500 hover:text-white transition-all flex items-center justify-center gap-1.5"
                           onClick={(e) => handleAddToCart(product, e)}
                         >
-                          <FiShoppingCart size={14} /> <span className="hidden sm:inline">Add</span>
+                          <FiShoppingCart size={12} /> <span className="hidden sm:inline">Add</span>
                         </button>
                         <button
-                          className="flex-1 bg-orange-500 text-white text-[8px] md:text-[9px] font-black uppercase tracking-widest py-3 md:py-3.5 rounded-xl md:rounded-2xl hover:bg-orange-600 transition-all shadow-lg active:scale-95 shadow-orange-500/20"
+                          className="flex-1 bg-orange-500 text-white text-[8px] font-black uppercase tracking-widest py-2 rounded-lg hover:bg-orange-600 transition-all shadow-lg active:scale-95 shadow-orange-500/20"
                           onClick={(e) => handleBuyNow(product, e)}
                         >
                           Buy Now
