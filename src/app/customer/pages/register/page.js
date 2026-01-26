@@ -2,9 +2,32 @@
 
 import React, { useState } from 'react';
 import { useRouter } from 'next/navigation';
-import { FiEye, FiEyeOff } from 'react-icons/fi';
-import { ToastContainer, toast } from 'react-toastify';
-import { ThreeDots } from 'react-loader-spinner';
+import {
+  Box,
+  Card,
+  CardContent,
+  TextField,
+  Button,
+  Typography,
+  CircularProgress,
+  InputAdornment,
+  IconButton,
+  Paper,
+  Grid
+} from '@mui/material';
+import { motion, AnimatePresence } from 'framer-motion';
+import {
+  FiMail,
+  FiLock,
+  FiUser,
+  FiPhone,
+  FiMapPin,
+  FiCamera,
+  FiArrowRight,
+  FiEye,
+  FiEyeOff
+} from 'react-icons/fi';
+import { toast, ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 
 const Register = () => {
@@ -12,262 +35,261 @@ const Register = () => {
     name: '',
     email: '',
     password: '',
-    confirmPassword: '', // Added confirmPassword field
+    confirmPassword: '',
     phoneno: '',
     city: '',
-    role: 'CUSTOMER', // or 'ADMIN'
+    role: 'CUSTOMER',
     image: null,
     base64: '',
   });
 
   const [showPassword, setShowPassword] = useState(false);
-  const [loading, setLoading] = useState(false); // Loading state
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-
     if (name === 'name') {
-      // Allow only letters (A-Z, a-z)
       const lettersOnly = /^[A-Za-z\s]*$/;
       if (!lettersOnly.test(value)) {
         toast.error('Name should only contain letters.');
         return;
       }
     }
-
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-  };
-
-  const handleImageChange = (e) => {
-    const file = e.target.files[0];
-    const reader = new FileReader();
-
-    reader.onloadend = () => {
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        image: file,
-        base64: reader.result.split(',')[1], // Get base64 part of the string
-      }));
-    };
-
-    reader.readAsDataURL(file);
+    setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handlePhoneChange = (e) => {
     let value = e.target.value;
-    // Add +92 prefix if it's not there and format the number
     if (!value.startsWith('+92')) {
       value = '+92' + value.replace(/^0+/, '');
     }
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      phoneno: value,
-    }));
+    setFormData((prev) => ({ ...prev, phoneno: value }));
+  };
+
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onloadend = () => {
+      setFormData((prev) => ({
+        ...prev,
+        image: file,
+        base64: reader.result.split(',')[1],
+      }));
+    };
+    reader.readAsDataURL(file);
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Validate password and confirmPassword
     if (formData.password !== formData.confirmPassword) {
       toast.error("Passwords do not match!");
       return;
     }
 
-    // Validate phone number format
     const phoneRegex = /^\+92\d{10}$/;
     if (!phoneRegex.test(formData.phoneno)) {
-      toast.error("Phone number must be in the format +92xxxxxxxxxx with exactly 10 digits.");
+      toast.error("Format: +92xxxxxxxxxx (10 digits)");
       return;
     }
 
-    setLoading(true); // Start loading
-
+    setLoading(true);
     try {
-      const uploadedImageUrl = await uploadImage(formData.base64);
-
-      const formDataToSend = {
-        ...formData,
-        imageUrl: uploadedImageUrl,  // This URL will be stored in your database
-        base64: '', // No need to send the base64 string
-        confirmPassword: '', // Don't send confirmPassword to the server
-      };
+      const uploadedImageUrl = formData.base64 ? await uploadImage(formData.base64) : '';
 
       const response = await fetch('/api/users', {
         method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(formDataToSend),
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          imageUrl: uploadedImageUrl,
+          base64: '',
+          confirmPassword: '',
+        }),
       });
 
       const data = await response.json();
       if (response.ok) {
-        toast.success('User registered successfully! Please check your email to verify your account.');
-        setTimeout(() => {
-          router.push('/admin');
-        }, 3000); // Redirect to login after 3 seconds
+        toast.success('Check your email to verify account!');
+        setTimeout(() => router.push('/admin'), 3000);
       } else {
-        toast.error(`Error: ${data.message || 'Failed to register user'}`);
+        toast.error(data.message || 'Registration failed');
       }
     } catch (error) {
-      console.error('Error registering user:', error);
-      toast.error('An unexpected error occurred. Please try again.');
+      console.error(error);
+      toast.error('Unexpected error occurred.');
     } finally {
-      setLoading(false); // Stop loading
+      setLoading(false);
     }
   };
 
   const uploadImage = async (base64) => {
-    try {
-      const response = await fetch(`${process.env.NEXT_PUBLIC_UPLOAD_IMAGE_API}`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ image: base64 }),
-      });
-      const result = await response.json();
-      if (response.ok) {
-        return result.image_url; // This should be the exact key returned by your upload endpoint
-      } else {
-        throw new Error(result.error || 'Failed to upload image');
-      }
-    } catch (error) {
-      console.error('Error uploading image:', error);
-      throw error;
+    const response = await fetch(`${process.env.NEXT_PUBLIC_UPLOAD_IMAGE_API}`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ image: base64 }),
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Upload failed');
+    return result.image_url;
+  };
+
+  const glassStyle = {
+    background: 'rgba(255, 255, 255, 0.8)',
+    backdropFilter: 'blur(20px)',
+    WebkitBackdropFilter: 'blur(20px)',
+    border: '1px solid rgba(0, 0, 0, 0.05)',
+    boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.1)',
+  };
+
+  const inputStyle = {
+    '& .MuiOutlinedInput-root': {
+      borderRadius: '16px',
+      transition: 'all 0.3s cubic-bezier(0.4, 0, 0.2, 1)',
+      bgcolor: 'transparent',
+      '& fieldset': { borderColor: 'rgba(0,0,0,0.1)' },
+      '&:hover fieldset': { borderColor: '#F25C2C' },
+      '&.Mui-focused fieldset': { borderColor: '#F25C2C', borderWidth: '2px' },
+      '&.Mui-focused': { bgcolor: '#fff' },
     }
   };
 
-  const togglePasswordVisibility = () => {
-    setShowPassword(!showPassword);
-  };
-
   return (
-    <div className="min-h-screen flex flex-col justify-center items-center bg-gray-100 py-10">
-      <form className="bg-white p-8 rounded shadow-md w-full max-w-md mt-4 mb-4" onSubmit={handleSubmit}>
-        <h2 className="text-2xl font-bold mb-6">Register</h2>
-
-        <div className="mb-4">
-          <label className="block text-gray-700">Name</label>
-          <input
-            type="text"
-            name="name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Email</label>
-          <input
-            type="email"
-            name="email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4 relative">
-          <label className="block text-gray-700">Password</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            name="password"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-          <span
-            className="absolute right-3 top-10 cursor-pointer"
-            onClick={togglePasswordVisibility}
-          >
-            {showPassword ? <FiEyeOff /> : <FiEye />}
-          </span>
-        </div>
-        <div className="mb-4 relative">
-          <label className="block text-gray-700">Confirm Password</label>
-          <input
-            type={showPassword ? "text" : "password"}
-            name="confirmPassword"
-            value={formData.confirmPassword}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-          <span
-            className="absolute right-3 top-10 cursor-pointer"
-            onClick={togglePasswordVisibility}
-          >
-            {showPassword ? <FiEyeOff /> : <FiEye />}
-          </span>
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Phone Number</label>
-          <input
-            type="text"
-            name="phoneno"
-            value={formData.phoneno}
-            onChange={handlePhoneChange}
-            placeholder="+92xxxxxxxxxx"
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-        <div className="mb-4">
-          <label className="block text-gray-700">Address</label>
-          <input
-            type="text"
-            name="city"
-            value={formData.city}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded-md"
-            required
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="w-full bg-blue-500 text-white py-2 rounded-md flex justify-center items-center"
-          disabled={loading}
-        >
-          Register
-        </button>
-        <div className="mt-4 text-center">
-          <p className="text-gray-700">Already have an account?</p>
-          <button
-            onClick={() => router.push('/admin')}
-            className="mt-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
-            disabled={loading}
-          >
-            Login
-          </button>
-        </div>
-      </form>
-
-      {/* Loading Spinner */}
-      {loading && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <ThreeDots
-            height="80"
-            width="80"
-            radius="9"
-            color="#ffffff"
-            ariaLabel="three-dots-loading"
-            wrapperStyle={{}}
-            visible={true}
-          />
-        </div>
-      )}
-
+    <Box sx={{
+      minHeight: '100vh', display: 'flex', alignItems: 'center',
+      justifyContent: 'center', py: 8, px: 2, background: '#fff'
+    }}>
       <ToastContainer />
-    </div>
+      <motion.div
+        initial={{ opacity: 0, y: 30 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+      >
+        <Paper sx={{ width: '100%', maxWidth: 500, p: { xs: 3, md: 5 }, borderRadius: '32px', ...glassStyle }}>
+          <Box sx={{ textAlign: 'center', mb: 4 }}>
+            <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, color: '#111827', letterSpacing: '-0.02em' }}>
+              Create <span style={{ color: '#F25C2C' }}>Account</span>
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
+              Join Store2u for a seamless shopping experience
+            </Typography>
+          </Box>
+
+          <form onSubmit={handleSubmit}>
+            <Grid container spacing={2.5}>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth label="Full Name" name="name" required
+                  value={formData.name} onChange={handleChange} sx={inputStyle}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><FiUser color="#9CA3AF" /></InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <TextField
+                  fullWidth label="Email Address" name="email" type="email" required
+                  value={formData.email} onChange={handleChange} sx={inputStyle}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><FiMail color="#9CA3AF" /></InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth label="Password" name="password" required
+                  type={showPassword ? 'text' : 'password'}
+                  value={formData.password} onChange={handleChange} sx={inputStyle}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><FiLock color="#9CA3AF" /></InputAdornment>,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowPassword(!showPassword)} edge="end">
+                          {showPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth label="Confirm" name="confirmPassword" required
+                  type={showConfirmPassword ? 'text' : 'password'}
+                  value={formData.confirmPassword} onChange={handleChange} sx={inputStyle}
+                  InputProps={{
+                    startAdornment: <InputAdornment position="start"><FiLock color="#9CA3AF" /></InputAdornment>,
+                    endAdornment: (
+                      <InputAdornment position="end">
+                        <IconButton onClick={() => setShowConfirmPassword(!showConfirmPassword)} edge="end">
+                          {showConfirmPassword ? <FiEyeOff size={20} /> : <FiEye size={20} />}
+                        </IconButton>
+                      </InputAdornment>
+                    )
+                  }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth label="Phone" name="phoneno" required placeholder="+92xxxxxxxxxx"
+                  value={formData.phoneno} onChange={handlePhoneChange} sx={inputStyle}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><FiPhone color="#9CA3AF" /></InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={12} sm={6}>
+                <TextField
+                  fullWidth label="City/Address" name="city" required
+                  value={formData.city} onChange={handleChange} sx={inputStyle}
+                  InputProps={{ startAdornment: <InputAdornment position="start"><FiMapPin color="#9CA3AF" /></InputAdornment> }}
+                />
+              </Grid>
+              <Grid item xs={12}>
+                <input
+                  accept="image/*" style={{ display: 'none' }}
+                  id="profile-upload" type="file" onChange={handleImageChange}
+                />
+                <label htmlFor="profile-upload">
+                  <Button
+                    component="span" fullWidth startIcon={<FiCamera />}
+                    sx={{
+                      height: '56px', borderRadius: '16px', border: '1px solid rgba(0,0,0,0.1)',
+                      textTransform: 'none', color: formData.image ? '#F25C2C' : '#6B7280',
+                      bgcolor: 'rgba(255, 255, 255, 0.5)', '&:hover': { bgcolor: '#fff', borderColor: '#F25C2C' }
+                    }}
+                  >
+                    {formData.image ? 'Image Selected' : 'Upload Profile Picture'}
+                  </Button>
+                </label>
+              </Grid>
+              <Grid item xs={12}>
+                <Button
+                  type="submit" variant="contained" fullWidth disabled={loading}
+                  sx={{
+                    py: 2, borderRadius: '16px', bgcolor: '#F25C2C', fontWeight: 800,
+                    fontSize: '1rem', textTransform: 'none',
+                    boxShadow: '0 15px 30px rgba(242, 92, 44, 0.3)',
+                    '&:hover': { bgcolor: '#EA580C', transform: 'translateY(-2px)' },
+                    transition: 'all 0.3s'
+                  }}
+                >
+                  {loading ? <CircularProgress size={26} sx={{ color: '#fff' }} /> : 'Create My Account'}
+                </Button>
+              </Grid>
+              <Grid item xs={12} sx={{ textAlign: 'center', mt: 1 }}>
+                <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                  Already have an account?{' '}
+                  <Typography
+                    component="span" onClick={() => router.push('/admin')}
+                    sx={{ color: '#F25C2C', fontWeight: 700, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
+                  >
+                    Login Now
+                  </Typography>
+                </Typography>
+              </Grid>
+            </Grid>
+          </form>
+        </Paper>
+      </motion.div>
+    </Box>
   );
 };
 
