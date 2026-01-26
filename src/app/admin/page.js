@@ -81,7 +81,8 @@ const LoginPage = () => {
       }
     } catch (error) {
       console.error('Error logging in:', error.message);
-      setError('Failed to log in. Please check your credentials and try again.');
+      const errorMessage = error.response?.data?.message || 'Failed to log in. Please check your credentials and try again.';
+      setError(errorMessage);
     } finally {
       setLoading(false);
     }

@@ -46,18 +46,27 @@ export async function POST(request) {
       },
     });
 
-    // Send verification email
-    await sendVerificationEmail(email, verificationToken);
+    // Send verification email - Wrapped in try/catch to avoid 500ing after successful DB creation
+    try {
+      await sendVerificationEmail(email, verificationToken);
+      return NextResponse.json({
+        message: 'Account created! Please check your email to verify your account.',
+        status: true,
+      }, { status: 201 });
+    } catch (emailError) {
+      console.error('[REGISTRATION] User created but email failed:', emailError);
+      return NextResponse.json({
+        message: 'Account created, but we couldn\'t send the welcome email. Please contact support to verify your account.',
+        status: true,
+        emailError: true
+      }, { status: 201 }); // Still 201 because the resource (user) was created
+    }
 
-    return NextResponse.json({
-      message: 'User registered successfully. Please check your email to verify your account.',
-      status: true,
-    });
   } catch (error) {
     console.error('Error creating customer:', error);
     return NextResponse.json(
       {
-        message: 'Failed to create customer',
+        message: 'Failed to create account',
         status: false,
         error: error.message,
       },
