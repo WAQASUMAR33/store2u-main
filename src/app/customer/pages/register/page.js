@@ -114,7 +114,9 @@ const Register = () => {
       const data = await response.json();
       if (response.ok) {
         toast.success('Check your email to verify account!');
-        setTimeout(() => router.push('/admin'), 3000);
+        setTimeout(() => {
+          router.push('/login');
+        }, 3000); // Redirect to login after 3 seconds
       } else {
         toast.error(data.message || 'Registration failed');
       }
@@ -284,7 +286,7 @@ const Register = () => {
                 <Typography variant="body2" sx={{ color: '#6B7280' }}>
                   Already have an account?{' '}
                   <Typography
-                    component="span" onClick={() => router.push('/admin')}
+                    component="span" onClick={() => router.push('/login')}
                     sx={{ color: '#F25C2C', fontWeight: 700, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                   >
                     Login Now
