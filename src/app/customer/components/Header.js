@@ -293,11 +293,11 @@ const Header = () => {
         <div className="flex-shrink-0 mr-8 xl:mr-12">
           <Link href="/">
             <Image
-              width={160}
-              height={50}
+              width={130}
+              height={40}
               src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${companyHeaderImage}`}
               alt="Logo"
-              className="h-10 md:h-12 w-auto cursor-pointer object-contain"
+              className="h-8 md:h-9 w-auto cursor-pointer object-contain"
               unoptimized
             />
           </Link>
@@ -409,31 +409,31 @@ const Header = () => {
         </AnimatePresence>
 
         {/* Right Side: Icons - Grouped with consistent spacing */}
-        <div className="hidden lg:flex items-center space-x-6 xl:space-x-8 ml-auto">
+        <div className="hidden lg:flex items-center space-x-4 xl:space-x-5 ml-auto">
           {!isSearchOpen && (
             <>
               <button
                 onClick={() => setIsSearchOpen(true)}
-                className="p-2 text-gray-700 hover:text-black transition-colors focus:outline-none"
+                className="p-1.5 text-gray-700 hover:text-black transition-colors focus:outline-none"
               >
-                <FiSearch size={22} />
+                <FiSearch size={20} />
               </button>
               <div className="h-4 w-[1px] bg-gray-200"></div>
             </>
           )}
 
           {/* Shopping Cart */}
-          <Link href="/customer/pages/cart" className="relative group p-2 focus:outline-none flex items-center justify-center">
-            <FiShoppingCart className="text-gray-700 text-[26px] group-hover:text-black transition-colors" />
+          <Link href="/customer/pages/cart" className="relative group p-1.5 focus:outline-none flex items-center justify-center">
+            <FiShoppingCart className="text-gray-700 text-[22px] group-hover:text-black transition-colors" />
             {totalQuantityOfItems > 0 && (
-              <span className="absolute -top-1 -right-1 h-5 w-5 flex justify-center items-center bg-[#F25C2C] text-white rounded-full text-[10px] font-bold shadow-md ring-2 ring-white">
+              <span className="absolute -top-1 -right-1 h-4 w-4 flex justify-center items-center bg-[#F25C2C] text-white rounded-full text-[9px] font-bold shadow-md ring-2 ring-white">
                 {totalQuantityOfItems}
               </span>
             )}
           </Link>
 
           {/* Vertical Divider */}
-          <div className="h-8 w-[1px] bg-gray-200"></div>
+          <div className="h-4 w-[1px] bg-gray-200"></div>
 
           {/* Profile Section */}
           <div className="relative flex items-center">

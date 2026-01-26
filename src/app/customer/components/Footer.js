@@ -133,15 +133,15 @@ const Footer = () => {
         initial="hidden"
         animate={inView ? "visible" : "hidden"}
         variants={containerVariants}
-        className="grid grid-cols-1 px-4 gap-8 md:px-10 lg:px-20 sm:grid-cols-2 lg:grid-cols-4 py-16 border-t border-gray-200 bg-white text-black"
+        className="grid grid-cols-1 px-4 gap-6 md:px-10 lg:px-20 sm:grid-cols-2 lg:grid-cols-4 py-10 border-t border-gray-200 bg-white text-black"
       >
         {/* Column 1: Brand & Description */}
         <motion.div variants={itemVariants} className="flex flex-col gap-4">
           <Link href="/" className="focus:outline-none">
             {companyHeaderImage ? (
               <Image
-                width={200}
-                height={60}
+                width={140}
+                height={42}
                 src={getImageUrl(companyHeaderImage)}
                 className="cursor-pointer object-contain"
                 alt="Footer Logo"
@@ -221,7 +221,7 @@ const Footer = () => {
         initial={{ opacity: 0 }}
         animate={inView ? { opacity: 1 } : { opacity: 0 }}
         transition={{ delay: 0.5, duration: 0.5 }}
-        className="bg-white border-t border-gray-200 text-gray-600 py-8 px-4"
+        className="bg-white border-t border-gray-200 text-gray-600 py-6 px-4"
       >
         <div className="container mx-auto flex flex-col md:flex-row justify-between items-center gap-6">
 

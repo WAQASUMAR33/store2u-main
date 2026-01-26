@@ -41,6 +41,7 @@ const ProductPage = ({ productData }) => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [sizes, setSizes] = useState([]);
   const [colors, setColors] = useState([]);
+  const [categories, setCategories] = useState([]); // All categories for the navigation row
   const [quantity, setQuantity] = useState(1);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isNavigating, setIsNavigating] = useState(false);
@@ -54,6 +55,21 @@ const ProductPage = ({ productData }) => {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [userName, setUserName] = useState(null);
   const [linkShare, setLinkShare] = useState(false);
+
+  // Fetch all categories for the navigation row
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get('/api/categories');
+        if (response.data.status) {
+          setCategories(response.data.data);
+        }
+      } catch (error) {
+        console.error('Error fetching categories:', error);
+      }
+    };
+    fetchCategories();
+  }, []);
 
   // Early check
   useEffect(() => {
@@ -491,6 +507,23 @@ const ProductPage = ({ productData }) => {
         shouldUnoptimize={shouldUnoptimize}
         router={router}
       />
+
+      {/* Categories Row */}
+      {categories.length > 0 && (
+        <div className="mt-16 mb-20 border-t border-gray-100 pt-12">
+          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
+            {categories.map((cat) => (
+              <button
+                key={cat.slug}
+                onClick={() => router.push(`/customer/pages/category/${cat.slug}`)}
+                className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-all hover:scale-110 active:scale-95"
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Modal Re-use */}
       {isModalOpen && (
