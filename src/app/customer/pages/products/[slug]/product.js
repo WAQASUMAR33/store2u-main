@@ -510,13 +510,13 @@ const ProductPage = ({ productData }) => {
 
       {/* Categories Row */}
       {categories.length > 0 && (
-        <div className="mt-16 mb-20 border-t border-gray-100 pt-12">
+        <div className="mt-16 mb-12 border-t border-gray-100 pt-12">
           <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
             {categories.map((cat) => (
               <button
                 key={cat.slug}
                 onClick={() => router.push(`/customer/pages/category/${cat.slug}`)}
-                className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-400 hover:text-black transition-all hover:scale-110 active:scale-95"
+                className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-400 hover:text-orange-500 transition-all hover:scale-110 active:scale-95"
               >
                 {cat.name}
               </button>
