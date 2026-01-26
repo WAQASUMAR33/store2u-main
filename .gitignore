@@ -2,3 +2,5 @@ node_modules
 .next
 store2u/
 .env
+store2u.rar
+next-env.d.ts
