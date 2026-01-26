@@ -182,6 +182,7 @@ const Register = () => {
             <Grid container spacing={2.5}>
               <Grid item xs={12}>
                 <TextField
+                  id="reg-name"
                   fullWidth label="Full Name" name="name" required
                   value={formData.name} onChange={handleChange} sx={inputStyle}
                   InputProps={{ startAdornment: <InputAdornment position="start"><FiUser color="#9CA3AF" /></InputAdornment> }}
@@ -189,6 +190,7 @@ const Register = () => {
               </Grid>
               <Grid item xs={12}>
                 <TextField
+                  id="reg-email"
                   fullWidth label="Email Address" name="email" type="email" required
                   value={formData.email} onChange={handleChange} sx={inputStyle}
                   InputProps={{ startAdornment: <InputAdornment position="start"><FiMail color="#9CA3AF" /></InputAdornment> }}
@@ -196,6 +198,7 @@ const Register = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="reg-password"
                   fullWidth label="Password" name="password" required
                   type={showPassword ? 'text' : 'password'}
                   value={formData.password} onChange={handleChange} sx={inputStyle}
@@ -213,6 +216,7 @@ const Register = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="reg-confirm"
                   fullWidth label="Confirm" name="confirmPassword" required
                   type={showConfirmPassword ? 'text' : 'password'}
                   value={formData.confirmPassword} onChange={handleChange} sx={inputStyle}
@@ -230,6 +234,7 @@ const Register = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="reg-phone"
                   fullWidth label="Phone" name="phoneno" required placeholder="+92xxxxxxxxxx"
                   value={formData.phoneno} onChange={handlePhoneChange} sx={inputStyle}
                   InputProps={{ startAdornment: <InputAdornment position="start"><FiPhone color="#9CA3AF" /></InputAdornment> }}
@@ -237,6 +242,7 @@ const Register = () => {
               </Grid>
               <Grid item xs={12} sm={6}>
                 <TextField
+                  id="reg-city"
                   fullWidth label="City/Address" name="city" required
                   value={formData.city} onChange={handleChange} sx={inputStyle}
                   InputProps={{ startAdornment: <InputAdornment position="start"><FiMapPin color="#9CA3AF" /></InputAdornment> }}

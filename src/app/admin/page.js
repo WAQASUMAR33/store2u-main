@@ -26,6 +26,8 @@ const LoginPage = () => {
   const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSuccess, setResendSuccess] = useState('');
   const [isRegistering, setIsRegistering] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
@@ -85,6 +87,27 @@ const LoginPage = () => {
       setError(errorMessage);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleResendVerification = async () => {
+    if (!email) {
+      setError('Please enter your email address first.');
+      return;
+    }
+    setResendLoading(true);
+    setResendSuccess('');
+    try {
+      const response = await axios.post('/api/resend-verification', { email });
+      if (response.data.status) {
+        setResendSuccess(response.data.message);
+        setError('');
+      }
+    } catch (err) {
+      console.error('Error resending verification:', err);
+      setError(err.response?.data?.message || 'Failed to resend verification.');
+    } finally {
+      setResendLoading(false);
     }
   };
 
@@ -212,8 +235,25 @@ const LoginPage = () => {
 
               {error && (
                 <motion.div initial={{ opacity: 0, scale: 0.9 }} animate={{ opacity: 1, scale: 1 }}>
-                  <Typography sx={{ mb: 3, p: 1.5, bgcolor: '#FEE2E2', color: '#B91C1C', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 600, textAlign: 'center', border: '1px solid #FCA5A5' }}>
+                  <Typography sx={{ mb: 2, p: 1.5, bgcolor: '#FEE2E2', color: '#B91C1C', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 600, textAlign: 'center', border: '1px solid #FCA5A5' }}>
                     {error}
+                  </Typography>
+                  {error.includes('verify your email') && (
+                    <Button
+                      onClick={handleResendVerification}
+                      disabled={resendLoading}
+                      sx={{ mb: 3, width: '100%', textTransform: 'none', color: '#F25C2C', fontWeight: 700 }}
+                    >
+                      {resendLoading ? <CircularProgress size={20} /> : 'Resend Verification Email'}
+                    </Button>
+                  )}
+                </motion.div>
+              )}
+
+              {resendSuccess && (
+                <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                  <Typography sx={{ mb: 3, p: 1.5, bgcolor: '#ECFDF5', color: '#047857', borderRadius: '12px', fontSize: '0.875rem', fontWeight: 600, textAlign: 'center', border: '1px solid #A7F3D0' }}>
+                    {resendSuccess}
                   </Typography>
                 </motion.div>
               )}
@@ -221,6 +261,7 @@ const LoginPage = () => {
               <form onSubmit={handleLogin}>
                 <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2.5 }}>
                   <TextField
+                    id="login-email"
                     label="Email Address"
                     type="email"
                     value={email}
@@ -237,6 +278,7 @@ const LoginPage = () => {
                     }}
                   />
                   <TextField
+                    id="login-password"
                     label="Password"
                     type={showPassword ? 'text' : 'password'}
                     value={password}
