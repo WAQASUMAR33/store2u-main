@@ -1,9 +1,14 @@
 'use client';
 import React, { useState, useRef, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import {
   Search as SearchIcon,
   Add as AddIcon,
+  Edit as EditIcon,
+  Delete as DeleteIcon,
+  CloudUpload as CloudUploadIcon,
 } from '@mui/icons-material';
+import { styled } from '@mui/system';
 
 // MUI Imports
 import {
@@ -23,11 +28,69 @@ import {
   DialogContent,
   DialogActions,
   Button,
-  CircularProgress,
   Select,
   MenuItem,
   TablePagination,
+  Chip,
+  Avatar,
+  Divider,
+  InputAdornment,
 } from '@mui/material';
+
+// Custom styled loading bar for API fetching (Matches Orders Page)
+const ModernProgress = styled(Box)(({ theme }) => ({
+  width: '300px',
+  height: '8px',
+  background: 'rgba(255, 255, 255, 0.15)',
+  borderRadius: '8px',
+  overflow: 'hidden',
+  position: 'relative',
+  boxShadow: '0 4px 12px rgba(0, 0, 0, 0.2)',
+  '&:before': {
+    content: '""',
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    width: '100%',
+    height: '100%',
+    background: 'linear-gradient(90deg, #F25C2C, #F97316, #FB923C, #FBBF24, #F25C2C)',
+    backgroundSize: '200% 100%',
+    animation: 'flow 1.5s infinite ease-in-out',
+  },
+  '@keyframes flow': {
+    '0%': { backgroundPosition: '200% 0' },
+    '100%': { backgroundPosition: '-200% 0' },
+  },
+}));
+
+const AnimatedLabel = styled(Typography)(({ theme }) => ({
+  fontSize: '1.5rem',
+  fontWeight: '600',
+  color: '#FFFFFF',
+  background: 'linear-gradient(45deg, #F25C2C, #FB923C)',
+  WebkitBackgroundClip: 'text',
+  WebkitTextFillColor: 'transparent',
+  textShadow: '0 2px 6px rgba(0, 0, 0, 0.3)',
+  position: 'relative',
+  '&:after': {
+    content: '"..."',
+    display: 'inline-block',
+    animation: 'dots 1.5s infinite steps(4, end)',
+  },
+  '@keyframes dots': {
+    '0%': { content: '"."', opacity: 1 },
+    '25%': { content: '".."', opacity: 1 },
+    '50%': { content: '"..."', opacity: 1 },
+    '75%': { content: '"..."', opacity: 0.5 },
+    '100%': { content: '"..."', opacity: 1 },
+  },
+}));
+
+// Status Color Helper
+const getStatusStyles = (status) => {
+  if (status === 1) return { bgcolor: '#ECFDF5', color: '#059669', border: '1px solid #6EE7B7' }; // Active
+  return { bgcolor: '#FEE2E2', color: '#DC2626', border: '1px solid #FCA5A5' }; // Inactive
+};
 
 const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
   const [filter, setFilter] = useState('');
@@ -48,19 +111,20 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
   });
   const [isAdminForm, setIsAdminForm] = useState(false);
   const [images, setImages] = useState([]);
-  const fileInputRef = useRef(null);
 
   // Pagination state
   const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(5);
+  const [rowsPerPage, setRowsPerPage] = useState(10); // Default to 10 to match Orders feel
 
   useEffect(() => {
     setFilteredData(
-      (customers || []).filter((item) =>
-        Object.values(item).some((val) =>
-          String(val).toLowerCase().includes(filter.toLowerCase())
+      (customers || [])
+        .filter((item) =>
+          Object.values(item).some((val) =>
+            String(val).toLowerCase().includes(filter.toLowerCase())
+          )
         )
-      )
+        .sort((a, b) => b.id - a.id) // Sort by ID desc by default
     );
   }, [filter, customers]);
 
@@ -71,7 +135,7 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
     }
     setIsLoading(true);
     try {
-      let imageUrl = '';
+      let imageUrl = newCustomer.imageUrl || ''; // Keep existing URL if not changing
       if (images.length > 0) {
         const imageBase64 = await convertToBase64(images[0]);
         const response = await fetch(`${process.env.NEXT_PUBLIC_UPLOAD_IMAGE_API}`, {
@@ -105,29 +169,36 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
       if (response.ok) {
         fetchCustomers();
         setIsModalOpen(false);
-        setNewCustomer({
-          id: null,
-          name: '',
-          email: '',
-          password: '',
-          phoneno: '',
-          city: '',
-          image: null,
-          imageUrl: '',
-          role: 'CUSTOMER',
-        });
-        setImages([]);
+        resetForm();
       } else {
         const errorData = await response.json();
-        console.error('Failed to create/update customer:', errorData.message);
+        alert(`Failed to save customer: ${errorData.message}`);
       }
     } catch (error) {
       console.error('Error adding/updating customer:', error);
+      alert('An unexpected error occurred.');
     }
     setIsLoading(false);
   };
 
+  const resetForm = () => {
+    setNewCustomer({
+      id: null,
+      name: '',
+      email: '',
+      password: '',
+      phoneno: '',
+      city: '',
+      image: null,
+      imageUrl: '',
+      role: 'CUSTOMER',
+    });
+    setImages([]);
+  };
+
   const handleDeleteItem = async (id) => {
+    if (!confirm('Are you sure you want to delete this customer?')) return;
+
     setIsLoading(true);
     try {
       const response = await fetch(`/api/users/${id}`, {
@@ -140,7 +211,6 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
       } else {
         const errorData = await response.json();
         const errorMessage = errorData.message || 'Failed to delete customer';
-        console.error('Failed to delete customer:', errorMessage);
         alert(errorMessage);
       }
     } catch (error) {
@@ -151,15 +221,9 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
   };
 
   const handleEditItem = async (item) => {
-    setIsLoading(true);
-    try {
-      setNewCustomer(item);
-      setIsAdminForm(false);
-      setIsModalOpen(true);
-    } catch (error) {
-      console.error('Error fetching customer data:', error);
-    }
-    setIsLoading(false);
+    setNewCustomer(item);
+    setIsAdminForm(item.role === 'ADMIN');
+    setIsModalOpen(true);
   };
 
   const handleStatusChange = async (id, action) => {
@@ -172,10 +236,8 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
       });
       if (response.ok) {
         fetchCustomers();
-        alert(`Customer status updated successfully`); // Optional confirmation
       } else {
         const errorData = await response.json();
-        console.error('Failed to update customer status:', errorData.message);
         alert(`Failed to update status: ${errorData.message}`);
       }
     } catch (error) {
@@ -199,7 +261,6 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
     setImages([file]);
   };
 
-  // Pagination handlers
   const handleChangePage = (event, newPage) => {
     setPage(newPage);
   };
@@ -209,127 +270,212 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
     setPage(0);
   };
 
-  // Paginated data
-  const paginatedData = filteredData.slice(
+  const paginatedData = Array.isArray(filteredData) ? filteredData.slice(
     page * rowsPerPage,
     page * rowsPerPage + rowsPerPage
-  );
+  ) : [];
 
   return (
     <Box sx={{ bgcolor: '#F3F4F6', minHeight: '100vh', p: 1 }}>
-      {/* Loading Overlay */}
+      {/* Modern Loading State */}
       {isLoading && (
         <Box
           sx={{
             position: 'fixed',
             inset: 0,
             display: 'flex',
+            flexDirection: 'column',
             alignItems: 'center',
             justifyContent: 'center',
-            bgcolor: 'rgba(0, 0, 0, 0.5)',
+            bgcolor: 'rgba(0, 0, 0, 0.6)',
+            backdropFilter: 'blur(6px)',
             zIndex: 50,
+            transition: 'opacity 0.3s ease-in-out',
           }}
         >
-          <CircularProgress color="inherit" />
-          <Typography sx={{ color: 'white', ml: 2 }}>Loading...</Typography>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              bgcolor: 'rgba(255, 255, 255, 0.1)',
+              borderRadius: '12px',
+              p: 3,
+              boxShadow: '0 8px 24px rgba(0, 0, 0, 0.3)',
+              border: '1px solid rgba(255, 255, 255, 0.2)',
+            }}
+          >
+            <ModernProgress />
+            <AnimatedLabel sx={{ mt: 2 }}>Processing</AnimatedLabel>
+          </Box>
         </Box>
       )}
 
-      {/* Main Content */}
-      <Paper sx={{ boxShadow: 3, p: 0, m: 0 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2 }}>
-          <Typography variant="h6" sx={{ fontWeight: 'bold', color: '#1F2937' }}>
-            Customers List
-          </Typography>
-          <Box sx={{ display: 'flex', gap: 1 }}>
+      {/* Main Card */}
+      <Paper
+        sx={{
+          p: 3,
+          borderRadius: '24px',
+          border: '1px solid #E5E7EB',
+          boxShadow: '0 4px 20px rgba(0,0,0,0.05)',
+          background: '#fff',
+          position: 'relative',
+          overflow: 'hidden'
+        }}
+      >
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 4 }}>
+          <Box>
+            <Typography variant="h5" sx={{ fontWeight: 800, color: '#111827', letterSpacing: '-0.5px' }}>
+              Customer Management
+            </Typography>
+            <Typography variant="body2" sx={{ color: '#6B7280', mt: 0.5, fontWeight: 500 }}>
+              View, edit, and manage all your registered users
+            </Typography>
+          </Box>
+          <Box sx={{ display: 'flex', gap: 1.5 }}>
             <IconButton
-              color="primary"
               onClick={() => setIsSearchVisible(!isSearchVisible)}
-            >
-              <SearchIcon />
-            </IconButton>
-            <IconButton
-              color="primary"
-              onClick={() => {
-                setNewCustomer({
-                  id: null,
-                  name: '',
-                  email: '',
-                  password: '',
-                  phoneno: '',
-                  city: '',
-                  image: null,
-                  imageUrl: '',
-                  role: 'CUSTOMER',
-                });
-                setIsAdminForm(true);
-                setImages([]);
-                setIsModalOpen(true);
+              sx={{
+                bgcolor: isSearchVisible ? '#F25C2C' : '#F3F4F6',
+                color: isSearchVisible ? '#fff' : '#4B5563',
+                borderRadius: '12px',
+                width: '42px',
+                height: '42px',
+                border: isSearchVisible ? 'none' : '1px solid #E5E7EB',
+                boxShadow: isSearchVisible ? '0 4px 12px rgba(242, 92, 44, 0.3)' : 'none',
+                '&:hover': { bgcolor: isSearchVisible ? '#E04E1D' : '#E5E7EB', transform: 'translateY(-1px)' },
+                transition: 'all 0.2s ease-in-out'
               }}
             >
-              <AddIcon />
+              <SearchIcon sx={{ fontSize: '1.25rem' }} />
+            </IconButton>
+            <IconButton
+              onClick={() => {
+                resetForm();
+                setIsAdminForm(true); // Default to generic add, can toggle inside
+                setIsModalOpen(true);
+              }}
+              sx={{
+                bgcolor: '#F25C2C',
+                color: '#fff',
+                borderRadius: '12px',
+                width: '42px',
+                height: '42px',
+                boxShadow: '0 4px 12px rgba(242, 92, 44, 0.3)',
+                '&:hover': { bgcolor: '#E04E1D', transform: 'translateY(-1px)', boxShadow: '0 6px 16px rgba(242, 92, 44, 0.4)' },
+                transition: 'all 0.2s ease-in-out'
+              }}
+            >
+              <AddIcon sx={{ fontSize: '1.5rem' }} />
             </IconButton>
           </Box>
         </Box>
 
-        {/* Search Input */}
         {isSearchVisible && (
           <TextField
             fullWidth
             variant="outlined"
-            placeholder="Search..."
+            placeholder="Search by name, email, or city..."
             value={filter}
             onChange={(e) => setFilter(e.target.value)}
-            sx={{ mb: 2, mx: 2 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <SearchIcon sx={{ color: '#9CA3AF', fontSize: '1.2rem' }} />
+                </InputAdornment>
+              ),
+            }}
+            sx={{
+              mb: 3,
+              '& .MuiOutlinedInput-root': {
+                borderRadius: '16px',
+                bgcolor: '#F9FAFB',
+                height: '48px',
+                '& fieldset': { borderColor: '#E5E7EB' },
+                '&:hover fieldset': { borderColor: '#F25C2C' },
+                '&.Mui-focused fieldset': { borderColor: '#F25C2C', borderWidth: '2px' },
+              },
+              boxShadow: '0 2px 10px rgba(0,0,0,0.02)'
+            }}
           />
         )}
 
-        {/* Table */}
         <TableContainer sx={{ maxHeight: '60vh', overflowX: 'auto' }}>
           <Table stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>ID</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Name</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Email</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Phone No</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', width: 150 }}>Address</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Role</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Updated At</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB' }}>Actions</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151' }}>ID</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151' }}>Customer</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151' }}>Contact Info</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151' }}>Location</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151', textAlign: 'center' }}>Role</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151', textAlign: 'center' }}>Status</TableCell>
+                <TableCell sx={{ fontWeight: 'bold', bgcolor: '#F9FAFB', color: '#374151', textAlign: 'right' }}>Actions</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
               {Array.isArray(paginatedData) && paginatedData.map((item, index) => (
-                <TableRow key={item.id} sx={{ bgcolor: index % 2 === 0 ? 'white' : '#F9FAFB' }}>
-                  <TableCell>{item.id}</TableCell>
-                  <TableCell>{item.name}</TableCell>
-                  <TableCell>{item.email}</TableCell>
-                  <TableCell>{item.phoneno}</TableCell>
-                  <TableCell sx={{ maxWidth: 150, wordBreak: 'break-word' }}>{item.city}</TableCell>
-                  <TableCell>{item.role}</TableCell>
-                  <TableCell>{new Date(item.updatedAt).toLocaleString()}</TableCell>
+                <TableRow key={item.id} sx={{ bgcolor: index % 2 === 0 ? 'white' : '#F9FAFB', '&:hover': { bgcolor: '#F3F4F6' } }}>
+                  <TableCell sx={{ fontWeight: 600, color: '#3B82F6', fontSize: '0.8rem' }}>#{item.id}</TableCell>
                   <TableCell>
-                    <Button
-                      color="primary"
-                      onClick={() => handleEditItem(item)}
-                      sx={{ mr: 1 }}
-                    >
-                      Edit
-                    </Button>
-                    <Button
-                      color="error"
-                      onClick={() => handleDeleteItem(item.id)}
-                      sx={{ mr: 1 }}
-                    >
-                      Delete
-                    </Button>
-                    <Button
-                      color={item.status === 1 ? 'warning' : 'success'}
-                      onClick={() => handleStatusChange(item.id, item.status === 1 ? 'deactivate' : 'activate')}
-                    >
-                      {item.status === 1 ? 'Deactivate' : 'Activate'}
-                    </Button>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <Avatar
+                        src={item.imageUrl ? `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${item.imageUrl}` : undefined}
+                        sx={{ width: 32, height: 32, bgcolor: '#F3F4F6', color: '#F25C2C', fontSize: '0.8rem', fontWeight: 'bold' }}
+                      >
+                        {item.name?.charAt(0).toUpperCase() || 'U'}
+                      </Avatar>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 600, color: '#111827', fontSize: '0.85rem' }}>{item.name}</Typography>
+                        <Typography variant="caption" sx={{ color: '#9CA3AF', fontSize: '0.7rem' }}>Joined: {new Date(item.createdAt || Date.now()).toLocaleDateString()}</Typography>
+                      </Box>
+                    </Box>
+                  </TableCell>
+                  <TableCell>
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <Typography variant="body2" sx={{ color: '#374151', fontSize: '0.8rem' }}>{item.email}</Typography>
+                      <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.75rem' }}>{item.phoneno}</Typography>
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ maxWidth: 150, fontSize: '0.8rem', color: '#4B5563' }}>
+                    {item.city || 'N/A'}
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Chip
+                      label={item.role}
+                      size="small"
+                      sx={{
+                        bgcolor: item.role === 'ADMIN' ? '#EFF6FF' : '#F3F4F6',
+                        color: item.role === 'ADMIN' ? '#2563EB' : '#4B5563',
+                        fontWeight: 700,
+                        fontSize: '0.65rem'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'center' }}>
+                    <Chip
+                      label={item.status === 1 ? 'Active' : 'Inactive'}
+                      size="small"
+                      sx={{
+                        ...getStatusStyles(item.status),
+                        fontWeight: 700,
+                        fontSize: '0.65rem',
+                        height: '22px'
+                      }}
+                    />
+                  </TableCell>
+                  <TableCell sx={{ textAlign: 'right' }}>
+                    <Box sx={{ display: 'flex', justifyContent: 'flex-end', gap: 1 }}>
+                      <IconButton size="small" onClick={() => handleEditItem(item)} sx={{ color: '#3B82F6', bgcolor: '#EFF6FF', '&:hover': { bgcolor: '#DBEAFE' } }}>
+                        <EditIcon fontSize="small" />
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleStatusChange(item.id, item.status === 1 ? 'deactivate' : 'activate')} sx={{ color: '#F59E0B', bgcolor: '#FFFBEB', '&:hover': { bgcolor: '#FEF3C7' } }}>
+                        <Typography sx={{ fontSize: '10px', fontWeight: 900 }}>{item.status === 1 ? 'OFF' : 'ON'}</Typography>
+                      </IconButton>
+                      <IconButton size="small" onClick={() => handleDeleteItem(item.id)} sx={{ color: '#EF4444', bgcolor: '#FEE2E2', '&:hover': { bgcolor: '#FECACA' } }}>
+                        <DeleteIcon fontSize="small" />
+                      </IconButton>
+                    </Box>
                   </TableCell>
                 </TableRow>
               ))}
@@ -337,7 +483,6 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
           </Table>
         </TableContainer>
 
-        {/* Pagination */}
         <TablePagination
           rowsPerPageOptions={[5, 10, 25]}
           component="div"
@@ -349,118 +494,144 @@ const FilterableCustomerTable = ({ customers, fetchCustomers }) => {
         />
       </Paper>
 
-      {/* Modal with Smaller, Rectangular Buttons */}
-      <Dialog open={isModalOpen} onClose={() => setIsModalOpen(false)} maxWidth="sm" fullWidth>
-        <DialogTitle>{newCustomer.id ? 'Edit Customer' : 'Add New Admin'}</DialogTitle>
-        <DialogContent>
-          <TextField
-            fullWidth
-            label="Name"
-            value={newCustomer.name}
-            onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          />
-          <TextField
-            fullWidth
-            label="Email"
-            type="email"
-            value={newCustomer.email}
-            onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          />
-          <TextField
-            fullWidth
-            label="Password"
-            type="password"
-            value={newCustomer.password}
-            onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          />
-          <TextField
-            fullWidth
-            label="Phone No"
-            value={newCustomer.phoneno}
-            onChange={(e) => setNewCustomer({ ...newCustomer, phoneno: e.target.value })}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          />
-          <TextField
-            fullWidth
-            label="City"
-            value={newCustomer.city}
-            onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
-            sx={{ mt: 2 }}
-            variant="outlined"
-          />
-          <TextField
-            fullWidth
-            label="Image"
-            type="file"
-            onChange={handleImageChange}
-            sx={{ mt: 2 }}
-            variant="outlined"
-            InputLabelProps={{ shrink: true }}
-          />
-          {!isAdminForm && (
-            <Select
+      {/* Modern Modal */}
+      <Dialog
+        open={isModalOpen}
+        onClose={() => setIsModalOpen(false)}
+        maxWidth="sm"
+        fullWidth
+        PaperProps={{
+          sx: {
+            borderRadius: '24px',
+            boxShadow: '0 20px 40px rgba(0,0,0,0.1)'
+          }
+        }}
+      >
+        <DialogTitle sx={{ pt: 3, px: 4 }}>
+          <Typography variant="h5" sx={{ fontWeight: 800, color: '#111827' }}>
+            {newCustomer.id ? 'Edit User' : 'Add New User'}
+          </Typography>
+          <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
+            {newCustomer.id ? 'Update user details and permissions' : 'Create a new customer or admin account'}
+          </Typography>
+        </DialogTitle>
+        <DialogContent sx={{ px: 4, py: 2 }}>
+          <Box sx={{ display: 'grid', gap: 2.5, mt: 1 }}>
+            <TextField
               fullWidth
-              value={newCustomer.role}
-              onChange={(e) => setNewCustomer({ ...newCustomer, role: e.target.value })}
-              sx={{ mt: 2 }}
+              label="Full Name"
+              value={newCustomer.name}
+              onChange={(e) => setNewCustomer({ ...newCustomer, name: e.target.value })}
               variant="outlined"
-            >
-              <MenuItem value="CUSTOMER">Customer</MenuItem>
-              <MenuItem value="ADMIN">Admin</MenuItem>
-            </Select>
-          )}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#F9FAFB' } }}
+            />
+            <Box sx={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 2 }}>
+              <TextField
+                fullWidth
+                label="Email Address"
+                type="email"
+                value={newCustomer.email}
+                onChange={(e) => setNewCustomer({ ...newCustomer, email: e.target.value })}
+                variant="outlined"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#F9FAFB' } }}
+              />
+              <TextField
+                fullWidth
+                label="Phone Number"
+                value={newCustomer.phoneno}
+                onChange={(e) => setNewCustomer({ ...newCustomer, phoneno: e.target.value })}
+                variant="outlined"
+                sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#F9FAFB' } }}
+              />
+            </Box>
+            <TextField
+              fullWidth
+              label="Password"
+              type="password"
+              value={newCustomer.password}
+              onChange={(e) => setNewCustomer({ ...newCustomer, password: e.target.value })}
+              variant="outlined"
+              helperText={newCustomer.id ? "Leave blank to keep current password" : ""}
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#F9FAFB' } }}
+            />
+            <TextField
+              fullWidth
+              label="City / Address"
+              value={newCustomer.city}
+              onChange={(e) => setNewCustomer({ ...newCustomer, city: e.target.value })}
+              variant="outlined"
+              sx={{ '& .MuiOutlinedInput-root': { borderRadius: '12px', bgcolor: '#F9FAFB' } }}
+            />
+
+            <Box sx={{ position: 'relative', border: '1px dashed #E5E7EB', borderRadius: '12px', p: 2, bgcolor: '#F9FAFB' }}>
+              <Typography variant="caption" sx={{ color: '#6B7280', mb: 1, display: 'block', fontWeight: 600 }}>
+                Profile Image
+              </Typography>
+              <Button
+                component="label"
+                variant="outlined"
+                startIcon={<CloudUploadIcon />}
+                fullWidth
+                sx={{
+                  textTransform: 'none',
+                  borderRadius: '10px',
+                  color: '#4B5563',
+                  borderColor: '#E5E7EB',
+                  bgcolor: '#fff',
+                  '&:hover': { bgcolor: '#F3F4F6' }
+                }}
+              >
+                {images.length > 0 ? images[0].name : "Upload Image"}
+                <input type="file" hidden onChange={handleImageChange} />
+              </Button>
+            </Box>
+
+            {!isAdminForm && (
+              <Select
+                fullWidth
+                value={newCustomer.role}
+                onChange={(e) => setNewCustomer({ ...newCustomer, role: e.target.value })}
+                variant="outlined"
+                sx={{ borderRadius: '12px', bgcolor: '#F9FAFB' }}
+              >
+                <MenuItem value="CUSTOMER">Customer</MenuItem>
+                <MenuItem value="ADMIN">Admin</MenuItem>
+              </Select>
+            )}
+          </Box>
         </DialogContent>
-        <DialogActions sx={{ p: 2, justifyContent: 'flex-end', gap: 1 }}>
+        <DialogActions sx={{ p: 4, pt: 2, gap: 2 }}>
           <Button
-            onClick={() => setIsModalOpen(false)}
+            fullWidth
             variant="outlined"
+            onClick={() => setIsModalOpen(false)}
             sx={{
-              px: 2, // Reduced padding for smaller size
-              py: 0.5, // Reduced padding for smaller size
-              borderColor: '#B0BEC5', // Light gray border
-              color: '#546E7A', // Muted teal-gray text
-              fontWeight: '600',
-              fontSize: '0.875rem', // Smaller text
-              bgcolor: '#ECEFF1', // Very light gray background
-              boxShadow: '0 2px 4px rgba(0, 0, 0, 0.1)', // Soft shadow
-              '&:hover': {
-                bgcolor: '#CFD8DC', // Slightly darker gray on hover
-                borderColor: '#90A4AE', // Darker border
-                boxShadow: '0 4px 8px rgba(0, 0, 0, 0.15)', // Enhanced shadow
-                transform: 'scale(1.02)', // Slight scale-up
-              },
-              transition: 'all 0.3s ease-in-out',
+              borderRadius: '14px',
+              py: 1.5,
+              color: '#4B5563',
+              borderColor: '#E5E7EB',
+              textTransform: 'none',
+              fontWeight: 700,
+              '&:hover': { bgcolor: '#F3F4F6', borderColor: '#D1D5DB' }
             }}
           >
             Cancel
           </Button>
           <Button
-            onClick={handleAddNewItem}
+            fullWidth
             variant="contained"
+            onClick={handleAddNewItem}
             sx={{
-              px: 2, // Reduced padding for smaller size
-              py: 0.5, // Reduced padding for smaller size
-              bgcolor: '#0288D1', // Vibrant blue
-              color: 'white',
-              fontWeight: '600',
-              fontSize: '0.875rem', // Smaller text
-              boxShadow: '0 4px 12px rgba(2, 136, 209, 0.3)', // Blue-tinted shadow
-              '&:hover': {
-                bgcolor: '#0277BD', // Darker blue on hover
-                boxShadow: '0 6px 16px rgba(2, 136, 209, 0.4)', // Stronger shadow
-                transform: 'scale(1.02)', // Slight scale-up
-              },
-              transition: 'all 0.3s ease-in-out',
+              borderRadius: '14px',
+              py: 1.5,
+              bgcolor: '#F25C2C',
+              textTransform: 'none',
+              fontWeight: 700,
+              boxShadow: '0 8px 16px rgba(242, 92, 44, 0.25)',
+              '&:hover': { bgcolor: '#E04E1D', boxShadow: '0 12px 24px rgba(242, 92, 44, 0.35)' }
             }}
           >
-            {newCustomer.id ? 'Update' : 'Add'}
+            {newCustomer.id ? 'Save Changes' : 'Create User'}
           </Button>
         </DialogActions>
       </Dialog>

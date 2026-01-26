@@ -21,7 +21,8 @@ export async function POST(request) {
       }, { status: 404 });
     }
 
-    if (!user.emailVerified) {
+    // Check if email is verified OR if the account has been manually activated by an admin (status === 1)
+    if (!user.emailVerified && user.status !== 1) {
       return NextResponse.json({
         message: "Please verify your email before logging in.",
       }, { status: 403 });
@@ -35,7 +36,7 @@ export async function POST(request) {
     }
 
     // Generate JWT token
-    const token = jwt.sign({ email: user.email, id: user.id, name:user.name, role: user.role }, SECRET_KEY, {
+    const token = jwt.sign({ email: user.email, id: user.id, name: user.name, role: user.role }, SECRET_KEY, {
       expiresIn: '1h' // token will expire in 1 hour
     });
 
@@ -43,7 +44,7 @@ export async function POST(request) {
       success: true,
       message: "Login Successfully",
       token,
-      user: { email: user.email, id: user.id,name:user.name, role: user.role }, // Return the user details
+      user: { email: user.email, id: user.id, name: user.name, role: user.role }, // Return the user details
     });
   } catch (error) {
     console.error('Error during login:', error);

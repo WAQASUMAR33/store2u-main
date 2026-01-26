@@ -391,7 +391,7 @@ const Header = () => {
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleSearch}
-                    className={`px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${activeType === 'collection' ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-gray-50 text-gray-400 hover:bg-gray-100"
                   >
                     SEARCH
                   </button>
