@@ -23,17 +23,6 @@ export async function POST(request) {
       );
     }
 
-    // Ensure endDate is after startDate, add end of day to endDate
-    if (endDate < startDate) {
-      return NextResponse.json(
-        { error: 'End date must be after start date' },
-        { status: 400 }
-      );
-    }
-
-    // Ensure the endDate includes the full day (23:59:59) to include orders from the whole day
-    endDate.setHours(23, 59, 59, 999);
-
     // List of statuses to aggregate
     const statuses = ['PENDING', 'PAID', 'SHIPPED', 'COMPLETED', 'CANCELLED'];
 

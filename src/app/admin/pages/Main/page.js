@@ -57,7 +57,7 @@ export default function Home() {
 
   const [endDate, setEndDate] = useState(() => {
     const date = new Date();
-    date.setHours(0, 0, 0, 0); // Normalized to midnight (API handles end-of-day extension)
+    date.setHours(23, 59, 59, 999); // End of today (Local Time)
     return date;
   });
 
@@ -74,8 +74,9 @@ export default function Home() {
 
   const fetchData = async (startDate, endDate) => {
     try {
-      const date1 = startDate.toISOString().split('T')[0];
-      const date2 = endDate.toISOString().split('T')[0];
+      // Send full ISO strings so the server searches the exact UTC range corresponding to the user's local day
+      const date1 = startDate.toISOString();
+      const date2 = endDate.toISOString();
 
       const response = await fetch('/api/dashboard/allorders', {
         method: 'POST',
