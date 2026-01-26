@@ -7,7 +7,11 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
   const mailHost = process.env.MAIL_HOST || 'smtp.titan.email';
   const mailPort = parseInt(process.env.MAIL_PORT || '465', 10);
 
-  console.log(`[SMTP] Preparing Order Confirmation for: ${email} (Order #${orderId})`);
+  console.log(`[SMTP] Configuration Check:`);
+  console.log(`  - Host: ${mailHost}`);
+  console.log(`  - Port: ${mailPort}`);
+  console.log(`  - User: ${mailUser ? mailUser : 'UNDEFINED'}`);
+  console.log(`  - Pass: ${mailPass ? '******' : 'UNDEFINED'}`);
 
   if (!mailUser || !mailPass) {
     console.error('[SMTP] Missing credentials! MAIL_USER or MAIL_PASSWORD not set.');

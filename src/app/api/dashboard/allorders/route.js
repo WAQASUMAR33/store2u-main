@@ -1,6 +1,8 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../util/prisma';
 
+export const dynamic = 'force-dynamic';
+
 export async function POST(request) {
   try {
     // Parse the request body to get date1 and date2

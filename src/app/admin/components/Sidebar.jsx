@@ -75,14 +75,8 @@ const Sidebar = ({ setActiveComponent }) => {
           const data = await res.json();
           const currentTotal = data.count;
 
-          // Set the initial count on the first successful fetch
-          if (initialPendingCountRef.current === null) {
-            initialPendingCountRef.current = currentTotal;
-          }
-
-          // Calculate new orders received during this session
-          const newOrders = currentTotal - initialPendingCountRef.current;
-          setPendingOrderCount(newOrders > 0 ? newOrders : 0);
+          // Show absolute number of pending orders
+          setPendingOrderCount(currentTotal);
         }
       } catch (error) {
         console.error("Failed to fetch pending orders count", error);

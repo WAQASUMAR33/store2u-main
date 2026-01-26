@@ -311,7 +311,11 @@ const CartPage = () => {
     if (isReadyForPayment && isScriptLoaded && window.paypal) {
       // Clear previous buttons if any
       const container = document.getElementById('paypal-button-container');
-      if (container) container.innerHTML = '';
+
+      // Safety check: ensure container exists before rendering
+      if (!container) return;
+
+      container.innerHTML = '';
 
       window.paypal.Buttons({
         createOrder: (data, actions) => {
