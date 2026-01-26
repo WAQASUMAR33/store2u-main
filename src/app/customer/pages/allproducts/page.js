@@ -297,18 +297,18 @@ const AllProducts = () => {
         </div>
 
         {/* Newsletter Section */}
-        <div className="mt-32 bg-[#F25C2C] rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden group text-center shadow-2xl shadow-orange-500/20">
+        <div className="mt-32 bg-white border border-gray-100 rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden group text-center shadow-xl shadow-gray-200/50">
           <div className="relative z-10 max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tighter">Stay in the Loop</h2>
-            <p className="text-white/80 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h2>
+            <p className="text-gray-500 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
 
             <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
               <input
                 type="email"
                 placeholder="ENTER YOUR EMAIL"
-                className="flex-1 bg-white border-none rounded-xl py-4 px-6 text-black text-xs font-bold tracking-wider placeholder:text-gray-400 focus:ring-0 outline-none"
+                className="flex-1 bg-gray-50 border border-gray-200 rounded-xl py-4 px-6 text-black text-xs font-bold tracking-wider placeholder:text-gray-400 focus:ring-2 focus:ring-[#F25C2C]/20 outline-none transition-all"
               />
-              <button className="bg-black text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-900 transition-all shadow-lg">
+              <button className="bg-[#F25C2C] text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-[#E04E1D] transition-all shadow-lg shadow-orange-500/30">
                 Subscribe
               </button>
             </div>
