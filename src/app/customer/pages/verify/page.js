@@ -33,7 +33,7 @@ export default function VerifyPage() {
           // Show toast only on successful verification
           toast.success(data.message || 'Email verified successfully!');
           setTimeout(() => {
-            router.push('/customer/pages/login');
+            router.push('/admin');
           }, 3000); // Redirect to login after 3 seconds
         } else {
           setLoading(false);

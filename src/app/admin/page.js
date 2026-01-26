@@ -41,13 +41,13 @@ const LoginPage = () => {
   const router = useRouter();
 
   useEffect(() => {
-    const token = localStorage.getItem('token');
+    const token = localStorage.getItem('token') || localStorage.getItem('authToken');
     if (token) {
       const userRole = localStorage.getItem('role');
       if (userRole === 'ADMIN') {
         router.push('/admin/pages/Main');
       } else if (userRole === 'CUSTOMER') {
-        router.push('/customer/pages/login');
+        router.push('/');
       }
     }
   }, [router]);
@@ -62,14 +62,17 @@ const LoginPage = () => {
       if (response.data.success) {
         const { token, user } = response.data;
         localStorage.setItem('token', token);
+        localStorage.setItem('authToken', token); // For consistency with components
         localStorage.setItem('role', user.role);
+        localStorage.setItem('userId', user.id);
+        localStorage.setItem('userName', user.name);
 
         if (user.role === 'ADMIN') {
           alert('Login Successfully');
           router.push('/admin/pages/Main');
         } else if (user.role === 'CUSTOMER') {
-          alert('This ID exists for a customer');
-          router.push('/customer/pages/login');
+          alert('Login Successfully');
+          router.push('/');
         } else {
           setError('Unknown role. Please contact support.');
         }
@@ -199,10 +202,10 @@ const LoginPage = () => {
             <Paper sx={{ width: '100%', maxWidth: 450, p: { xs: 4, md: 5 }, borderRadius: '32px', ...glassStyle }}>
               <Box sx={{ textAlign: 'center', mb: 4 }}>
                 <Typography variant="h4" sx={{ fontWeight: 900, mb: 1, color: '#111827', letterSpacing: '-0.02em' }}>
-                  Admin <span style={{ color: '#F25C2C' }}>Portal</span>
+                  Account <span style={{ color: '#F25C2C' }}>Login</span>
                 </Typography>
                 <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
-                  Enter your credentials to manage Store2u
+                  Enter your credentials to access your account
                 </Typography>
               </Box>
 
@@ -273,15 +276,15 @@ const LoginPage = () => {
                       transition: 'all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275)'
                     }}
                   >
-                    {loading ? <CircularProgress size={26} sx={{ color: '#fff' }} /> : 'Log In to Dashboard'}
+                    {loading ? <CircularProgress size={26} sx={{ color: '#fff' }} /> : 'Log In Now'}
                   </Button>
 
                   <Box sx={{ mt: 3, textAlign: 'center' }}>
                     <Typography variant="body2" sx={{ color: '#6B7280' }}>
-                      Don't have an admin account?{' '}
+                      Don't have an account?{' '}
                       <Typography
                         component="span"
-                        onClick={() => setIsRegistering(true)}
+                        onClick={() => router.push('/customer/pages/register')}
                         sx={{ color: '#F25C2C', fontWeight: 700, cursor: 'pointer', '&:hover': { textDecoration: 'underline' } }}
                       >
                         Register Instead

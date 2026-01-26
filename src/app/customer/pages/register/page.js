@@ -26,7 +26,7 @@ const Register = () => {
 
   const handleChange = (e) => {
     const { name, value } = e.target;
-  
+
     if (name === 'name') {
       // Allow only letters (A-Z, a-z)
       const lettersOnly = /^[A-Za-z\s]*$/;
@@ -35,7 +35,7 @@ const Register = () => {
         return;
       }
     }
-  
+
     setFormData((prevFormData) => ({
       ...prevFormData,
       [name]: value,
@@ -109,7 +109,7 @@ const Register = () => {
       if (response.ok) {
         toast.success('User registered successfully! Please check your email to verify your account.');
         setTimeout(() => {
-          router.push('/customer/pages/login');
+          router.push('/admin');
         }, 3000); // Redirect to login after 3 seconds
       } else {
         toast.error(`Error: ${data.message || 'Failed to register user'}`);
@@ -231,7 +231,7 @@ const Register = () => {
             required
           />
         </div>
-        
+
         <button
           type="submit"
           className="w-full bg-blue-500 text-white py-2 rounded-md flex justify-center items-center"
@@ -242,7 +242,7 @@ const Register = () => {
         <div className="mt-4 text-center">
           <p className="text-gray-700">Already have an account?</p>
           <button
-            onClick={() => router.push('/customer/pages/login')}
+            onClick={() => router.push('/admin')}
             className="mt-2 py-2 px-4 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
             disabled={loading}
           >

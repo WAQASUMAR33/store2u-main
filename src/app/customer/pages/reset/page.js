@@ -35,12 +35,8 @@ export default function ResetPasswordPage() {
       if (res.ok) {
         toast.success('Password reset successful!');
 
-        // Redirect based on the user's role
-        if (data.role === 'customer') {
-          setTimeout(() => router.push('/customer/pages/login'), 3000); // Redirect to customer login
-        } else if (data.role === 'admin') {
-          setTimeout(() => router.push('/admin'), 3000); // Redirect to admin dashboard
-        }
+        // Redirect all roles to the unified login portal
+        setTimeout(() => router.push('/admin'), 3000);
       } else {
         toast.error(data.message || 'Failed to reset password');
       }

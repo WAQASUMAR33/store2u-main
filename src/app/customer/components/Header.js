@@ -245,7 +245,6 @@ const Header = () => {
 
 
   const handleSignOut = () => {
-    // Clear all auth related storage
     localStorage.removeItem('authToken');
     localStorage.removeItem('token');
     localStorage.removeItem('role');
@@ -256,7 +255,7 @@ const Header = () => {
     setIsSignOutModalOpen(false);
 
     // Redirect the user to the login page
-    router.push('/customer/pages/login');
+    router.push('/admin');
   };
 
 
@@ -489,7 +488,7 @@ const Header = () => {
               </div>
             ) : (
               <Link
-                href="/customer/pages/login"
+                href="/admin"
                 className="group p-2 flex items-center justify-center"
               >
                 <FiUser className="w-6 h-6 text-gray-700 group-hover:text-black transition-colors" />
@@ -622,7 +621,7 @@ const Header = () => {
                   </div>
                 ) : (
                   <Link
-                    href="/customer/pages/login"
+                    href="/admin"
                     className="text-white font-bold py-3 px-2 text-[14px] text-center bg-black rounded-xl transition-all hover:bg-gray-800 shadow-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
@@ -693,10 +692,12 @@ const Header = () => {
                   className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
                   onClick={() => {
                     localStorage.removeItem('authToken');
+                    localStorage.removeItem('token');
                     localStorage.removeItem('userName');
+                    localStorage.removeItem('role');
                     setAuthToken(null);
                     setIsSignOutModalOpen(false);
-                    router.push('/customer/pages/login');
+                    router.push('/admin');
                   }}
                 >
                   Sign Out
