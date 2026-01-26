@@ -2,7 +2,8 @@ import prisma from '../../../util/prisma';
 import { NextResponse } from 'next/server';
 
 export async function GET(request, { params }) {
-  const id = parseInt(params.id);
+  const { id: paramId } = await params;
+  const id = parseInt(paramId);
   try {
     const user = await prisma.user.findUnique({
       where: { id },
@@ -18,7 +19,8 @@ export async function GET(request, { params }) {
 }
 
 export async function PUT(request, { params }) {
-  const id = parseInt(params.id);
+  const { id: paramId } = await params;
+  const id = parseInt(paramId);
   try {
     const data = await request.json();
     const { action } = data;
@@ -60,7 +62,8 @@ export async function PUT(request, { params }) {
 }
 
 export async function DELETE(request, { params }) {
-  const id = parseInt(params.id);
+  const { id: paramId } = await params;
+  const id = parseInt(paramId);
   try {
     // 1. Check if user exists
     const user = await prisma.user.findUnique({ where: { id } });
