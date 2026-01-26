@@ -84,13 +84,12 @@ export async function PUT(request, { params }) {
 
 
 export async function GET(request, { params }) {
-  const { slug } = await params; // Use slug parameter
+  const { slug } = await params;
 
   try {
-    // Decode the slug to handle special characters (like apostrophes)
     const decodedSlug = decodeURIComponent(slug);
+    console.log("Fetching product with slug:", decodedSlug);
 
-    // Fetch the product by slug
     const product = await prisma.product.findUnique({
       where: { slug: decodedSlug },
       include: {
@@ -104,20 +103,41 @@ export async function GET(request, { params }) {
     });
 
     if (!product) {
+      console.log("Product not found for slug:", decodedSlug);
       return NextResponse.json(
         { message: 'Product not found.' },
         { status: 404 }
       );
     }
 
-    // Parse colors and sizes from JSON strings
-    const colorIds = JSON.parse(product.colors || '[]');
-    const sizeIds = JSON.parse(product.sizes || '[]');
+    let colorIds = [];
+    let sizeIds = [];
 
-    // Fetch color and size details
+    try {
+      if (product.colors) {
+        colorIds = typeof product.colors === 'string' ? JSON.parse(product.colors) : product.colors;
+        if (!Array.isArray(colorIds)) colorIds = [colorIds];
+      }
+    } catch (e) {
+      console.error("Error parsing product colors:", product.colors, e);
+    }
+
+    try {
+      if (product.sizes) {
+        sizeIds = typeof product.sizes === 'string' ? JSON.parse(product.sizes) : product.sizes;
+        if (!Array.isArray(sizeIds)) sizeIds = [sizeIds];
+      }
+    } catch (e) {
+      console.error("Error parsing product sizes:", product.sizes, e);
+    }
+
+    // Ensure IDs are integers if they are not
+    const formattedColorIds = Array.isArray(colorIds) ? colorIds.map(id => parseInt(id)).filter(id => !isNaN(id)) : [];
+    const formattedSizeIds = Array.isArray(sizeIds) ? sizeIds.map(id => parseInt(id)).filter(id => !isNaN(id)) : [];
+
     const colors = await prisma.color.findMany({
       where: {
-        id: { in: colorIds },
+        id: { in: formattedColorIds },
       },
       select: {
         name: true,
@@ -127,20 +147,19 @@ export async function GET(request, { params }) {
 
     const sizes = await prisma.size.findMany({
       where: {
-        id: { in: sizeIds },
+        id: { in: formattedSizeIds },
       },
       select: {
         name: true,
       },
     });
 
-    // Fetch related products (customize the logic as needed)
     const relatedProducts = await prisma.product.findMany({
       where: {
         subcategorySlug: product.subcategorySlug,
-        NOT: { slug: product.slug }, // Exclude the current product
+        NOT: { slug: product.slug },
       },
-      take: 6, // Limit to 6 related products
+      take: 6,
       include: {
         images: true,
       },
@@ -158,9 +177,9 @@ export async function GET(request, { params }) {
       { status: 200 }
     );
   } catch (error) {
-    console.error('Error fetching product:', error);
+    console.error('CRITICAL ERROR fetching product API:', error);
     return NextResponse.json(
-      { message: 'Internal Server Error' },
+      { message: 'Internal Server Error', error: error.message },
       { status: 500 }
     );
   }

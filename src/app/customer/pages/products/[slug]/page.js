@@ -55,11 +55,12 @@ async function getProductData(slug) {
     });
 
     if (!res.ok) {
+      const errorBody = await res.json().catch(() => ({}));
       if (res.status === 404) {
         return null;
       }
       // Log error for debugging
-      console.error(`Failed to fetch product: ${res.status} - ${res.statusText} - URL: ${apiUrl}`);
+      console.error(`Failed to fetch product: ${res.status} - ${res.statusText} - URL: ${apiUrl}`, errorBody);
       return null;
     }
 

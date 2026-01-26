@@ -105,55 +105,35 @@ const SubcategoryProductsComponent = () => {
               filteredProducts.map((product) => (
                 <motion.div
                   key={product.id}
-                  className="bg-white shadow-md rounded-lg p-4 relative cursor-pointer border border-gray-300"
-                  whileHover={{ scale: 1.05, boxShadow: "0px 10px 20px rgba(0, 0, 0, 0.1)" }}
-                  transition={{ duration: 0.3 }}
+                  className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 relative cursor-pointer"
                   onClick={() => handleProductClick(product.id)}
                 >
-                  {product.images && product.images.length > 0 ? (
-                    <motion.div
-                      whileHover={{ scale: 1.1 }}
-                      transition={{ duration: 0.3 }}
-                      className="h-40 w-full mb-4 rounded overflow-hidden"
-                    >
+                  <div className="relative aspect-square bg-[#F3F4FB] overflow-hidden">
+                    {product.images && product.images.length > 0 ? (
                       <Image
-                        width={300}
-                        height={160}
+                        fill
                         src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
                         alt={product.name}
-                        className="h-40 w-full object-contain"
-                        loading="lazy"
-                        sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 20vw"
+                        className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                         unoptimized
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = '/fallback-image.jpg';
                         }}
                       />
-                    </motion.div>
-                  ) : (
-                    <div className="h-40 w-full bg-gray-200 mb-4 rounded flex items-center justify-center text-gray-500">
-                      No Image
-                    </div>
-                  )}
-                  <div className="grid grid-cols-2 gap-2">
-                    <div>
-                      <h3 className="text-md font-medium text-gray-800 mb-1 overflow-hidden text-ellipsis whitespace-nowrap">{product.name}</h3>
-                      <p className="text-md font-medium text-gray-700">Rs.{product.price}</p>
-                    </div>
-                    <div>
-                      <p className="text-md font-medium text-gray-500">QTY: {product.stock}</p>
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-gray-500 text-xs">
+                        No Image
+                      </div>
+                    )}
+                  </div>
+                  <div className="p-4 flex flex-col flex-grow">
+                    <h3 className="text-sm font-bold text-gray-800 line-clamp-2 mb-2 leading-tight h-[2.5em] group-hover:text-black transition-colors">{product.name}</h3>
+                    <div className="mt-auto flex justify-between items-end">
+                      <p className="text-base font-black text-black leading-none">Rs.{product.price}</p>
+                      <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Stock: {product.stock}</p>
                     </div>
                   </div>
-                  {/* <button
-                    className="absolute bottom-4 right-4 border border-gray-300 text-gray-700 hover:text-blue-500 hover:border-blue-500 transition-colors duration-300 rounded-full p-2 bg-white shadow-lg"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleAddToCart(product);
-                    }}
-                  >
-                    <FiPlus className="h-5 w-5" />
-                  </button> */}
                 </motion.div>
               ))
             ) : (

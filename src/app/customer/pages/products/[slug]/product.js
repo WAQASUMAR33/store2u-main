@@ -532,41 +532,38 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
           return (
             <div
               key={product.slug}
-              className="group flex flex-col gap-2 relative bg-white"
+              className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+              onClick={() => router.push(`/customer/pages/products/${product.slug}`)}
             >
-              {/* Card Image Container */}
               <div
-                className="relative bg-[#F3F4F6] rounded-[1.5rem] overflow-hidden aspect-square cursor-pointer group-hover:shadow-xl transition-all duration-300 isolate"
-                onClick={() => router.push(`/customer/pages/products/${product.slug}`)}
+                className="relative aspect-square bg-[#F3F4FB] overflow-hidden"
               >
                 {/* Discount Badge */}
                 {product.discount && (
-                  <div className="absolute top-3 left-3 z-20 bg-[#1E4C2F] text-white text-[10px] sm:text-xs font-bold px-2 py-1 rounded-full drop-shadow-sm">
+                  <div className="absolute top-3 left-3 z-20 bg-[#1E4C2F] text-white text-[10px] font-bold px-2 py-1 rounded-full drop-shadow-sm">
                     {product.discount.toFixed(0)}% OFF
                   </div>
                 )}
 
                 {/* Floating Action Icons */}
                 <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300 ease-out">
-
-                  <button className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-sm text-gray-700 hover:bg-gray-900 hover:text-white transition-colors" title="Quick View">
-                    <FiMaximize2 size={16} />
+                  <button className="bg-white/95 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-gray-700 hover:bg-gray-900 hover:text-white transition-colors" title="Quick View">
+                    <FiMaximize2 size={14} />
                   </button>
                   <button
-                    className="bg-white/95 backdrop-blur-sm p-2 rounded-full shadow-sm text-gray-700 hover:bg-gray-900 hover:text-white transition-colors"
+                    className="bg-white/95 backdrop-blur-sm p-1.5 rounded-full shadow-sm text-gray-700 hover:bg-gray-900 hover:text-white transition-colors"
                     title="Add to Cart"
                     onClick={(e) => {
                       e.stopPropagation();
-                      // Simple add to cart logic or redirect
                       router.push(`/customer/pages/products/${product.slug}`);
                     }}
                   >
-                    <FiShoppingBag size={16} />
+                    <FiShoppingBag size={14} />
                   </button>
                 </div>
 
                 {/* Image */}
-                <div className="absolute inset-0 p-4 sm:p-6 flex items-center justify-center">
+                <div className="absolute inset-0 p-6 flex items-center justify-center">
                   {product.images?.[0] ? (
                     <Image
                       width={300}
@@ -584,39 +581,28 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
               </div>
 
               {/* Card Details */}
-              <div className="px-1 mt-1">
-                <div className="flex justify-between items-start mb-0.5">
-                  <p className="text-[10px] sm:text-xs text-gray-400 font-bold uppercase tracking-wider truncate max-w-[70%]">
+              <div className="p-4 flex flex-col flex-grow">
+                <div className="flex justify-between items-start mb-2">
+                  <p className="text-[9px] text-gray-400 font-bold uppercase tracking-wider truncate max-w-[70%]">
                     {product.category?.name || 'Collection'}
                   </p>
-                  <div className="flex items-center gap-1 text-yellow-500 text-xs font-bold bg-yellow-50 px-1.5 py-0.5 rounded">
+                  <div className="flex items-center gap-1 text-yellow-500 text-[9px] font-bold bg-yellow-50 px-1.5 py-0.5 rounded">
                     <GoStarFill size={10} />
                     <span>4.9</span>
                   </div>
                 </div>
 
                 <h3
-                  className="text-sm sm:text-base font-bold text-gray-900 mb-1 leading-snug cursor-pointer group-hover:text-orange-600 transition-colors line-clamp-2 min-h-[2.5em]"
-                  onClick={() => router.push(`/customer/pages/products/${product.slug}`)}
+                  className="text-sm font-bold text-gray-900 mb-2 leading-snug cursor-pointer group-hover:text-black transition-colors line-clamp-2 h-[2.8em]"
                 >
                   {product.name}
                 </h3>
 
-                {/* Price - Discounted ON TOP */}
-                <div className="flex flex-col items-start">
-                  {product.discount ? (
-                    <>
-                      <span className="text-gray-900 font-extrabold text-base sm:text-lg">
-                        Rs.{formatPrice(originalPrice)}
-                      </span>
-                      <span className="text-gray-400 text-xs sm:text-sm line-through font-medium">
-                        Rs.{formatPrice(product.price)}
-                      </span>
-                    </>
-                  ) : (
-                    <span className="text-gray-900 font-extrabold text-base sm:text-lg">
-                      Rs.{formatPrice(product.price)}
-                    </span>
+                {/* Price */}
+                <div className="flex flex-col mt-auto justify-end">
+                  <p className="text-base font-bold text-black leading-none">Rs.{formatPrice(product.price)}</p>
+                  {product.discount > 0 && (
+                    <p className="text-[9px] text-gray-400 line-through mt-1 font-bold">Rs.{formatPrice(originalPrice)}</p>
                   )}
                 </div>
               </div>
