@@ -51,12 +51,14 @@ export async function POST(request) {
         },
         where: {
           status: status,
-          updatedAt: {
+          createdAt: { // Changed from updatedAt to createdAt to correctly count orders placed in the period
             gte: startDate,
             lte: endDate,
           },
         },
       });
+
+      console.log(`Status: ${status}, Count: ${aggregation._count.id}, Amount: ${aggregation._sum.netTotal}`);
 
       // Store the results with the status as the key
       results[status.toLowerCase()] = {
