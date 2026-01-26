@@ -55,6 +55,11 @@ export default function Home() {
     labels: [],
     datasets: [],
   });
+  const [isMounted, setIsMounted] = useState(false);
+
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   const fetchData = async (startDate, endDate) => {
     try {
@@ -275,6 +280,11 @@ export default function Home() {
       },
     },
   };
+
+
+  if (!isMounted) {
+    return null;
+  }
 
   return (
     <Box sx={{ pt: 3, minHeight: '100vh', bgcolor: '#F0F2F5' }}> {/* More professional off-white */}
