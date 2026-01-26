@@ -13,7 +13,6 @@ import { GoStarFill } from 'react-icons/go';
 
 const AllProducts = () => {
   const [products, setProducts] = useState([]);
-  const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
@@ -36,7 +35,6 @@ const AllProducts = () => {
       }));
 
       setProducts(fetchedProducts);
-      setRecommendations(fetchedProducts.slice(0, 4));
       setLoading(false);
     } catch (error) {
       console.error('Error fetching products:', error);
@@ -266,35 +264,6 @@ const AllProducts = () => {
           </div>
         )}
 
-        {/* Recommendations Section */}
-        <div className="mt-32 pt-20 border-t border-gray-100">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
-            <div>
-              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-gray-900">You Might Also <span className="text-[#F25C2C]">Like</span></h2>
-              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">Handpicked for you</p>
-            </div>
-          </div>
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {recommendations.map(p => (
-              <div key={p.id} className="group cursor-pointer" onClick={() => handleProductClick(p.slug)}>
-                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-[#F3F4FB] border border-gray-100 mb-4 transition-all duration-500 group-hover:shadow-lg">
-                  {p.images?.[0] && (
-                    <Image
-                      fill
-                      src={`${p.images[0].url ? process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL + '/' + p.images[0].url : process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL + '/' + p.images[0]}`}
-                      alt={p.name}
-                      className="object-contain p-6 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
-                      unoptimized
-                    />
-                  )}
-                </div>
-                <h4 className="text-sm font-bold truncate group-hover:text-[#F25C2C] transition-colors text-gray-900">{p.name}</h4>
-                <p className="text-sm font-black text-gray-900 mt-1">Rs.{formatPrice(p.price)}</p>
-              </div>
-            ))}
-          </div>
-        </div>
 
         {/* Newsletter Section */}
         <div className="mt-32 p-12 md:p-20 relative overflow-hidden group text-center">
