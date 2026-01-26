@@ -8,7 +8,7 @@ import { useDispatch } from 'react-redux';
 import { addToCart, setCart } from '../../../store/cartSlice';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag } from 'react-icons/fi';
+import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag, FiFilter } from 'react-icons/fi';
 import { GoStarFill } from 'react-icons/go';
 
 const AllProducts = () => {
@@ -84,7 +84,7 @@ const AllProducts = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
-        <ThreeDots height="60" width="60" color="#000" />
+        <ThreeDots height="60" width="60" color="#F25C2C" />
       </div>
     );
   }
@@ -95,64 +95,60 @@ const AllProducts = () => {
 
   return (
     <div className="bg-white min-h-screen text-[#1A1A1A] font-sans">
-      {/* Hero Section */}
-      <div className="relative h-[300px] md:h-[450px] w-full overflow-hidden flex items-center justify-center">
-        <div className="absolute inset-0 z-0">
-          <Image
-            fill
-            src="/home4.jpg"
-            alt="Shop Hero"
-            className="object-cover brightness-50"
-            priority
-          />
-        </div>
-        <div className="relative z-10 text-center">
-          <h1 className="text-8xl md:text-[160px] font-black text-white/10 uppercase tracking-tighter select-none leading-none">Shop</h1>
-          <div className="flex items-center justify-center gap-4 text-white font-bold text-xs md:text-sm mt-4 tracking-widest">
-            <span className="cursor-pointer hover:text-blue-400" onClick={() => router.push('/')}>HOME</span>
-            <FiChevronRight className="text-white/40" />
-            <span className="text-white/60 uppercase">ALL PRODUCTS</span>
+      {/* Refined Header Section */}
+      <div className="bg-gray-50 border-b border-gray-100 py-12 px-4 md:px-8">
+        <div className="container mx-auto">
+          {/* Breadcrumb */}
+          <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest text-gray-400 mb-6">
+            <span className="cursor-pointer hover:text-[#F25C2C] transition-colors" onClick={() => router.push('/')}>Home</span>
+            <FiChevronRight />
+            <span className="text-gray-800">Search Results</span>
+          </div>
+
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-gray-900 leading-none">
+              Explore <span className="text-[#F25C2C]">Collection</span>
+            </h1>
+
+            <div className="flex w-full lg:w-auto items-center bg-white rounded-full pl-6 pr-2 py-2 overflow-hidden border border-gray-200 shadow-sm transition-all focus-within:ring-2 focus-within:ring-[#F25C2C]/20 focus-within:border-[#F25C2C] group">
+              <FiSearch className="text-gray-400 mr-3 shrink-0 group-focus-within:text-[#F25C2C] transition-colors" />
+              <input
+                type="text"
+                placeholder="Search products..."
+                className="bg-transparent border-none focus:ring-0 text-sm py-2 w-full lg:w-80 font-medium placeholder:text-gray-300"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <button
+                className="bg-[#F25C2C] text-white px-8 py-3 rounded-full text-[10px] font-black uppercase tracking-widest hover:bg-[#E04E1D] transition-colors shrink-0 shadow-lg shadow-orange-500/30"
+                onClick={() => fetchProducts(searchQuery)}
+              >
+                Search
+              </button>
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="container mx-auto px-4 md:px-8 py-16">
-        {/* Header Bar */}
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-16 gap-8">
-          <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tight">Give All You Need</h2>
-
-          <div className="flex w-full md:w-auto items-center bg-gray-50 rounded-full pl-6 overflow-hidden border border-gray-100 shadow-sm transition-all focus-within:ring-2 focus-within:ring-black/5">
-            <FiSearch className="text-gray-400 mr-3 shrink-0" />
-            <input
-              type="text"
-              placeholder="Search a product..."
-              className="bg-transparent border-none focus:ring-0 text-sm py-4 w-full md:w-80 font-medium"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-            <button
-              className="bg-black text-white px-10 py-4 text-xs font-black uppercase tracking-widest hover:bg-gray-800 transition-colors shrink-0"
-              onClick={() => fetchProducts(searchQuery)}
-            >
-              Search
-            </button>
-          </div>
-        </div>
-
+      <div className="container mx-auto px-4 md:px-8 py-12">
         {/* Filters */}
-        <div className="flex items-center gap-3 mb-16 overflow-x-auto pb-4 no-scrollbar">
+        <div className="flex items-center gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
+          <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F25C2C] hover:text-[#F25C2C] transition-colors shrink-0">
+            <FiFilter />
+          </button>
+          <div className="h-8 w-px bg-gray-200 mx-2"></div>
           {['All', 'New Release', 'Popularity', 'Best Seller', 'Sale'].map(filter => (
             <button
               key={filter}
               onClick={() => setActiveFilter(filter)}
-              className={`px-8 py-3 rounded-full text-[11px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeFilter === filter ? 'bg-black text-white shadow-xl shadow-black/10' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+              className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeFilter === filter ? 'bg-[#F25C2C] text-white shadow-lg shadow-orange-500/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
             >
               {filter}
             </button>
           ))}
         </div>
 
-        {/* Product Grid - Tissot Style */}
+        {/* Product Grid */}
         {displayProducts.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-6 gap-y-12">
             {displayProducts.map(product => {
@@ -160,7 +156,7 @@ const AllProducts = () => {
               return (
                 <div
                   key={product.id}
-                  className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
+                  className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl hover:shadow-orange-500/5 transition-all duration-300 cursor-pointer"
                   onClick={() => handleProductClick(product.slug)}
                 >
                   <div
@@ -175,11 +171,11 @@ const AllProducts = () => {
 
                     {/* Floating Icons */}
                     <div className="absolute top-3 right-3 z-30 flex flex-col gap-2 translate-x-12 opacity-0 group-hover:translate-x-0 group-hover:opacity-100 transition-all duration-300">
-                      <button className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110">
+                      <button className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-[#F25C2C] hover:text-white transition-all transform hover:scale-110">
                         <FiMaximize2 size={14} />
                       </button>
                       <button
-                        className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-black hover:text-white transition-all transform hover:scale-110"
+                        className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-[#F25C2C] hover:text-white transition-all transform hover:scale-110"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
                         <FiShoppingBag size={14} />
@@ -208,27 +204,27 @@ const AllProducts = () => {
                     </div>
 
                     <h3
-                      className="text-sm font-bold mb-2 line-clamp-2 text-[#2D2D2D] group-hover:text-black transition-colors leading-snug h-[2.8em] overflow-hidden"
+                      className="text-sm font-bold mb-2 line-clamp-2 text-[#2D2D2D] group-hover:text-[#F25C2C] transition-colors leading-snug h-[2.8em] overflow-hidden"
                     >
                       {product.name}
                     </h3>
 
                     <div className="flex flex-col mt-auto justify-end mb-3">
-                      <p className="text-base font-bold text-black leading-none">Rs.{formatPrice(product.price)}</p>
+                      <p className="text-base font-bold text-gray-900 leading-none">Rs.{formatPrice(product.price)}</p>
                       {product.discount > 0 && (
-                        <p className="text-[9px] text-gray-400 line-through mt-1">Rs.{formatPrice(originalPrice)}</p>
+                        <p className="text-[9px] text-gray-400 line-through mt-1 font-medium">Rs.{formatPrice(originalPrice)}</p>
                       )}
                     </div>
 
                     <div className="grid grid-cols-2 gap-2">
                       <button
-                        className="flex-1 border border-black text-black text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:bg-black hover:text-white transition-all flex items-center justify-center gap-1.5"
+                        className="flex-1 border border-gray-200 text-gray-600 text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:border-[#F25C2C] hover:text-[#F25C2C] transition-all flex items-center justify-center gap-1.5"
                         onClick={(e) => handleAddToCart(product, e)}
                       >
                         <FiShoppingCart size={12} /> <span className="hidden sm:inline">Add</span>
                       </button>
                       <button
-                        className="flex-1 bg-black text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:bg-gray-800 transition-all shadow-lg active:scale-95 shadow-black/10"
+                        className="flex-1 bg-[#F25C2C] text-white text-[9px] font-black uppercase tracking-widest py-2.5 rounded-lg hover:bg-[#E04E1D] transition-all shadow-lg active:scale-95 shadow-orange-500/20"
                         onClick={(e) => handleBuyNow(product, e)}
                       >
                         Buy Now
@@ -240,44 +236,49 @@ const AllProducts = () => {
             })}
           </div>
         ) : (
-          <div className="py-32 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200">
-            <p className="text-gray-400 font-black uppercase tracking-[0.2em]">No products found</p>
+          <div className="py-32 text-center bg-gray-50 rounded-[3rem] border border-dashed border-gray-200">
+            <p className="text-gray-400 font-bold uppercase tracking-widest text-sm">No products found matching "{searchQuery}"</p>
+            <button
+              className='mt-6 text-[#F25C2C] text-xs font-black uppercase tracking-widest hover:underline'
+              onClick={() => {
+                setSearchQuery('');
+                fetchProducts('');
+              }}
+            >
+              Clear Search
+            </button>
           </div>
         )}
 
         {/* Pagination placeholder */}
         {displayProducts.length > 0 && (
-          <div className="mt-24 flex items-center justify-center gap-4">
-            <button className="w-12 h-12 rounded-2xl border-2 border-gray-100 flex items-center justify-center text-xs font-black text-gray-400 hover:border-black hover:text-black transition-all">PREV</button>
+          <div className="mt-20 flex items-center justify-center gap-3">
+            <button className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 hover:border-[#F25C2C] hover:text-[#F25C2C] transition-all">Prev</button>
             {[1, 2, 3].map((page) => (
               <button
                 key={page}
-                className={`w-12 h-12 rounded-2xl text-xs font-black transition-all ${page === 1 ? 'bg-black text-white shadow-xl shadow-black/20' : 'text-gray-400 hover:bg-gray-100'}`}
+                className={`w-10 h-10 rounded-xl text-xs font-bold transition-all ${page === 1 ? 'bg-[#F25C2C] text-white shadow-lg shadow-orange-500/30' : 'text-gray-500 hover:bg-gray-50'}`}
               >
                 {page}
               </button>
             ))}
-            <button className="w-12 h-12 rounded-2xl border-2 border-gray-100 flex items-center justify-center text-xs font-black text-gray-400 hover:border-black hover:text-black transition-all">NEXT</button>
+            <button className="w-10 h-10 rounded-xl border border-gray-200 flex items-center justify-center text-xs font-bold text-gray-400 hover:border-[#F25C2C] hover:text-[#F25C2C] transition-all">Next</button>
           </div>
         )}
 
         {/* Recommendations Section */}
-        <div className="mt-40 pt-24 border-t border-gray-100">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
+        <div className="mt-32 pt-20 border-t border-gray-100">
+          <div className="flex flex-col md:flex-row justify-between items-end mb-12 gap-6">
             <div>
-              <h2 className="text-4xl font-black uppercase tracking-tighter mb-4 leading-none">Explore Recommendations</h2>
-              <p className="text-gray-400 text-xs font-black uppercase tracking-[0.2em]">Handpicked products based on your interest</p>
-            </div>
-            <div className="flex gap-4">
-              <button className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-black hover:text-black transition-all"><FiChevronDown className="rotate-90 text-xl" /></button>
-              <button className="w-14 h-14 rounded-full border-2 border-gray-100 flex items-center justify-center text-gray-400 hover:border-black hover:text-black transition-all"><FiChevronDown className="-rotate-90 text-xl" /></button>
+              <h2 className="text-3xl font-black uppercase tracking-tighter mb-2 text-gray-900">You Might Also <span className="text-[#F25C2C]">Like</span></h2>
+              <p className="text-gray-400 text-[10px] font-bold uppercase tracking-[0.2em]">Handpicked for you</p>
             </div>
           </div>
 
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-10">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {recommendations.map(p => (
               <div key={p.id} className="group cursor-pointer" onClick={() => handleProductClick(p.slug)}>
-                <div className="relative aspect-video rounded-[2rem] overflow-hidden bg-[#F3F4FB] border border-gray-100 mb-6 transition-all duration-500 group-hover:shadow-xl">
+                <div className="relative aspect-[4/5] rounded-2xl overflow-hidden bg-[#F3F4FB] border border-gray-100 mb-4 transition-all duration-500 group-hover:shadow-lg">
                   {p.images?.[0] && (
                     <Image
                       fill
@@ -288,27 +289,27 @@ const AllProducts = () => {
                     />
                   )}
                 </div>
-                <h4 className="text-base font-black truncate group-hover:text-blue-600 transition-colors uppercase tracking-tight mb-1">{p.name}</h4>
-                <p className="text-xl font-black">Rs.{formatPrice(p.price)}</p>
+                <h4 className="text-sm font-bold truncate group-hover:text-[#F25C2C] transition-colors text-gray-900">{p.name}</h4>
+                <p className="text-sm font-black text-gray-900 mt-1">Rs.{formatPrice(p.price)}</p>
               </div>
             ))}
           </div>
         </div>
 
-        {/* Newsletter Section - Smaller, White Background */}
-        <div className="mt-32 bg-gray-50/50 border border-gray-100 rounded-[3rem] p-12 md:p-20 relative overflow-hidden group text-center">
+        {/* Newsletter Section */}
+        <div className="mt-32 bg-[#F25C2C] rounded-[2.5rem] p-12 md:p-20 relative overflow-hidden group text-center shadow-2xl shadow-orange-500/20">
           <div className="relative z-10 max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-6xl font-black text-black mb-6 leading-tight tracking-tighter">Ready to Get Our New Stuff?</h2>
-            <p className="text-gray-400 mb-12 text-[10px] font-black uppercase tracking-[0.3em] leading-relaxed">Join our inner circle for early access and special discounts.</p>
+            <h2 className="text-4xl md:text-5xl font-black text-white mb-6 leading-tight tracking-tighter">Stay in the Loop</h2>
+            <p className="text-white/80 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
 
-            <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">
+            <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">
               <input
                 type="email"
                 placeholder="ENTER YOUR EMAIL"
-                className="flex-1 bg-white border border-gray-200 rounded-2xl py-5 px-8 text-black text-[10px] font-black tracking-widest focus:ring-2 focus:ring-black/5 transition-all outline-none"
+                className="flex-1 bg-white border-none rounded-xl py-4 px-6 text-black text-xs font-bold tracking-wider placeholder:text-gray-400 focus:ring-0 outline-none"
               />
-              <button className="bg-black text-white px-12 py-5 rounded-2xl font-black text-[11px] uppercase tracking-[0.2em] hover:bg-gray-800 transition-all shadow-xl">
-                JOIN
+              <button className="bg-black text-white px-10 py-4 rounded-xl font-black text-[10px] uppercase tracking-[0.2em] hover:bg-gray-900 transition-all shadow-lg">
+                Subscribe
               </button>
             </div>
           </div>

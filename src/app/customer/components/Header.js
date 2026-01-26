@@ -37,7 +37,10 @@ const Header = () => {
 
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
+  const [searchResults, setSearchResults] = useState([]);
+  const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef(null);
+  const searchContainerRef = useRef(null); // Ref for click outside logic
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -51,6 +54,33 @@ const Header = () => {
     tiktok: '',
   });
   const [loadingSocial, setLoadingSocial] = useState(true);
+
+  // Debounced Search Effect
+  useEffect(() => {
+    const delayDebounceFn = setTimeout(async () => {
+      if (searchQuery.trim().length > 2) {
+        setIsSearching(true);
+        try {
+          const response = await fetch(`/api/products/search/${encodeURIComponent(searchQuery.trim())}`);
+          const data = await response.json();
+          if (data.status) {
+            setSearchResults(data.data);
+          } else {
+            setSearchResults([]);
+          }
+        } catch (error) {
+          console.error("Search error:", error);
+          setSearchResults([]);
+        } finally {
+          setIsSearching(false);
+        }
+      } else {
+        setSearchResults([]);
+      }
+    }, 500); // 500ms debounce
+
+    return () => clearTimeout(delayDebounceFn);
+  }, [searchQuery]);
 
   const animationControls = useAnimation();
 
@@ -183,12 +213,24 @@ const Header = () => {
       }
     };
 
+    // Close search results when clicking outside
+    const handleClickOutsideSearch = (event) => {
+      if (
+        searchContainerRef.current &&
+        !searchContainerRef.current.contains(event.target)
+      ) {
+        setSearchResults([]); // Close dropdown by clearing results
+      }
+    };
+
     document.addEventListener('mousedown', handleClickOutsideMega);
     document.addEventListener('mousedown', handleClickOutsideProfile);
+    document.addEventListener('mousedown', handleClickOutsideSearch);
 
     return () => {
       document.removeEventListener('mousedown', handleClickOutsideMega);
       document.removeEventListener('mousedown', handleClickOutsideProfile);
+      document.removeEventListener('mousedown', handleClickOutsideSearch);
     };
   }, [dispatch]);
 
@@ -317,7 +359,7 @@ const Header = () => {
               {isMegaDropdownOpen && (
                 <div
                   ref={megaDropdownRef}
-                  className="absolute left-0 top-full w-[350px] bg-white shadow-2xl rounded-b-[2rem] border border-gray-100 z-50 overflow-hidden py-4 px-2"
+                  className="absolute left-0 top-full w-[350px] bg-white/95 backdrop-blur-xl shadow-2xl rounded-b-[2rem] border border-gray-100 z-50 overflow-hidden py-4 px-2"
                   onMouseLeave={handleCategoryLeave}
                 >
                   <div className="grid grid-cols-1">
@@ -377,27 +419,100 @@ const Header = () => {
               exit={{ opacity: 0, y: -20 }}
               className="absolute inset-0 bg-white z-50 flex items-center px-4 sm:px-6 lg:px-8 max-w-[1440px] mx-auto"
             >
-              <div className="relative w-full flex items-center gap-4">
+              <div className="relative w-full flex items-center gap-4" ref={searchContainerRef}>
                 <FiSearch className="text-gray-400" size={20} />
-                <input
-                  ref={searchInputRef}
-                  type="text"
-                  placeholder="What are you looking for?"
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
-                  className="w-full bg-transparent border-none py-4 text-lg outline-none font-medium placeholder:text-gray-300"
-                />
+                <div className="w-full relative">
+                  <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="What are you looking for?"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
+                    className="w-full bg-transparent border-none py-4 text-lg outline-none font-medium placeholder:text-gray-300"
+                  />
+
+                  {/* Live Search Dropdown */}
+                  {(searchResults.length > 0 || isSearching) && searchQuery.length > 2 && (
+                    <div className="absolute top-full left-0 w-full bg-white shadow-2xl rounded-2xl border border-gray-100 mt-2 max-h-[60vh] overflow-y-auto z-50">
+                      {isSearching ? (
+                        <div className="p-6 text-center text-gray-400 text-sm font-medium">Searching...</div>
+                      ) : (
+                        <div className="py-2">
+                          <div className="px-4 py-2 text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                            Products ({searchResults.length})
+                          </div>
+                          {searchResults.map((product) => (
+                            <div
+                              key={product.id}
+                              onClick={() => {
+                                router.push(`/customer/pages/products/${product.slug}`);
+                                setIsSearchOpen(false);
+                                setSearchResults([]);
+                              }}
+                              className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
+                            >
+                              <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                                {product.images && JSON.parse(product.images)[0] ? (
+                                  <Image
+                                    src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                    alt={product.name}
+                                    width={48}
+                                    height={48}
+                                    className="w-full h-full object-cover"
+                                    unoptimized
+                                  />
+                                ) : (
+                                  <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Img</div>
+                                )}
+                              </div>
+                              <div className="flex-1 min-w-0">
+                                <h4 className="text-sm font-bold text-gray-900 truncate">{product.name}</h4>
+                                <p className="text-xs text-gray-500 truncate">{product.subcategorySlug}</p>
+                              </div>
+                              <div className="text-right">
+                                {product.discount > 0 ? (
+                                  <>
+                                    <span className="block text-sm font-bold text-[#F25C2C]">
+                                      Rs. {(product.price - (product.price * product.discount) / 100).toLocaleString()}
+                                    </span>
+                                    <span className="block text-[10px] text-gray-400 line-through">
+                                      Rs. {product.price.toLocaleString()}
+                                    </span>
+                                  </>
+                                ) : (
+                                  <span className="block text-sm font-bold text-gray-900">
+                                    Rs. {product.price.toLocaleString()}
+                                  </span>
+                                )}
+                              </div>
+                            </div>
+                          ))}
+                          <div
+                            onClick={handleSearch}
+                            className="p-3 text-center text-xs font-bold text-[#F25C2C] hover:bg-orange-50 cursor-pointer transition-colors border-t border-gray-100"
+                          >
+                            VIEW ALL RESULTS
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
+                </div>
+
                 <div className="flex items-center gap-3">
                   <button
                     onClick={handleSearch}
-                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-gray-50 text-gray-400 hover:bg-gray-100"
+                    className="px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest transition-all bg-gray-50 text-gray-400 hover:bg-gray-100 flex-shrink-0"
                   >
                     SEARCH
                   </button>
                   <button
-                    onClick={() => setIsSearchOpen(false)}
-                    className="p-2.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-full transition-all"
+                    onClick={() => {
+                      setIsSearchOpen(false);
+                      setSearchResults([]);
+                    }}
+                    className="p-2.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-full transition-all flex-shrink-0"
                   >
                     <FiX size={24} />
                   </button>

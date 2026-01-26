@@ -3,7 +3,7 @@ import prisma from '../../../../util/prisma';
 import pluralize from 'pluralize'; // Import the pluralize library
 
 export async function GET(request, { params }) {
-  const search = params.id; // Fetch the search query from the URL parameters
+  const { id: search } = await params; // Fetch the search query from the URL parameters
 
   if (!search) {
     return NextResponse.json(
