@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
 import prisma from '../../../util/prisma';
-import prisma from '../../../util/prisma';
 import { sendStatusUpdateEmail } from '../../../util/sendStatusUpdateEmail';
 import nodemailer from 'nodemailer';
 
