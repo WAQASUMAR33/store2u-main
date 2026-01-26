@@ -1,47 +1,80 @@
 import nodemailer from 'nodemailer';
 
 export async function sendOrderConfirmation(email, orderId, total, items) {
+  // Use either MAIL_USER or EMAIL_USERNAME as fallback
+  const mailUser = process.env.MAIL_USER || process.env.EMAIL_USERNAME;
+  const mailPass = process.env.MAIL_PASSWORD || process.env.EMAIL_PASSWORD;
+  const mailHost = process.env.MAIL_HOST || 'smtp.titan.email';
+  const mailPort = parseInt(process.env.MAIL_PORT || '465', 10);
+
+  console.log(`[SMTP] Preparing Order Confirmation for: ${email} (Order #${orderId})`);
+
+  if (!mailUser || !mailPass) {
+    console.error('[SMTP] Missing credentials! MAIL_USER or MAIL_PASSWORD not set.');
+    throw new Error('SMTP Configuration Error: Missing credentials');
+  }
+
   try {
-    console.log("email is ",email,"Order id is :",orderId,"total is : ",total,"Items are ",items);
-    // const transporter = nodemailer.createTransport({
-    //   service: 'gmail', // Using Gmail's service
-    //   auth: {
-    //     user: process.env.EMAIL_USERNAME, // Your Gmail email address
-    //     pass: process.env.EMAIL_PASSWORD, // Your Gmail app password (not your regular Gmail password)
-    //   },
-    // });
     const transporter = nodemailer.createTransport({
-        host: 'smtp.titan.email', // Hostinger's SMTP server
-        port: 465, // Secure port for SMTP over SSL
-        secure: true, // Use SSL
-        auth: {
-          user: process.env.MAIL_USER, // Your Hostinger email address
-          pass: process.env.MAIL_PASSWORD, // Your Hostinger email password
-        },
-      });
+      host: mailHost,
+      port: mailPort,
+      secure: mailPort === 465, // true for 465, false for 587
+      auth: {
+        user: mailUser,
+        pass: mailPass,
+      },
+      tls: {
+        rejectUnauthorized: false
+      }
+    });
+
+    // Verification step
+    await transporter.verify();
 
     // Create order items list for the email
     const itemsList = items
-      .map(item => `<li>${item.quantity}x ${item.product.name} (Price: Rs.${item.price})</li>`)
+      .map(item => `
+        <li style="margin-bottom: 10px;">
+          <strong>${item.quantity}x</strong> ${item.product.name} 
+          <br/>
+          <span style="color: #666; font-size: 12px;">Price: Rs.${item.price.toLocaleString()}</span>
+        </li>`
+      )
       .join('');
 
     const mailOptions = {
-      from: process.env.MAIL_USER,
+      from: `"Store2U Orders" <${mailUser}>`,
       to: email,
       subject: `Order Confirmation - Order ID #${orderId}`,
       html: `
-        <h2>Thank you for your order!</h2>
-        <p>Your order ID is: <strong>#${orderId}</strong></p>
-        <ul>${itemsList}</ul>
-        <p><strong>Total Amount: Rs.${total}</strong></p>
-        <p>We will notify you once your order has been shipped.</p>
+        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
+          <h2 style="color: #F25C2C; text-align: center;">Thank you for your order!</h2>
+          <p style="text-align: center; font-size: 16px;">Your order ID is: <strong style="color: #000;">#${orderId}</strong></p>
+          
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          
+          <h3 style="color: #333;">Order Summary</h3>
+          <ul style="list-style-type: none; padding: 0;">${itemsList}</ul>
+          
+          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
+          
+          <p style="font-size: 18px; font-weight: bold; text-align: right;">Total Amount: <span style="color: #F25C2C;">Rs.${total.toLocaleString()}</span></p>
+          
+          <p style="text-align: center; color: #777; font-size: 12px; margin-top: 30px;">
+            We will notify you once your order has been shipped.
+          </p>
+        </div>
       `,
     };
 
-    await transporter.sendMail(mailOptions);
-    console.log('Order confirmation email sent successfully.');
+    const info = await transporter.sendMail(mailOptions);
+    console.log('[SMTP] Order Confirmation Sent! Message ID:', info.messageId);
+    return info;
   } catch (error) {
-    console.error('Error sending order confirmation email:', error);
+    console.error('[SMTP] FATAL ERROR sending order confirmation:', {
+      message: error.message,
+      code: error.code
+    });
     throw new Error('Failed to send order confirmation email');
   }
 }
