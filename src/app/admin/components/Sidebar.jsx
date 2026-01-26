@@ -67,6 +67,15 @@ const Sidebar = ({ setActiveComponent }) => {
     }
   }, [router]);
 
+  // Reset badge when visiting orders page
+  useEffect(() => {
+    if (window.location.pathname.includes("/admin/pages/orders")) {
+      const currentTotal = localStorage.getItem("totalPendingOrders") || "0";
+      localStorage.setItem("lastSeenOrderCount", currentTotal);
+      setPendingOrderCount(0);
+    }
+  }, []);
+
   useEffect(() => {
     const fetchPendingOrders = async () => {
       try {
@@ -75,8 +84,23 @@ const Sidebar = ({ setActiveComponent }) => {
           const data = await res.json();
           const currentTotal = data.count;
 
-          // Show absolute number of pending orders
-          setPendingOrderCount(currentTotal);
+          // Store total for reference
+          localStorage.setItem("totalPendingOrders", currentTotal.toString());
+
+          // Check if we are currently on the orders page
+          const isOnOrdersPage = window.location.pathname.includes("/admin/pages/orders");
+
+          if (isOnOrdersPage) {
+            // Update seen count to match current total -> Badge 0
+            localStorage.setItem("lastSeenOrderCount", currentTotal.toString());
+            setPendingOrderCount(0);
+          } else {
+            // Calculate unseen orders
+            const lastSeen = parseInt(localStorage.getItem("lastSeenOrderCount") || "0", 10);
+            // Ensure we don't show negative numbers if orders were deleted
+            const badgeCount = Math.max(0, currentTotal - lastSeen);
+            setPendingOrderCount(badgeCount);
+          }
         }
       } catch (error) {
         console.error("Failed to fetch pending orders count", error);
@@ -84,8 +108,8 @@ const Sidebar = ({ setActiveComponent }) => {
     };
 
     fetchPendingOrders();
-    // Refresh count every 10 seconds
-    const interval = setInterval(fetchPendingOrders, 10000);
+    // Refresh count every 5 seconds for snappier updates
+    const interval = setInterval(fetchPendingOrders, 5000);
     return () => clearInterval(interval);
   }, []);
 
