@@ -48,8 +48,19 @@ ChartJS.register(
 );
 
 export default function Home() {
-  const [startDate, setStartDate] = useState(new Date());
-  const [endDate, setEndDate] = useState(new Date());
+  // Initialize start date to specific time to avoid missing data
+  const [startDate, setStartDate] = useState(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0); // Start of today
+    return date;
+  });
+
+  const [endDate, setEndDate] = useState(() => {
+    const date = new Date();
+    date.setHours(0, 0, 0, 0); // Normalized to midnight (API handles end-of-day extension)
+    return date;
+  });
+
   const [statsData, setStatsData] = useState(null);
   const [salesData, setSalesData] = useState({
     labels: [],
@@ -298,6 +309,8 @@ export default function Home() {
             alignItems: 'center',
             mb: 6,
             gap: 2,
+            position: 'relative',
+            zIndex: 50, // Ensure date picker floats above cards
           }}
         >
           <Box
