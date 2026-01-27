@@ -68,7 +68,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                         <div className="flex items-center justify-between p-5 border-b border-gray-100 bg-white">
                             <div>
                                 <div className="w-8 h-1 bg-[#F25C2C] rounded-full mb-2"></div>
-                                <h2 className="text-xl font-bold text-gray-900">Your Cart</h2>
+                                <h3 className="text-xl font-bold text-gray-900">Your Cart</h3>
                             </div>
                             <button onClick={onClose} className="p-2 hover:bg-gray-100 rounded-full transition-colors">
                                 <FiX size={24} className="text-gray-500" />

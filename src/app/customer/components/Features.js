@@ -44,7 +44,7 @@ const features = [
 
 const Features = () => {
   return (
-    <section className="py-8 bg-white">
+    <section className="pb-8 bg-white">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4 md:gap-12 justify-center">
           {features.map((feature, index) => (

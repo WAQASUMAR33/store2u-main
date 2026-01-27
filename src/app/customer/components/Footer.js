@@ -166,7 +166,7 @@ const Footer = () => {
 
         {/* Column 2: Company Links */}
         <motion.div variants={itemVariants} className="flex flex-col gap-3">
-          <h3 className="text-lg font-semibold mb-2">Company</h3>
+          <h3 className="text-lg font-bold mb-2">Company</h3>
           {[
             { name: 'Privacy Policy', path: '/customer/pages/privacypolicy', id: 'privacy' },
             { name: 'Terms & Conditions', path: '/customer/pages/termsandconditions', id: 'terms' },
@@ -187,7 +187,7 @@ const Footer = () => {
 
         {/* Column 3: Explore */}
         <motion.div variants={itemVariants} className="flex flex-col gap-3">
-          <h3 className="text-lg font-semibold mb-2">Explore</h3>
+          <h3 className="text-lg font-bold mb-2">Explore</h3>
           {[
             { name: 'About Us', path: '/customer/pages/aboutus', id: 'about' },
             { name: 'FAQs', path: '/customer/pages/faq', id: 'faq' },
@@ -207,7 +207,7 @@ const Footer = () => {
 
         {/* Column 4: Support */}
         <motion.div variants={itemVariants} className="flex flex-col gap-4">
-          <h3 className="text-lg font-semibold mb-2">Support</h3>
+          <h3 className="text-lg font-bold mb-2">Support</h3>
           <div className="text-sm text-gray-600 flex flex-col gap-2">
             <p><span className="text-black font-bold">Email:</span> {companyEmail}</p>
             <p><span className="text-black font-bold">Phone:</span> {companyPhone}</p>

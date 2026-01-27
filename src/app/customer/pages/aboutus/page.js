@@ -25,28 +25,28 @@ const About = () => {
 
   return (
     <>
-    {(aboutData)?(<>
-      <Head>
-         <title>{aboutData.Title} - Store2u.ca</title>
+      {(aboutData) ? (<>
+        <Head>
+          <title>{aboutData.Title} - Store2u.ca</title>
           <meta name="description" content={`${aboutData.description}`} />
-       
-      </Head>
-      <div className=" py-12 px-10 max-w-7xl mx-auto">
-        <h1 className="text-3xl font-bold mb-4 text-center">{aboutData.Title}</h1>
-        <p className="mb-4 text-center">{aboutData.description}</p>
 
-        
-      
+        </Head>
+        <div className=" py-12 px-10 max-w-7xl mx-auto">
+          <h3 className="text-[2rem] font-bold text-gray-800 mb-6 text-center">{aboutData.Title}</h3>
+          <p className="mb-4 text-center">{aboutData.description}</p>
+
+
+
           <div className="text-gray-800">
-          
+
             <div className="text-lg" dangerouslySetInnerHTML={{ __html: aboutData.Text }}></div>
           </div>
-       
-         
-        
-      </div>
-      </>):( <p className="text-center">Loading About Us content...</p>)}
-       
+
+
+
+        </div>
+      </>) : (<p className="text-center">Loading About Us content...</p>)}
+
     </>
   );
 };

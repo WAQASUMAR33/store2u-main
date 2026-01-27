@@ -2,10 +2,10 @@
 
 import React, { useState, useEffect } from 'react';
 import Image from 'next/image';
-import Modal from 'react-modal'; 
+import Modal from 'react-modal';
 import axios from 'axios';
 import { ToastContainer, toast } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css'; 
+import 'react-toastify/dist/ReactToastify.css';
 
 const modalStyles = {
   content: {
@@ -101,9 +101,9 @@ const ProfilePage = () => {
       toast.error('Please fill out all fields.');
       return;
     }
-  
+
     try {
-      setLoading(true); 
+      setLoading(true);
       const response = await axios.put('/api/users/update_profile', {
         ...editData,
         id: userId, // Include userId in the request body
@@ -112,11 +112,11 @@ const ProfilePage = () => {
           'Content-Type': 'application/json',
         },
       });
-  
+
       if (response.data.status) {
         toast.success('Profile updated successfully!');
-        closeModal(); 
-        setUserData({ ...userData, ...editData }); 
+        closeModal();
+        setUserData({ ...userData, ...editData });
       } else {
         toast.error(`Failed to update profile: ${response.data.message}`);
       }
@@ -124,16 +124,16 @@ const ProfilePage = () => {
       console.error('Error updating profile:', error.response?.data || error.message);
       toast.error('Error updating profile.');
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
-  
-  
+
+
 
   return (
     <div className="container mx-auto p-6 flex flex-col md:flex-row items-center justify-between min-h-screen">
       <ToastContainer />
-      
+
       {/* Left side: Image */}
       <div className="w-full md:w-1/2 h-screen flex justify-center items-center">
         <Image
@@ -147,7 +147,7 @@ const ProfilePage = () => {
 
       {/* Right side: Profile Information */}
       <div className="w-full md:w-1/2 p-6 flex flex-col justify-center">
-        <h2 className="text-2xl font-bold mb-4">Profile Information</h2>
+        <h3 className="text-3xl font-bold mb-4">Profile Information</h3>
         <div className="space-y-4">
           <div>
             <h4 className="font-semibold text-gray-700">Name:</h4>
@@ -186,7 +186,7 @@ const ProfilePage = () => {
         contentLabel="Update Profile Modal"
         ariaHideApp={false}
       >
-        <h2 className="text-xl font-bold mb-4">Edit Profile</h2>
+        <h3 className="text-xl font-bold mb-4">Edit Profile</h3>
         <form className="space-y-4">
           <div>
             <label className="block text-gray-700">Name</label>

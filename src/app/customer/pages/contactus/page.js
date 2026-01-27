@@ -73,7 +73,7 @@ const Contact = () => {
             <meta name="description" content={contactUsData.description} />
           </Head>
           <div className="py-12 px-10 max-w-7xl mx-auto">
-            <h1 className="text-3xl font-bold mb-4 text-center">{contactUsData.Title}</h1>
+            <h3 className="text-[2rem] font-bold mb-6 text-center">{contactUsData.Title}</h3>
             <p className="mb-4 text-center">{contactUsData.description}</p>
             <div className="text-gray-800">
               <div className="text-lg" dangerouslySetInnerHTML={{ __html: contactUsData.Text }}></div>
@@ -86,7 +86,7 @@ const Contact = () => {
 
       <div className="py-8 px-10 max-w-lg mx-auto">
         <section>
-          <h2 className="text-2xl font-semibold text-gray-800 mb-4">Contact Form</h2>
+          <h3 className="text-[2rem] font-bold text-gray-800 mb-6">Contact Form</h3>
           {success && <p className="text-green-500 mb-4">{success}</p>}
           {error && <p className="text-red-500 mb-4">{error}</p>}
           <form className="space-y-4" onSubmit={handleSubmit}>

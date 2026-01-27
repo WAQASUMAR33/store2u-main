@@ -71,7 +71,7 @@ const SubcategoryPage = () => {
       sortedProducts.sort((a, b) => a.price - b.price);
     } else if (option === "Price High to Low") {
       sortedProducts.sort((a, b) => b.price - a.price);
-    } 
+    }
     setFilteredProducts(sortedProducts);
     setSortOption(option);
   };
@@ -86,9 +86,9 @@ const SubcategoryPage = () => {
 
   return (
     <div className="container mx-auto bg-white px-4 py-8">
-      <h2 className="text-2xl font-bold mb-6">
+      <h3 className="text-[2rem] font-bold mb-6 text-gray-800">
         {subcategory ? subcategory.name : 'No subcategory found'}
-      </h2>
+      </h3>
 
       {/* Filters and Sorting */}
       <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center mb-6">
@@ -115,12 +115,12 @@ const SubcategoryPage = () => {
             />
           </div>
           <div className='flex justify-center items-end'>
-          <button
-            onClick={handleFilter}
-            className="bg-blue-500 text-white py-2  px-4 rounded hover:bg-blue-600"
-          >
-            Apply Filter
-          </button>
+            <button
+              onClick={handleFilter}
+              className="bg-blue-500 text-white py-2  px-4 rounded hover:bg-blue-600"
+            >
+              Apply Filter
+            </button>
           </div>
         </div>
 
@@ -137,7 +137,7 @@ const SubcategoryPage = () => {
             <option value="Z-A">Alphabetically Z-A</option>
             <option value="Price Low to High">Price: Low to High</option>
             <option value="Price High to Low">Price: High to Low</option>
-          
+
           </select>
         </div>
       </div>
@@ -202,7 +202,7 @@ const SubcategoryPage = () => {
                       )}
                     </div>
                   </div>
-                  <h3
+                  <h4
                     className="text-sm font-normal text-gray-800 overflow-hidden hover:underline hover:text-blue-400 cursor-pointer"
                     style={{
                       display: '-webkit-box',
@@ -213,7 +213,7 @@ const SubcategoryPage = () => {
                     onClick={() => handleProductClick(product.slug)}
                   >
                     {product.name.toUpperCase()}
-                  </h3>
+                  </h4>
                 </div>
               </div>
             );

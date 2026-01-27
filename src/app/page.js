@@ -25,15 +25,24 @@ export default function CustomerPage() {
         <Slider />
 
         <main className="pt-0 px-4 pb-4">
-          <TopCategories />
-          <AllProducts />
-          {/* <CategoryProductsComponent/> */}
-          <Products />
-          <Features />
-          <NewArrivals />
-          {/* <CategoryProductsComponent/> */}
-          <FaqSection />
-
+          <div className="mt-[20px]">
+            <TopCategories />
+          </div>
+          <div className="mt-[20px]">
+            <AllProducts />
+          </div>
+          <div className="mt-[20px]">
+            <Products />
+          </div>
+          <div className="mt-[20px]">
+            <Features />
+          </div>
+          <div className="mt-[20px]">
+            <NewArrivals />
+          </div>
+          <div className="mt-[20px]">
+            <FaqSection />
+          </div>
         </main>
       </div>
     </Customerlayout>

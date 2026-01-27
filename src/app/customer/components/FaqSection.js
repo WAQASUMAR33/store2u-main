@@ -24,10 +24,10 @@ const FaqSection = () => {
   };
 
   return (
-    <section className="py-16 bg-white">
+    <section className="pb-16 bg-white">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-16">
-          <h2 className="text-4xl md:text-5xl font-black text-black mb-6 uppercase tracking-tighter">Frequently Asked Questions</h2>
+          <h3 className="text-[2rem] font-black text-black mb-6 uppercase tracking-tighter">Frequently Asked Questions</h3>
           <div className="h-1.5 w-24 bg-orange-500 mx-auto rounded-full shadow-lg shadow-orange-500/20"></div>
         </div>
 

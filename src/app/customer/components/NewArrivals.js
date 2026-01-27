@@ -74,10 +74,10 @@ const NewArrivals = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-24">
+    <div className="container mx-auto px-4 pb-24">
       <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
         <div>
-          <h2 className="text-5xl md:text-7xl font-black uppercase tracking-tighter leading-none mb-6">New Arrivals</h2>
+          <h3 className="text-[2rem] font-black uppercase tracking-tighter leading-none mb-6">New Arrivals</h3>
           <p className="text-gray-400 text-xs font-black uppercase tracking-[0.3em] max-w-lg">Discover the latest additions to our curated collection of premium products.</p>
         </div>
         <button

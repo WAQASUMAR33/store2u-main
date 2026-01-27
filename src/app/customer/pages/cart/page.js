@@ -453,7 +453,7 @@ const CartPage = () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex justify-between items-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Your Cart & Checkout</h1>
+          <h3 className="text-[2rem] font-bold text-gray-900">Your Cart & Checkout</h3>
 
           {/* Show fix button if there are invalid items */}
           {cart.some(item => !item.productId) && (
@@ -479,10 +479,10 @@ const CartPage = () => {
 
             {/* Customer & Shipping Details */}
             <div className="bg-white p-8 rounded-3xl shadow-sm space-y-6">
-              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <h4 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
                 Shipping Information
-              </h2>
+              </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5 flex flex-col">
@@ -628,10 +628,10 @@ const CartPage = () => {
 
             {/* Payment Method */}
             <div className="bg-white p-8 rounded-3xl shadow-sm">
-              <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
+              <h4 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
                 Payment Method
-              </h2>
+              </h4>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <label className={`flex items-center justify-between p-5 rounded-2xl cursor-pointer border-2 transition-all ${paymentMethod === 'Credit Card' ? 'border-orange-500 bg-orange-50' : 'border-gray-100 hover:border-orange-200'}`}>
                   <div className="flex items-center gap-4">
@@ -675,7 +675,7 @@ const CartPage = () => {
           {/* Right Section - Order Summary */}
           <div className="w-full lg:w-2/5">
             <div className="bg-white rounded-[2.5rem] shadow-sm p-8 sticky top-24 border border-gray-50">
-              <h2 className="text-2xl font-black uppercase tracking-tight mb-8">Order Summary</h2>
+              <h4 className="text-2xl font-black uppercase tracking-tight mb-8">Order Summary</h4>
 
               {/* Items List */}
               <div className="flex flex-col gap-6 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -695,7 +695,7 @@ const CartPage = () => {
 
                     <div className="flex-grow flex flex-col justify-center">
                       <div className="flex justify-between items-start">
-                        <h3 className="text-[11px] font-black uppercase tracking-tight text-gray-800 line-clamp-1">{item.name}</h3>
+                        <h4 className="text-[11px] font-black uppercase tracking-tight text-gray-800 line-clamp-1">{item.name}</h4>
                         <button onClick={() => handleRemoveFromCart(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                           <FiX size={14} />
                         </button>
@@ -785,7 +785,7 @@ const CartPage = () => {
           <div className="w-20 h-20 bg-green-100 text-green-600 rounded-full flex items-center justify-center mx-auto mb-8 animate-bounce">
             <FiPlus size={40} className="rotate-45" />
           </div>
-          <h2 className="text-3xl font-black uppercase tracking-tight mb-4 text-gray-900">Order Placed!</h2>
+          <h4 className="text-2xl font-black uppercase tracking-tight mb-4 text-gray-900">Order Placed!</h4>
           <p className="text-gray-500 text-sm font-medium mb-10 leading-relaxed">
             Thank you for your purchase. We've sent a confirmation email to <span className="text-black font-bold">{shippingAddress.email}</span>. Your order will be processed shortly.
           </p>

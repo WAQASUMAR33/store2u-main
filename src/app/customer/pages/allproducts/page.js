@@ -104,9 +104,9 @@ const AllProducts = () => {
           </div>
 
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-            <h1 className="text-3xl md:text-5xl font-black uppercase tracking-tighter text-gray-900 leading-none">
+            <h3 className="text-[2rem] font-black uppercase tracking-tighter text-gray-900 leading-none">
               Explore <span className="text-[#F25C2C]">Collection</span>
-            </h1>
+            </h3>
 
             <div className="flex w-full lg:w-auto items-center bg-white rounded-full pl-6 pr-2 py-2 overflow-hidden border border-gray-200 shadow-sm transition-all focus-within:ring-2 focus-within:ring-[#F25C2C]/20 focus-within:border-[#F25C2C] group">
               <FiSearch className="text-gray-400 mr-3 shrink-0 group-focus-within:text-[#F25C2C] transition-colors" />
@@ -201,11 +201,11 @@ const AllProducts = () => {
                       </div>
                     </div>
 
-                    <h3
+                    <h4
                       className="text-sm font-bold mb-2 line-clamp-2 text-[#2D2D2D] group-hover:text-[#F25C2C] transition-colors leading-snug h-[2.8em] overflow-hidden"
                     >
                       {product.name}
-                    </h3>
+                    </h4>
 
                     <div className="flex flex-col mt-auto justify-end mb-3">
                       <p className="text-base font-bold text-gray-900 leading-none">Rs.{formatPrice(product.price)}</p>
@@ -268,7 +268,7 @@ const AllProducts = () => {
         {/* Newsletter Section */}
         <div className="mt-32 p-12 md:p-20 relative overflow-hidden group text-center">
           <div className="relative z-10 max-w-2xl mx-auto">
-            <h2 className="text-4xl md:text-5xl font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h2>
+            <h3 className="text-[2rem] font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h3>
             <p className="text-gray-500 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
 
             <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">

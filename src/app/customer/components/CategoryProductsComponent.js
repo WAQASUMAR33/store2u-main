@@ -84,7 +84,7 @@ const SubcategoryProductsComponent = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h2 className="text-2xl font-semibold mb-6">Subcategories</h2>
+      <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-6">Subcategories</h3>
       <div className="flex space-x-4 overflow-x-auto pb-4">
         {subcategories.map((subcategory) => (
           <button
@@ -99,7 +99,7 @@ const SubcategoryProductsComponent = () => {
 
       {selectedSubcategory && (
         <div className="mt-8">
-          <h2 className="text-2xl font-semibold mb-6">Products</h2>
+          <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-6">Products</h3>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {filteredProducts.length ? (
               filteredProducts.map((product) => (
@@ -128,7 +128,7 @@ const SubcategoryProductsComponent = () => {
                     )}
                   </div>
                   <div className="p-4 flex flex-col flex-grow">
-                    <h3 className="text-sm font-bold text-gray-800 line-clamp-2 mb-2 leading-tight h-[2.5em] group-hover:text-black transition-colors">{product.name}</h3>
+                    <h4 className="text-base font-black text-gray-800 line-clamp-2 mb-2 leading-tight h-[2.5em] group-hover:text-black transition-colors">{product.name}</h4>
                     <div className="mt-auto flex justify-between items-end">
                       <p className="text-base font-black text-black leading-none">Rs.{product.price}</p>
                       <p className="text-[10px] text-gray-400 font-bold uppercase tracking-tighter">Stock: {product.stock}</p>

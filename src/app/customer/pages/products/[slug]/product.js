@@ -558,7 +558,7 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
   if (!relatedProducts?.length) return null;
   return (
     <div className="mt-20 mb-12">
-      <h3 className="text-2xl md:text-3xl font-bold mb-8 text-center text-gray-800">You May Also Like</h3>
+      <h3 className="text-[2rem] font-bold mb-8 text-center text-gray-800">You May Also Like</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         {relatedProducts.map(product => {
           const originalPrice = calculateOriginalPrice(product.price, product.discount);
@@ -625,11 +625,11 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
                   </div>
                 </div>
 
-                <h3
+                <h4
                   className="text-sm font-bold text-gray-900 mb-2 leading-snug cursor-pointer group-hover:text-black transition-colors line-clamp-2 h-[2.8em]"
                 >
                   {product.name}
-                </h3>
+                </h4>
 
                 {/* Price */}
                 <div className="flex flex-col mt-auto justify-end">

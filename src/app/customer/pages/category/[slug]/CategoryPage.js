@@ -184,7 +184,7 @@ const CategoryPage = () => {
                 <Image fill src="/feature1.jpg" alt="Promo" className="object-cover opacity-10 group-hover:scale-110 transition-transform duration-1000" />
                 <div className="relative z-10">
                   <span className="text-[9px] font-black text-white bg-orange-500 px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-lg">Special Offer</span>
-                  <h4 className="text-black text-xl font-black mb-6 leading-tight uppercase tracking-tighter">Get 30% Off New Items</h4>
+                  <h3 className="text-[2rem] font-black mb-6 leading-tight uppercase tracking-tighter">Get 30% Off New Items</h3>
                   <button className="text-orange-500 text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-500/30 pb-1 hover:border-orange-500 transition-all">Shop Now</button>
                 </div>
               </div>
@@ -241,11 +241,11 @@ const CategoryPage = () => {
                           4.9
                         </div>
                       </div>
-                      <h3
-                        className="text-[11px] md:text-sm font-bold mb-1.5 line-clamp-2 text-[#2D2D2D] group-hover:text-orange-500 transition-colors leading-tight h-[2.5em] overflow-hidden"
+                      <h4
+                        className="mb-1.5 line-clamp-2 text-[#2D2D2D] group-hover:text-orange-500 transition-colors leading-tight h-[2.5em] overflow-hidden"
                       >
                         {product.name}
-                      </h3>
+                      </h4>
 
                       {/* Reinforced Price Container for Alignment */}
                       <div className="flex flex-col mt-auto justify-end mb-3">
@@ -279,7 +279,7 @@ const CategoryPage = () => {
             </div>
           ) : (
             <div className="py-32 text-center bg-gray-50 rounded-[3rem] border-2 border-dashed border-gray-200 mx-4">
-              <p className="text-gray-400 font-black uppercase tracking-[0.2em]">No products found</p>
+              <h3 className="text-[2rem] font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h3>
             </div>
           )}
 
@@ -305,7 +305,7 @@ const CategoryPage = () => {
       <div className="mt-40 pt-24 border-t border-gray-100 px-4 max-w-[1440px] mx-auto">
         <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6 text-center md:text-left">
           <div className="w-full">
-            <h2 className="text-xl md:text-2xl font-black uppercase tracking-tighter mb-4 leading-none mx-auto md:mx-0">Explore Recommendations</h2>
+            <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-4 leading-none mx-auto md:mx-0">Explore Recommendations</h3>
             <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.2em]">Handpicked products based on your interest</p>
           </div>
           <div className="hidden md:flex gap-4">
@@ -339,7 +339,7 @@ const CategoryPage = () => {
       <div className="mx-4 mt-32 max-w-[1440px] md:mx-auto">
         <div className="bg-gray-50/50 border border-gray-100 rounded-[3rem] p-8 md:p-20 relative overflow-hidden group">
           <div className="relative z-10 max-w-2xl mx-auto text-center">
-            <h2 className="text-xl md:text-4xl font-black text-black mb-6 leading-tight tracking-tighter uppercase">Ready for Updates?</h2>
+            <h3 className="text-[2rem] font-black text-black mb-6 leading-tight tracking-tighter uppercase">Ready for Updates?</h3>
             <p className="text-gray-400 mb-10 text-[9px] md:text-[10px] font-black uppercase tracking-[0.3em] leading-relaxed">Join our inner circle for early access and special discounts.</p>
 
             <div className="flex flex-col sm:flex-row gap-4 max-w-lg mx-auto">

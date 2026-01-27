@@ -33,9 +33,9 @@ export default function Subscribe() {
           <div className="inline-flex items-center justify-center w-12 h-12 rounded-full bg-gray-50 mb-6">
             <FiMail className="w-6 h-6 text-gray-900" />
           </div>
-          <h2 className="text-2xl md:text-4xl font-extrabold mb-3 tracking-tight">
+          <h3 className="text-2xl md:text-4xl font-extrabold mb-3 tracking-tight text-gray-900">
             Join Our Newsletter
-          </h2>
+          </h3>
           <p className="text-xs md:text-sm text-gray-500 max-w-lg mx-auto leading-relaxed uppercase tracking-widest font-bold">
             Stay Updated with the latest Trends & Exclusive Offers
           </p>

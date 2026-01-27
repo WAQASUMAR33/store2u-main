@@ -123,7 +123,7 @@ const Products = () => {
   }
 
   return (
-    <section className="py-8 bg-white">
+    <section className="pb-8 bg-white">
       <div className="container mx-auto px-4">
         {categories.map((category) => {
           const categorySubcategories = subcategories.filter(
@@ -150,7 +150,7 @@ const Products = () => {
           return (
             <div key={category.slug} className="mb-12">
               <div className="flex justify-between items-end mb-6">
-                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">
+                <h3 className="text-[2rem] font-black uppercase tracking-tighter">
                   {category.name}
                 </h3>
                 <Link
@@ -248,11 +248,11 @@ const Products = () => {
                               </div>
                             </div>
 
-                            <h3
+                            <h4
                               className="text-sm font-bold text-[#2D2D2D] mb-2 leading-snug cursor-pointer group-hover:text-orange-500 transition-all line-clamp-2 h-[2.8em] overflow-hidden"
                             >
                               {product.name}
-                            </h3>
+                            </h4>
 
                             {/* Reinforced Price Container for Alignment */}
                             <div className="flex flex-col mt-auto justify-end">

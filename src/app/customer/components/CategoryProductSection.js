@@ -8,7 +8,7 @@ const CategoryProductSection = ({ categoryImage, products }) => {
     <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h3 className="text-2xl font-black uppercase tracking-tighter">
+          <h3 className="text-[2rem] font-black uppercase tracking-tighter">
             Upto 15% Sale!
           </h3>
           <div className="h-1 w-12 bg-orange-500 mt-2 rounded-full"></div>
@@ -56,7 +56,7 @@ const CategoryProductSection = ({ categoryImage, products }) => {
                   </button>
                 </div>
                 <div className="p-3 flex flex-col flex-grow">
-                  <h3 className="text-[11px] font-bold text-gray-800 line-clamp-2 mb-2 leading-tight h-[2.5em]">{product.name}</h3>
+                  <h4 className="text-gray-800 line-clamp-2 mb-2 leading-tight h-[2.5em] font-bold text-sm">{product.name}</h4>
                   <div className="mt-auto flex flex-col items-start">
                     <p className="text-sm font-black text-black leading-none">Rs.{product.price}</p>
                     {product.discount && (

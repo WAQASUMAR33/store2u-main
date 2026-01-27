@@ -74,9 +74,9 @@ export default function Blog() {
 
       {/* Header Section */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 text-center">
-        <h1 className="text-2xl md:text-5xl font-extrabold mb-3 tracking-tight">
+        <h3 className="text-[2rem] font-extrabold mb-3 tracking-tight">
           Shopping Guides & Trends
-        </h1>
+        </h3>
         <p className="text-xs md:text-base text-gray-400 mb-6 max-w-2xl mx-auto leading-relaxed border-b border-gray-50 pb-6">
           The latest fashion lookbooks, reviews, and tips curated for you.
         </p>
@@ -110,9 +110,9 @@ export default function Blog() {
         ) : (
           <>
             <div className="mb-10">
-              <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-300 mb-6 flex items-center gap-4">
+              <h3 className="text-xs font-black uppercase tracking-[0.3em] text-gray-300 mb-6 flex items-center gap-4">
                 <span className="h-px bg-gray-100 flex-1"></span> Featured Story
-              </h2>
+              </h3>
               {featuredPost && (
                 <div className="bg-white rounded-[2rem] overflow-hidden border border-gray-50 shadow-sm hover:shadow-md transition-all duration-500">
                   <div className="md:flex items-stretch">
@@ -123,9 +123,9 @@ export default function Blog() {
                         <span className="text-[10px] font-bold text-gray-400">{formatDate(featuredPost.createdAt)}</span>
                       </div>
 
-                      <h2 className="text-xl md:text-4xl font-extrabold mb-4 leading-tight text-gray-900 group-hover:text-blue-600 transition-colors">
+                      <h4 className="text-xl md:text-4xl font-extrabold mb-4 leading-tight text-gray-900 group-hover:text-blue-600 transition-colors">
                         {featuredPost.title}
-                      </h2>
+                      </h4>
                       <div className="text-gray-400 mb-6 line-clamp-2 md:line-clamp-3 text-xs md:text-base leading-relaxed" dangerouslySetInnerHTML={{ __html: featuredPost.description }} />
 
                       <Link href={`/customer/pages/blog/${featuredPost.id}`} className="text-[10px] font-black uppercase tracking-[0.2em] inline-flex items-center gap-2 text-black hover:gap-3 transition-all underline underline-offset-8">
@@ -148,8 +148,8 @@ export default function Blog() {
 
             {/* Articles Grid */}
             <div className="mb-12 pt-6 border-t border-gray-50">
-              <div className="flex justify-between items-center mb-8">
-                <h2 className="text-xs font-black uppercase tracking-[0.3em] text-gray-300">Latest Articles</h2>
+              <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
+                <h3 className="text-[2rem] font-black uppercase tracking-tighter text-gray-900 mb-8">Latest Articles</h3>
               </div>
 
               <BlogPosts
@@ -224,9 +224,9 @@ function BlogPosts({ blogs, calculateReadingTime, formatDate }) {
             </div>
 
             <Link href={`/customer/pages/blog/${post.id}`} className="block mb-3">
-              <h3 className="text-xl font-bold text-gray-900 leading-snug group-hover:text-blue-600 transition-colors">
+              <h4 className="text-xl font-bold text-gray-900 leading-snug group-hover:text-blue-600 transition-colors">
                 {post.title}
-              </h3>
+              </h4>
             </Link>
 
             <div
