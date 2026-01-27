@@ -27,7 +27,7 @@ const FaqSection = () => {
     <section className="pb-16 bg-white">
       <div className="container mx-auto px-4 max-w-4xl">
         <div className="text-center mb-16">
-          <h3 className="text-[2rem] font-black text-black mb-6 uppercase tracking-tighter">Frequently Asked Questions</h3>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-black text-black mb-6 uppercase tracking-tighter">Frequently Asked Questions</h3>
           <div className="h-1.5 w-24 bg-orange-500 mx-auto rounded-full shadow-lg shadow-orange-500/20"></div>
         </div>
 

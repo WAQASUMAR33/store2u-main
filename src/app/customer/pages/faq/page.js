@@ -13,7 +13,7 @@ const FAQ = () => {
       <div className="bg-gray-100 py-8 md:py-12">
         <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12">
           <div className="text-center mb-8 md:mb-12">
-            <h3 className="text-[2rem] font-bold text-gray-800">Frequently Asked Questions</h3>
+            <h3 className="text-[1.5rem] md:text-[2rem] font-bold text-gray-800">Frequently Asked Questions</h3>
             <p className="mt-4 text-gray-600 text-sm md:text-base">Find answers to your questions about Store2u.ca</p>
           </div>
           <FaqSection />

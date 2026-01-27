@@ -55,7 +55,7 @@ const TopCategories = () => {
   return (
     <div className="container mx-auto pb-12 px-4 bg-white sm:max-w-full lg:max-w-[1440px]">
       <div className="mb-16 px-2 md:px-4">
-        <h3 className="text-[2rem] font-black text-black text-center uppercase tracking-tighter">Shop by Categories</h3>
+        <h3 className="text-[1.5rem] md:text-[2rem] font-black text-black text-center uppercase tracking-tighter">Shop by Categories</h3>
         <div className="h-1.5 w-24 bg-orange-500 mx-auto mt-6 rounded-full shadow-lg shadow-orange-500/20"></div>
       </div>
 

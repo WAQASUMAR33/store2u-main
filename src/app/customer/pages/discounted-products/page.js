@@ -58,7 +58,7 @@ const DiscountedProducts = () => {
           height="80"
           width="80"
           radius="9"
-          color="#3498db"
+          color="#f97316"
           ariaLabel="three-dots-loading"
           visible={true}
         />
@@ -68,7 +68,7 @@ const DiscountedProducts = () => {
 
   return (
     <div className="container mx-auto pb-8 pt-[20px] px-4">
-      <h3 className="text-[2rem] font-bold mb-6 text-gray-800">Offers</h3>
+      <h3 className="text-[1.5rem] md:text-[2rem] font-bold mb-6 text-gray-800">Offers</h3>
       <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-6 gap-4">
         {products.map((product) => {
           const originalPrice = calculateOriginalPrice(product.price, product.discount);

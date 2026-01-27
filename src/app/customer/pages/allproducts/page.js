@@ -82,7 +82,7 @@ const AllProducts = () => {
   if (loading) {
     return (
       <div className="flex items-center justify-center min-h-[80vh]">
-        <ThreeDots height="60" width="60" color="#F25C2C" />
+        <ThreeDots height="60" width="60" color="#f97316" />
       </div>
     );
   }
@@ -104,7 +104,7 @@ const AllProducts = () => {
           </div>
 
           <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-            <h3 className="text-[2rem] font-black uppercase tracking-tighter text-gray-900 leading-none">
+            <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter text-gray-900 leading-none">
               Explore <span className="text-[#F25C2C]">Collection</span>
             </h3>
 
@@ -268,7 +268,7 @@ const AllProducts = () => {
         {/* Newsletter Section */}
         <div className="mt-32 p-12 md:p-20 relative overflow-hidden group text-center">
           <div className="relative z-10 max-w-2xl mx-auto">
-            <h3 className="text-[2rem] font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h3>
+            <h3 className="text-[1.5rem] md:text-[2rem] font-black text-gray-900 mb-6 leading-tight tracking-tighter">Stay in the Loop</h3>
             <p className="text-gray-500 mb-10 text-[10px] font-bold uppercase tracking-[0.2em]">Get the latest updates and exclusive offers.</p>
 
             <div className="flex flex-col sm:flex-row gap-3 max-w-lg mx-auto">

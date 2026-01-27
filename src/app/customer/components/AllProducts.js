@@ -123,7 +123,7 @@ const TopRatedProducts = () => {
   return (
     <div className="container mx-auto px-4 pb-12">
       <div className="flex flex-col items-center mb-10">
-        <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-4">Top Rated</h3>
+        <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter mb-4">Top Rated</h3>
         <div className="h-1.5 w-24 bg-orange-500 rounded-full shadow-lg shadow-orange-500/20"></div>
       </div>
 

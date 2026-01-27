@@ -239,7 +239,7 @@ const ProductPage = ({ productData }) => {
 
 
 
-  if (!product && loading) return <div className="h-screen flex items-center justify-center"><ThreeDots color="#000" /></div>;
+  if (!product && loading) return <div className="h-screen flex items-center justify-center"><ThreeDots color="#f97316" /></div>;
   if (error) return <div className="text-center mt-20">{error}</div>;
 
   return (
@@ -558,7 +558,7 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
   if (!relatedProducts?.length) return null;
   return (
     <div className="mt-20 mb-12">
-      <h3 className="text-[2rem] font-bold mb-8 text-center text-gray-800">You May Also Like</h3>
+      <h3 className="text-[1.5rem] md:text-[2rem] font-bold mb-8 text-center text-gray-800">You May Also Like</h3>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 sm:gap-6">
         {relatedProducts.map(product => {
           const originalPrice = calculateOriginalPrice(product.price, product.discount);

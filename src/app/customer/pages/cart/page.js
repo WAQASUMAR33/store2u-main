@@ -453,7 +453,7 @@ const CartPage = () => {
     <div className="min-h-screen bg-gray-50 py-12">
       <div className="container mx-auto px-4 max-w-6xl">
         <div className="flex justify-between items-center mb-8">
-          <h3 className="text-[2rem] font-bold text-gray-900">Your Cart & Checkout</h3>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-bold text-gray-900">Your Cart & Checkout</h3>
 
           {/* Show fix button if there are invalid items */}
           {cart.some(item => !item.productId) && (

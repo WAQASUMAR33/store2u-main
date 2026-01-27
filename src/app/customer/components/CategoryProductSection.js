@@ -8,7 +8,7 @@ const CategoryProductSection = ({ categoryImage, products }) => {
     <section className="py-12 bg-white">
       <div className="container mx-auto px-4">
         <div className="mb-8">
-          <h3 className="text-[2rem] font-black uppercase tracking-tighter">
+          <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter">
             Upto 15% Sale!
           </h3>
           <div className="h-1 w-12 bg-orange-500 mt-2 rounded-full"></div>

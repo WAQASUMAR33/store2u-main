@@ -77,8 +77,11 @@ const NewArrivals = () => {
     <div className="container mx-auto px-4 pb-24">
       <div className="flex flex-col md:flex-row justify-between items-end mb-20 gap-8">
         <div>
-          <h3 className="text-[2rem] font-black uppercase tracking-tighter leading-none mb-6">New Arrivals</h3>
-          <p className="text-gray-400 text-xs font-black uppercase tracking-[0.3em] max-w-lg">Discover the latest additions to our curated collection of premium products.</p>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter leading-none mb-6">New Arrivals</h3>
+          <p className="text-gray-400 text-[10px] md:text-xs font-black uppercase tracking-[0.4em] max-w-lg relative pl-12">
+            <span className="absolute left-0 top-1/2 -translate-y-1/2 w-10 h-[2px] bg-orange-500"></span>
+            Discover the latest additions to our curated collection
+          </p>
         </div>
         <button
           className="flex items-center gap-3 text-xs font-black uppercase tracking-widest group hover:text-orange-600 transition-colors"

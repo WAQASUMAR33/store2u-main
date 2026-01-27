@@ -32,7 +32,7 @@ const About = () => {
 
         </Head>
         <div className=" py-12 px-10 max-w-7xl mx-auto">
-          <h3 className="text-[2rem] font-bold text-gray-800 mb-6 text-center">{aboutData.Title}</h3>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-bold text-gray-800 mb-6 text-center">{aboutData.Title}</h3>
           <p className="mb-4 text-center">{aboutData.description}</p>
 
 

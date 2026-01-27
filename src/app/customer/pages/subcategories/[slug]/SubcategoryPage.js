@@ -79,14 +79,14 @@ const SubcategoryPage = () => {
   if (isLoading) {
     return (
       <div className="flex items-center justify-center min-h-screen">
-        <ThreeDots height="80" width="80" radius="9" color="#3498db" ariaLabel="three-dots-loading" visible={true} />
+        <ThreeDots height="80" width="80" radius="9" color="#f97316" ariaLabel="three-dots-loading" visible={true} />
       </div>
     );
   }
 
   return (
     <div className="container mx-auto bg-white px-4 py-8">
-      <h3 className="text-[2rem] font-bold mb-6 text-gray-800">
+      <h3 className="text-[1.5rem] md:text-[2rem] font-bold mb-6 text-gray-800">
         {subcategory ? subcategory.name : 'No subcategory found'}
       </h3>
 

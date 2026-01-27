@@ -84,7 +84,7 @@ const SubcategoryProductsComponent = () => {
 
   return (
     <div className="container mx-auto px-4 py-8">
-      <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-6">Subcategories</h3>
+      <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter mb-6">Subcategories</h3>
       <div className="flex space-x-4 overflow-x-auto pb-4">
         {subcategories.map((subcategory) => (
           <button
@@ -99,7 +99,7 @@ const SubcategoryProductsComponent = () => {
 
       {selectedSubcategory && (
         <div className="mt-8">
-          <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-6">Products</h3>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter mb-6">Products</h3>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
             {filteredProducts.length ? (
               filteredProducts.map((product) => (

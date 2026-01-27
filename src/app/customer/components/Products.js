@@ -150,14 +150,14 @@ const Products = () => {
           return (
             <div key={category.slug} className="mb-12">
               <div className="flex justify-between items-end mb-6">
-                <h3 className="text-[2rem] font-black uppercase tracking-tighter">
+                <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter">
                   {category.name}
                 </h3>
                 <Link
                   href={`/customer/pages/category/${category.slug}`}
                   className="text-xs font-black uppercase tracking-widest text-gray-400 hover:text-black transition-colors"
                 >
-                  View All {category.name}
+                  View All
                 </Link>
               </div>
 

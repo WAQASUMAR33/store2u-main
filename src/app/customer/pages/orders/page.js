@@ -96,7 +96,7 @@ const UserOrders = () => {
         <ThreeDots
           height={80}
           width={80}
-          color="#3498db"
+          color="#f97316"
           ariaLabel="circle-loading"
           visible={true}
         />

@@ -74,7 +74,7 @@ export default function Blog() {
 
       {/* Header Section */}
       <div className="container mx-auto px-4 sm:px-6 lg:px-8 pt-10 pb-6 text-center">
-        <h3 className="text-[2rem] font-extrabold mb-3 tracking-tight">
+        <h3 className="text-[1.5rem] md:text-[2rem] font-extrabold mb-3 tracking-tight">
           Shopping Guides & Trends
         </h3>
         <p className="text-xs md:text-base text-gray-400 mb-6 max-w-2xl mx-auto leading-relaxed border-b border-gray-50 pb-6">
@@ -149,7 +149,7 @@ export default function Blog() {
             {/* Articles Grid */}
             <div className="mb-12 pt-6 border-t border-gray-50">
               <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8">
-                <h3 className="text-[2rem] font-black uppercase tracking-tighter text-gray-900 mb-8">Latest Articles</h3>
+                <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter text-gray-900 mb-8">Latest Articles</h3>
               </div>
 
               <BlogPosts

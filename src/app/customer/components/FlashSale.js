@@ -54,7 +54,7 @@ const FlashSale = () => {
     <div className="container mx-auto px-4 py-12">
       <div className="flex flex-col md:flex-row items-center justify-between mb-8 gap-6">
         <div>
-          <h3 className="text-[2rem] font-black uppercase tracking-tighter mb-2">Flash Sale</h3>
+          <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter mb-2">Flash Sale</h3>
           <span className="text-orange-500 font-bold uppercase tracking-[0.2em] text-xs">On Sale Now</span>
         </div>
 

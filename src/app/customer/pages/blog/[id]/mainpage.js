@@ -47,10 +47,10 @@ const BlogDetailPage = ({ id }) => {
   const formatDate = (dateString) => {
     if (!dateString) return '';
     const date = new Date(dateString);
-    return date.toLocaleDateString('en-US', { 
-      year: 'numeric', 
-      month: 'long', 
-      day: 'numeric' 
+    return date.toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
     });
   };
 
@@ -58,7 +58,7 @@ const BlogDetailPage = ({ id }) => {
   const handleShare = (platform) => {
     const url = typeof window !== 'undefined' ? window.location.href : '';
     const title = blog?.title || '';
-    
+
     const shareUrls = {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`,
       twitter: `https://twitter.com/intent/tweet?url=${encodeURIComponent(url)}&text=${encodeURIComponent(title)}`,
@@ -80,7 +80,7 @@ const BlogDetailPage = ({ id }) => {
           height="80"
           width="80"
           radius="9"
-          color="#3498db"
+          color="#f97316"
           ariaLabel="three-dots-loading"
           visible={true}
         />
