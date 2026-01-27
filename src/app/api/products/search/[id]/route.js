@@ -3,7 +3,7 @@ import prisma from '../../../../util/prisma';
 import pluralize from 'pluralize'; // Import the pluralize library
 
 export async function GET(request, { params }) {
-  const { id: search } = await params; // Fetch the search query from the URL parameters
+  const { id: search } = await params;
 
   if (!search) {
     return NextResponse.json(
@@ -13,31 +13,27 @@ export async function GET(request, { params }) {
   }
 
   try {
-    // Split the search query into keywords and normalize them
+    // Split the search query into keywords
     const keywords = search.split(/\s+/).filter(keyword => keyword.trim() !== '');
-    console.log('Keywords are: ', keywords);
 
-    // Create a set to collect search terms for both singular and plural forms
+    // Search Terms (Singular/Plural)
     const searchTerms = new Set();
     keywords.forEach(keyword => {
       searchTerms.add(keyword);
-      searchTerms.add(pluralize.singular(keyword));  // Add singular form
-      searchTerms.add(pluralize.plural(keyword));    // Add plural form
+      searchTerms.add(pluralize.singular(keyword));
+      searchTerms.add(pluralize.plural(keyword));
     });
-
-    // Convert search terms into an array
     const searchArray = Array.from(searchTerms);
 
-    // Construct a WHERE clause for all search terms using OR logic
-    const whereConditions = searchArray.map(term => `
+    // 1. Search Products
+    const productConditions = searchArray.map(term => `
       Product.name LIKE '%${term}%' 
       OR Product.description LIKE '%${term}%' 
       OR Product.subcategorySlug LIKE '%${term}%'
       OR Product.sku LIKE '%${term}%'
     `).join(' OR ');
 
-    // Efficient query to search all keywords in a single query
-    const query = `
+    const productQuery = `
       SELECT 
         Product.id, 
         Product.slug,
@@ -48,33 +44,42 @@ export async function GET(request, { params }) {
         Product.subcategorySlug,
         Product.stock,
         COALESCE(
-          (
-            SELECT 
-              JSON_ARRAYAGG(Image.url)
-            FROM 
-              Image 
-            WHERE 
-              Image.productId = Product.id
-          ), 
+          (SELECT JSON_ARRAYAGG(Image.url) FROM Image WHERE Image.productId = Product.id), 
           JSON_ARRAY()
         ) AS images
-      FROM 
-        Product 
-      WHERE 
-        (${whereConditions})
+      FROM Product 
+      WHERE (${productConditions})
     `;
 
-    // Execute the query
-    const products = await prisma.$queryRawUnsafe(query);
+    // 2. Search Categories
+    // Using simple prisma findMany for categories as it's cleaner
+    const categories = await prisma.category.findMany({
+      where: {
+        OR: searchArray.map(term => ({
+          name: { contains: term } // Case insensitive in MySQL usually
+        }))
+      },
+      select: {
+        id: true,
+        name: true,
+        slug: true,
+        imageUrl: true
+      },
+      take: 5
+    });
 
-    // Remove duplicate products if any, based on the product ID
+    const products = await prisma.$queryRawUnsafe(productQuery);
     const uniqueProducts = Array.from(new Map(products.map(product => [product.id, product])).values());
 
-    return NextResponse.json({ data: uniqueProducts, status: true }, { status: 200 });
+    return NextResponse.json({
+      data: uniqueProducts,
+      categories: categories, // Return categories separately
+      status: true
+    }, { status: 200 });
   } catch (error) {
-    console.error('Error fetching products:', error);
+    console.error('Error fetching search results:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch products', error: error.message, status: false },
+      { message: 'Failed to fetch search results', error: error.message, status: false },
       { status: 500 }
     );
   }

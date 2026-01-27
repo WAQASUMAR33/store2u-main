@@ -32,7 +32,7 @@ const TopRatedProducts = () => {
   // UI State
   const [openDropdown, setOpenDropdown] = useState(null);
   const [gridCols, setGridCols] = useState(5);
-  const [mobileGridCols, setMobileGridCols] = useState(1);
+  const [mobileGridCols, setMobileGridCols] = useState(2);
 
   const router = useRouter();
   const dispatch = useDispatch();
@@ -121,9 +121,9 @@ const TopRatedProducts = () => {
   }
 
   return (
-    <div className="container mx-auto px-4 py-20">
-      <div className="flex flex-col items-center mb-16">
-        <h2 className="text-4xl md:text-5xl font-black uppercase tracking-tighter mb-4">Top Rated</h2>
+    <div className="container mx-auto px-4 py-12">
+      <div className="flex flex-col items-center mb-10">
+        <h2 className="text-3xl md:text-4xl font-black uppercase tracking-tighter mb-4">Top Rated</h2>
         <div className="h-1.5 w-24 bg-orange-500 rounded-full shadow-lg shadow-orange-500/20"></div>
       </div>
 

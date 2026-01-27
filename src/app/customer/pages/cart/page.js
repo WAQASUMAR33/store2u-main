@@ -79,6 +79,34 @@ const CartPage = () => {
     setIsAuthenticated(!!token);
   }, []);
 
+  // Pre-fill user details if logged in
+  useEffect(() => {
+    const fetchUserDetails = async () => {
+      if (isAuthenticated) {
+        const userId = await getUserId();
+        if (userId) {
+          try {
+            const response = await axios.get(`/api/users/${userId}`);
+            const user = response.data;
+            if (user) {
+              setShippingAddress(prev => ({
+                ...prev,
+                recipientName: user.name || prev.recipientName,
+                email: user.email || prev.email,
+                phoneNumber: user.phoneno || prev.phoneNumber,
+                city: user.city || prev.city
+              }));
+            }
+          } catch (error) {
+            console.error('Error fetching user details for checkout:', error);
+          }
+        }
+      }
+    };
+
+    fetchUserDetails();
+  }, [isAuthenticated]);
+
   useEffect(() => {
     const storedCart = JSON.parse(localStorage.getItem('cart')) || [];
     console.log('=== CART MIGRATION START ===');

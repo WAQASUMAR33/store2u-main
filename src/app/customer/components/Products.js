@@ -123,7 +123,7 @@ const Products = () => {
   }
 
   return (
-    <section className="py-16 bg-white">
+    <section className="py-8 bg-white">
       <div className="container mx-auto px-4">
         {categories.map((category) => {
           const categorySubcategories = subcategories.filter(
@@ -148,9 +148,9 @@ const Products = () => {
           );
 
           return (
-            <div key={category.slug} className="mb-24">
-              <div className="flex justify-between items-end mb-10">
-                <h3 className="text-3xl md:text-4xl font-black uppercase tracking-tighter">
+            <div key={category.slug} className="mb-12">
+              <div className="flex justify-between items-end mb-6">
+                <h3 className="text-2xl md:text-3xl font-black uppercase tracking-tighter">
                   {category.name}
                 </h3>
                 <Link

@@ -38,6 +38,7 @@ const Header = () => {
   // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [searchResults, setSearchResults] = useState([]);
+  const [searchCategories, setSearchCategories] = useState([]);
   const [isSearching, setIsSearching] = useState(false);
   const searchInputRef = useRef(null);
   const searchContainerRef = useRef(null); // Ref for click outside logic
@@ -65,17 +66,26 @@ const Header = () => {
           const data = await response.json();
           if (data.status) {
             setSearchResults(data.data);
+            // Store categories in a new property on searchResults or separate state
+            // For simplicity, we can augment the state or better, separate it.
+            // Let's attach it to the results array or use a separate state?
+            // Existing code uses `searchResults` array. Let's assume we change `searchResults` to object or keep it array and add a separate state for categories.
+            // But to minimize changes, let's keep `searchResults` for products and add `searchCategories`.
+            setSearchCategories(data.categories || []);
           } else {
             setSearchResults([]);
+            setSearchCategories([]);
           }
         } catch (error) {
           console.error("Search error:", error);
           setSearchResults([]);
+          setSearchCategories([]);
         } finally {
           setIsSearching(false);
         }
       } else {
         setSearchResults([]);
+        setSearchCategories([]);
       }
     }, 500); // 500ms debounce
 
@@ -220,6 +230,7 @@ const Header = () => {
         !searchContainerRef.current.contains(event.target)
       ) {
         setSearchResults([]); // Close dropdown by clearing results
+        setSearchCategories([]);
       }
     };
 
@@ -433,12 +444,47 @@ const Header = () => {
                   />
 
                   {/* Live Search Dropdown */}
-                  {(searchResults.length > 0 || isSearching) && searchQuery.length > 2 && (
+                  {((searchResults.length > 0 || searchCategories.length > 0) || isSearching) && searchQuery.length > 2 && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-2xl rounded-2xl border border-gray-100 mt-2 max-h-[60vh] overflow-y-auto z-50">
                       {isSearching ? (
                         <div className="p-6 text-center text-gray-400 text-sm font-medium">Searching...</div>
                       ) : (
                         <div className="py-2">
+                          {searchCategories.length > 0 && (
+                            <div className="mb-2">
+                              <div className="px-4 py-2 text-[10px] uppercase font-bold text-gray-400 tracking-wider">
+                                Categories ({searchCategories.length})
+                              </div>
+                              {searchCategories.map((category) => (
+                                <div
+                                  key={category.id}
+                                  onClick={() => {
+                                    router.push(`/customer/pages/category/${category.slug}`);
+                                    setIsSearchOpen(false);
+                                    setSearchResults([]);
+                                    setSearchCategories([]);
+                                  }}
+                                  className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
+                                >
+                                  {category.imageUrl && (
+                                    <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
+                                      <Image
+                                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                                        alt={category.name}
+                                        width={32}
+                                        height={32}
+                                        className="w-full h-full object-cover"
+                                        unoptimized
+                                      />
+                                    </div>
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    <h4 className="text-sm font-bold text-gray-900 truncate">{category.name}</h4>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                           <div className="px-4 py-2 text-[10px] uppercase font-bold text-gray-400 tracking-wider">
                             Products ({searchResults.length})
                           </div>
@@ -449,6 +495,7 @@ const Header = () => {
                                 router.push(`/customer/pages/products/${product.slug}`);
                                 setIsSearchOpen(false);
                                 setSearchResults([]);
+                                setSearchCategories([]);
                               }}
                               className="flex items-center gap-4 px-4 py-3 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
                             >
@@ -511,6 +558,7 @@ const Header = () => {
                     onClick={() => {
                       setIsSearchOpen(false);
                       setSearchResults([]);
+                      setSearchCategories([]);
                     }}
                     className="p-2.5 text-gray-400 hover:text-black hover:bg-gray-50 rounded-full transition-all flex-shrink-0"
                   >
