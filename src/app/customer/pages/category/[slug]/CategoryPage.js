@@ -3,10 +3,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import axios from 'axios';
-import { motion } from 'framer-motion';
+import { motion, AnimatePresence } from 'framer-motion';
 import { ThreeDots } from 'react-loader-spinner';
 import Image from 'next/image';
-import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag, FiFilter } from 'react-icons/fi';
+import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag, FiFilter, FiX, FiPlus } from 'react-icons/fi';
 import { GoStarFill } from 'react-icons/go';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../../../store/cartSlice';
@@ -23,6 +23,10 @@ const CategoryPage = () => {
   const [recommendations, setRecommendations] = useState([]);
   const [activeSubcategory, setActiveSubcategory] = useState(null);
   const [showFilters, setShowFilters] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [tempSortOption, setTempSortOption] = useState("newest");
+  const [tempStatusFilter, setTempStatusFilter] = useState("all");
 
   useEffect(() => {
     const fetchData = async () => {
@@ -91,31 +95,53 @@ const CategoryPage = () => {
     </div>
   );
 
-  const filteredProductsList = products.filter(p => {
-    const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
-    const subcategory = subcategories.find(s => s.id === activeSubcategory);
-    const matchesSubcategory = !activeSubcategory || p.subcategorySlug === subcategory?.slug;
-    return matchesSearch && matchesSubcategory;
-  });
+  const filteredProductsList = products
+    .filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+      const subcategory = subcategories.find(s => s.id === activeSubcategory);
+      const matchesSubcategory = !activeSubcategory || p.subcategorySlug === subcategory?.slug;
+
+      const isTopRated = p.rating >= 4.5; // Custom logic for top rated
+      const isOnSale = p.discount > 0;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "top-rated" && isTopRated) ||
+        (statusFilter === "on-sale" && isOnSale);
+
+      return matchesSearch && matchesSubcategory && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortOption === "price-asc") return a.price - b.price;
+      if (sortOption === "price-desc") return b.price - a.price;
+      if (sortOption === "name-asc") return a.name.localeCompare(b.name);
+      if (sortOption === "newest") return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0;
+    });
 
   return (
     <div className="bg-white min-h-screen pb-20 overflow-x-hidden">
       {/* Navigation Breadcrumb & Sidebar Toggle for Mobile */}
       <div className="container mx-auto px-4 py-8 md:py-12 border-b border-gray-50">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-6">
-          <div className="flex items-center gap-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-gray-400">
-            <span className="cursor-pointer hover:text-black transition-colors" onClick={() => router.push('/')}>HOME</span>
-            <FiChevronRight size={14} className="opacity-30" />
-            <span className="text-black">{categoryData.name}</span>
-          </div>
+          <div className="flex items-center justify-between w-full md:w-auto">
+            <div className="flex items-center gap-4 text-[10px] md:text-xs font-black uppercase tracking-[0.2em] text-gray-400">
+              <span className="cursor-pointer hover:text-black transition-colors" onClick={() => router.push('/')}>HOME</span>
+              <FiChevronRight size={14} className="opacity-30" />
+              <span className="text-black">{categoryData.name}</span>
+            </div>
 
-          {/* Mobile Filter Toggle */}
-          <button
-            onClick={() => setShowFilters(!showFilters)}
-            className="md:hidden flex items-center justify-center gap-3 bg-black text-white px-6 py-3 rounded-2xl text-[9px] font-black uppercase tracking-widest active:scale-95 transition-all shadow-xl shadow-black/10"
-          >
-            <FiFilter size={16} /> {showFilters ? 'CLOSE TOOLS' : 'OPEN TOOLS'}
-          </button>
+            {/* Mobile Filter Toggle - Right Side, Orange, White BG */}
+            <button
+              onClick={() => {
+                setTempSortOption(sortOption);
+                setTempStatusFilter(statusFilter);
+                setShowFilters(true);
+              }}
+              className="md:hidden flex items-center justify-center bg-white text-[#f97316] w-10 h-10 rounded-xl border border-gray-100 active:scale-95 transition-all shadow-sm"
+            >
+              <FiFilter size={18} />
+            </button>
+          </div>
 
           <div className="flex items-center gap-6">
             <p className="hidden md:block text-xs font-black uppercase tracking-widest text-gray-300">
@@ -137,25 +163,25 @@ const CategoryPage = () => {
 
       <div className="container mx-auto px-4 mt-12 grid grid-cols-1 md:grid-cols-12 gap-12 lg:gap-20">
         {/* Sidebar - Updated with Indicators and Badges */}
-        <aside className={`${showFilters ? 'block' : 'hidden'} md:block md:col-span-3 space-y-12`}>
-          <div className="bg-white border border-gray-100 rounded-[2.5rem] p-8 md:p-10 sticky top-32 shadow-sm">
-            <h3 className="text-base font-black uppercase tracking-[0.15em] mb-12 flex items-center gap-3">
-              <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
+        <aside className={`${showFilters ? 'block' : 'hidden'} md:block md:col-span-3 space-y-6 md:space-y-12`}>
+          <div className="bg-white border border-gray-100 rounded-[2rem] md:rounded-[2.5rem] p-6 md:p-10 sticky top-32 shadow-sm">
+            <h3 className="text-sm md:text-base font-black uppercase tracking-[0.15em] mb-6 md:mb-12 flex items-center gap-3">
+              <span className="w-1 md:w-1.5 h-5 md:h-6 bg-orange-500 rounded-full"></span>
               Categories
             </h3>
 
             <div className="space-y-3">
               <div
-                className={`group flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all duration-300 ${!activeSubcategory ? 'bg-white border-2 border-orange-500 shadow-lg shadow-orange-100' : 'hover:bg-orange-50/50'}`}
+                className={`group flex items-center justify-between p-3.5 rounded-xl md:rounded-2xl cursor-pointer transition-all duration-300 ${!activeSubcategory ? 'bg-white border-2 border-orange-500 shadow-lg shadow-orange-100' : 'hover:bg-orange-50/50'}`}
                 onClick={() => setActiveSubcategory(null)}
               >
-                <div className="flex items-center gap-4">
-                  <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${!activeSubcategory ? 'border-orange-500 bg-orange-500' : 'border-gray-200 group-hover:border-orange-500'}`}>
-                    {!activeSubcategory && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                <div className="flex items-center gap-3 md:gap-4">
+                  <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border-2 flex items-center justify-center transition-all ${!activeSubcategory ? 'border-orange-500 bg-orange-500' : 'border-gray-200 group-hover:border-orange-500'}`}>
+                    {!activeSubcategory && <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-white rounded-full"></div>}
                   </div>
-                  <span className={`text-[10px] font-black uppercase tracking-widest ${!activeSubcategory ? 'text-orange-600' : 'text-gray-600'}`}>All Items</span>
+                  <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${!activeSubcategory ? 'text-orange-600' : 'text-gray-600'}`}>All Items</span>
                 </div>
-                <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg ${!activeSubcategory ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-600'}`}>
+                <span className={`text-[8px] md:text-[9px] font-black px-1.5 md:px-2 py-0.5 rounded-lg ${!activeSubcategory ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400 group-hover:bg-orange-100 group-hover:text-orange-600'}`}>
                   {products.length}
                 </span>
               </div>
@@ -163,29 +189,29 @@ const CategoryPage = () => {
               {subcategories.map(sub => (
                 <div
                   key={sub.id}
-                  className={`group flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all duration-300 ${activeSubcategory === sub.id ? 'bg-white border-2 border-orange-500 shadow-lg shadow-orange-100' : 'hover:bg-orange-50/50'}`}
+                  className={`group flex items-center justify-between p-3.5 rounded-xl md:rounded-2xl cursor-pointer transition-all duration-300 ${activeSubcategory === sub.id ? 'bg-white border-2 border-orange-500 shadow-lg shadow-orange-100' : 'hover:bg-orange-50/50'}`}
                   onClick={() => setActiveSubcategory(sub.id)}
                 >
-                  <div className="flex items-center gap-4">
-                    <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center transition-all ${activeSubcategory === sub.id ? 'border-orange-500 bg-orange-500' : 'border-gray-200 group-hover:border-orange-500'}`}>
-                      {activeSubcategory === sub.id && <div className="w-1.5 h-1.5 bg-white rounded-full"></div>}
+                  <div className="flex items-center gap-3 md:gap-4">
+                    <div className={`w-4 h-4 md:w-5 md:h-5 rounded-full border-2 flex items-center justify-center transition-all ${activeSubcategory === sub.id ? 'border-orange-500 bg-orange-500' : 'border-gray-200 group-hover:border-orange-500'}`}>
+                      {activeSubcategory === sub.id && <div className="w-1 h-1 md:w-1.5 md:h-1.5 bg-white rounded-full"></div>}
                     </div>
-                    <span className={`text-[10px] font-black uppercase tracking-widest ${activeSubcategory === sub.id ? 'text-orange-600' : 'text-gray-600'}`}>{sub.name}</span>
+                    <span className={`text-[9px] md:text-[10px] font-black uppercase tracking-widest ${activeSubcategory === sub.id ? 'text-orange-600' : 'text-gray-600'}`}>{sub.name}</span>
                   </div>
-                  <span className={`text-[9px] font-black px-2.5 py-1 rounded-full ${activeSubcategory === sub.id ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
+                  <span className={`text-[8px] md:text-[9px] font-black px-2 py-0.5 md:px-2.5 md:py-1 rounded-full ${activeSubcategory === sub.id ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'}`}>
                     {products.filter(p => p.subCategoryId === sub.id).length}
                   </span>
                 </div>
               ))}
             </div>
 
-            <div className="mt-16 pt-12 border-t border-gray-100">
-              <div className="relative rounded-[2rem] overflow-hidden bg-white border-2 border-orange-500 p-8 group">
+            <div className="mt-8 md:mt-16 pt-8 md:pt-12 border-t border-gray-100">
+              <div className="relative rounded-[1.5rem] md:rounded-[2rem] overflow-hidden bg-white border-2 border-orange-500 p-6 md:p-8 group">
                 <Image fill src="/feature1.jpg" alt="Promo" className="object-cover opacity-10 group-hover:scale-110 transition-transform duration-1000" />
                 <div className="relative z-10">
-                  <span className="text-[9px] font-black text-white bg-orange-500 px-3 py-1 rounded-full uppercase tracking-widest mb-4 inline-block shadow-lg">Special Offer</span>
-                  <h3 className="text-[1.5rem] md:text-[2rem] font-black mb-6 leading-tight uppercase tracking-tighter">Get 30% Off New Items</h3>
-                  <button className="text-orange-500 text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-500/30 pb-1 hover:border-orange-500 transition-all">Shop Now</button>
+                  <span className="text-[8px] md:text-[9px] font-black text-white bg-orange-500 px-2 md:px-3 py-0.5 md:py-1 rounded-full uppercase tracking-widest mb-3 md:mb-4 inline-block shadow-lg">Special Offer</span>
+                  <h3 className="text-lg md:text-[2rem] font-black mb-4 md:mb-6 leading-tight uppercase tracking-tighter">Get 30% Off</h3>
+                  <button className="text-orange-500 text-[9px] md:text-[10px] font-black uppercase tracking-widest border-b-2 border-orange-500/30 pb-1 hover:border-orange-500 transition-all">Shop Now</button>
                 </div>
               </div>
             </div>
@@ -355,6 +381,115 @@ const CategoryPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Filter Modal for Mobile */}
+      <AnimatePresence>
+        {showFilters && (
+          <div className="fixed inset-0 z-[60] md:hidden">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowFilters(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            {/* Bottom Sheet */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute left-0 right-0 bottom-0 bg-white rounded-t-[2.5rem] shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="px-6 py-5 flex items-center justify-between border-b border-gray-50">
+                <div className="w-12 h-1 bg-gray-200 rounded-full absolute top-3 left-1/2 -translate-x-1/2" />
+                <div className="w-8" /> {/* Spacer */}
+                <h3 className="text-sm font-black uppercase tracking-widest text-black">Filters</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 text-gray-400 hover:text-black transition-colors"
+                >
+                  <FiX size={20} />
+                </button>
+              </div>
+
+              {/* General Filter Options */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+                {/* Sort Section */}
+                <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Sort By</h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {[
+                      { id: "newest", label: "Newest First" },
+                      { id: "price-asc", label: "Price: Low to High" },
+                      { id: "price-desc", label: "Price: High to Low" },
+                      { id: "name-asc", label: "Name: A-Z" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setTempSortOption(opt.id)}
+                        className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempSortOption === opt.id
+                            ? "bg-[#1A1A2E] text-white shadow-lg"
+                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                      >
+                        {opt.label}
+                        {tempSortOption === opt.id ? <FiX size={12} /> : <FiPlus size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Section */}
+                <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Product Status</h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {[
+                      { id: "all", label: "All Items" },
+                      { id: "top-rated", label: "Top Rated" },
+                      { id: "on-sale", label: "On Sale" },
+                    ].map((status) => (
+                      <button
+                        key={status.id}
+                        onClick={() => setTempStatusFilter(status.id)}
+                        className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempStatusFilter === status.id
+                            ? "bg-[#1A1A2E] text-white shadow-lg"
+                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                      >
+                        {status.label}
+                        {tempStatusFilter === status.id ? <FiX size={12} /> : <FiPlus size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="px-6 py-8 border-t border-gray-50 flex gap-4">
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="flex-1 py-4 border-2 border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setSortOption(tempSortOption);
+                    setStatusFilter(tempStatusFilter);
+                    setShowFilters(false);
+                  }}
+                  className="flex-1 py-4 bg-[#f97316] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                >
+                  Save
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div >
   );
 };

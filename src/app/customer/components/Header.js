@@ -59,7 +59,7 @@ const Header = () => {
   // Debounced Search Effect
   useEffect(() => {
     const delayDebounceFn = setTimeout(async () => {
-      if (searchQuery.trim().length > 2) {
+      if (searchQuery.trim().length > 0) {
         setIsSearching(true);
         try {
           const response = await fetch(`/api/products/search/${encodeURIComponent(searchQuery.trim())}`);
@@ -444,7 +444,7 @@ const Header = () => {
                   />
 
                   {/* Live Search Dropdown */}
-                  {((searchResults.length > 0 || searchCategories.length > 0) || isSearching) && searchQuery.length > 2 && (
+                  {((searchResults.length > 0 || searchCategories.length > 0) || isSearching) && searchQuery.length > 0 && (
                     <div className="absolute top-full left-0 w-full bg-white shadow-2xl rounded-2xl border border-gray-100 mt-2 max-h-[60vh] overflow-y-auto z-50">
                       {isSearching ? (
                         <div className="p-6 text-center text-gray-400 text-sm font-medium">Searching...</div>
@@ -709,6 +709,86 @@ const Header = () => {
                     <FaSearch size={14} />
                   </button>
                 </form>
+                {/* Mobile Drawer Live Search Results */}
+                {((searchResults.length > 0 || searchCategories.length > 0) || isSearching) && searchQuery.length > 0 && (
+                  <div className="mt-4 bg-white shadow-xl rounded-xl border border-gray-100 max-h-[50vh] overflow-y-auto w-full">
+                    {isSearching ? (
+                      <div className="p-4 text-center text-gray-400 text-xs font-medium">Searching...</div>
+                    ) : (
+                      <div className="py-2">
+                        {searchCategories.length > 0 && (
+                          <div className="mb-2">
+                            <div className="px-4 py-2 text-[10px] uppercase font-bold text-gray-400 tracking-wider border-b border-gray-50">
+                              Categories ({searchCategories.length})
+                            </div>
+                            {searchCategories.map((category) => (
+                              <div
+                                key={category.id}
+                                onClick={() => {
+                                  router.push(`/customer/pages/category/${category.slug}`);
+                                  setIsMobileMenuOpen(false);
+                                  setSearchResults([]);
+                                  setSearchCategories([]);
+                                }}
+                                className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer transition-colors border-b border-gray-50 last:border-0"
+                              >
+                                {category.imageUrl && (
+                                  <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
+                                    <Image
+                                      src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                                      alt={category.name}
+                                      width={24}
+                                      height={24}
+                                      className="w-full h-full object-cover"
+                                      unoptimized
+                                    />
+                                  </div>
+                                )}
+                                <span className="text-xs font-bold text-gray-900 truncate">{category.name}</span>
+                              </div>
+                            ))}
+                          </div>
+                        )}
+                        <div className="px-4 py-2 text-[10px] uppercase font-bold text-gray-400 tracking-wider border-b border-gray-50 mt-2">
+                          Products ({searchResults.length})
+                        </div>
+                        {searchResults.map((product) => (
+                          <div
+                            key={product.id}
+                            onClick={() => {
+                              router.push(`/customer/pages/products/${product.slug}`);
+                              setIsMobileMenuOpen(false);
+                              setSearchResults([]);
+                              setSearchCategories([]);
+                            }}
+                            className="flex items-center gap-3 px-4 py-2 hover:bg-gray-50 cursor-pointer transition-all border-b border-gray-50 last:border-0"
+                          >
+                            <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
+                              {product.images && JSON.parse(product.images)[0] ? (
+                                <Image
+                                  src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                  alt={product.name}
+                                  width={40}
+                                  height={40}
+                                  className="w-full h-full object-cover"
+                                  unoptimized
+                                />
+                              ) : (
+                                <div className="w-full h-full flex items-center justify-center text-[10px] text-gray-300">No Img</div>
+                              )}
+                            </div>
+                            <div className="flex-1 min-w-0">
+                              <h4 className="text-xs font-bold text-gray-900 truncate">{product.name}</h4>
+                              <p className="text-[10px] font-bold text-orange-500">
+                                Rs. {(product.price - (product.price * product.discount) / 100).toLocaleString()}
+                              </p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                )}
               </div>
 
               {/* Categories and Nav Links */}

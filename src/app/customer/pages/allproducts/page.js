@@ -8,7 +8,8 @@ import { useDispatch } from 'react-redux';
 import { addToCart, setCart } from '../../../store/cartSlice';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag, FiFilter } from 'react-icons/fi';
+import { FiChevronRight, FiSearch, FiShoppingCart, FiChevronDown, FiMaximize2, FiShoppingBag, FiFilter, FiX, FiPlus } from 'react-icons/fi';
+import { AnimatePresence } from 'framer-motion';
 import { GoStarFill } from 'react-icons/go';
 
 const AllProducts = () => {
@@ -16,6 +17,11 @@ const AllProducts = () => {
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
   const [activeFilter, setActiveFilter] = useState('All');
+  const [showFilters, setShowFilters] = useState(false);
+  const [sortOption, setSortOption] = useState("newest");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [tempSortOption, setTempSortOption] = useState("newest");
+  const [tempStatusFilter, setTempStatusFilter] = useState("all");
   const dispatch = useDispatch();
   const router = useRouter();
 
@@ -87,9 +93,26 @@ const AllProducts = () => {
     );
   }
 
-  const displayProducts = products.filter(p =>
-    p.name.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const displayProducts = products
+    .filter(p => {
+      const matchesSearch = p.name.toLowerCase().includes(searchQuery.toLowerCase());
+
+      const isTopRated = p.rating >= 4.5;
+      const isOnSale = p.discount > 0;
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "top-rated" && isTopRated) ||
+        (statusFilter === "on-sale" && isOnSale);
+
+      return matchesSearch && matchesStatus;
+    })
+    .sort((a, b) => {
+      if (sortOption === "price-asc") return a.price - b.price;
+      if (sortOption === "price-desc") return b.price - a.price;
+      if (sortOption === "name-asc") return a.name.localeCompare(b.name);
+      if (sortOption === "newest") return new Date(b.createdAt) - new Date(a.createdAt);
+      return 0;
+    });
 
   return (
     <div className="bg-white min-h-screen text-[#1A1A1A] font-sans">
@@ -130,20 +153,40 @@ const AllProducts = () => {
 
       <div className="container mx-auto px-4 md:px-8 py-12">
         {/* Filters */}
-        <div className="flex items-center gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
-          <button className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-500 hover:border-[#F25C2C] hover:text-[#F25C2C] transition-colors shrink-0">
+        <div className="flex items-center justify-between gap-3 mb-12 overflow-x-auto pb-4 no-scrollbar">
+          <div className="flex items-center gap-3">
+            {['All', 'New Release', 'Popularity', 'Best Seller', 'Sale'].map(filter => (
+              <button
+                key={filter}
+                onClick={() => setActiveFilter(filter)}
+                className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeFilter === filter ? 'bg-[#F25C2C] text-white shadow-lg shadow-orange-500/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
+              >
+                {filter}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={() => {
+              setTempSortOption(sortOption);
+              setTempStatusFilter(statusFilter);
+              setShowFilters(true);
+            }}
+            className="md:hidden flex items-center justify-center bg-white text-[#f97316] w-10 h-10 rounded-xl border border-gray-100 active:scale-95 transition-all shadow-sm shrink-0"
+          >
+            <FiFilter size={18} />
+          </button>
+
+          <button
+            onClick={() => {
+              setTempSortOption(sortOption);
+              setTempStatusFilter(statusFilter);
+              setShowFilters(true);
+            }}
+            className="hidden md:flex w-10 h-10 rounded-full border border-gray-200 items-center justify-center text-gray-500 hover:border-[#F25C2C] hover:text-[#F25C2C] transition-colors shrink-0"
+          >
             <FiFilter />
           </button>
-          <div className="h-8 w-px bg-gray-200 mx-2"></div>
-          {['All', 'New Release', 'Popularity', 'Best Seller', 'Sale'].map(filter => (
-            <button
-              key={filter}
-              onClick={() => setActiveFilter(filter)}
-              className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeFilter === filter ? 'bg-[#F25C2C] text-white shadow-lg shadow-orange-500/30' : 'bg-gray-50 text-gray-400 hover:bg-gray-100 hover:text-gray-600'}`}
-            >
-              {filter}
-            </button>
-          ))}
         </div>
 
         {/* Product Grid */}
@@ -284,6 +327,115 @@ const AllProducts = () => {
           </div>
         </div>
       </div>
+
+      {/* Filter Modal */}
+      <AnimatePresence>
+        {showFilters && (
+          <div className="fixed inset-0 z-[60]">
+            {/* Backdrop */}
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setShowFilters(false)}
+              className="absolute inset-0 bg-black/40 backdrop-blur-sm"
+            />
+            {/* Bottom Sheet / Modal */}
+            <motion.div
+              initial={{ y: "100%" }}
+              animate={{ y: 0 }}
+              exit={{ y: "100%" }}
+              transition={{ type: "spring", damping: 25, stiffness: 200 }}
+              className="absolute left-0 right-0 bottom-0 md:bottom-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 md:w-[450px] bg-white rounded-t-[2.5rem] md:rounded-[2.5rem] shadow-2xl flex flex-col max-h-[90vh]"
+            >
+              {/* Modal Header */}
+              <div className="px-6 py-5 flex items-center justify-between border-b border-gray-50">
+                <div className="w-12 h-1 bg-gray-200 rounded-full absolute top-3 left-1/2 -translate-x-1/2 md:hidden" />
+                <div className="w-8" /> {/* Spacer */}
+                <h3 className="text-sm font-black uppercase tracking-widest text-black">Filters</h3>
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="p-2 text-gray-400 hover:text-black transition-colors"
+                >
+                  <FiX size={20} />
+                </button>
+              </div>
+
+              {/* General Filter Options */}
+              <div className="flex-1 overflow-y-auto px-6 py-6 space-y-8">
+                {/* Sort Section */}
+                <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Sort By</h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {[
+                      { id: "newest", label: "Newest First" },
+                      { id: "price-asc", label: "Price: Low to High" },
+                      { id: "price-desc", label: "Price: High to Low" },
+                      { id: "name-asc", label: "Name: A-Z" },
+                    ].map((opt) => (
+                      <button
+                        key={opt.id}
+                        onClick={() => setTempSortOption(opt.id)}
+                        className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempSortOption === opt.id
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                      >
+                        {opt.label}
+                        {tempSortOption === opt.id ? <FiX size={12} /> : <FiPlus size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Status Section */}
+                <div>
+                  <h4 className="text-[10px] font-black uppercase tracking-[0.2em] text-gray-400 mb-4 px-2">Product Status</h4>
+                  <div className="flex flex-wrap gap-2.5">
+                    {[
+                      { id: "all", label: "All Items" },
+                      { id: "top-rated", label: "Top Rated" },
+                      { id: "on-sale", label: "On Sale" },
+                    ].map((status) => (
+                      <button
+                        key={status.id}
+                        onClick={() => setTempStatusFilter(status.id)}
+                        className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempStatusFilter === status.id
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          }`}
+                      >
+                        {status.label}
+                        {tempStatusFilter === status.id ? <FiX size={12} /> : <FiPlus size={12} />}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Modal Footer Actions */}
+              <div className="px-6 py-8 border-t border-gray-50 flex gap-4">
+                <button
+                  onClick={() => setShowFilters(false)}
+                  className="flex-1 py-4 border-2 border-gray-100 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-gray-50 transition-all"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={() => {
+                    setSortOption(tempSortOption);
+                    setStatusFilter(tempStatusFilter);
+                    setShowFilters(false);
+                  }}
+                  className="flex-1 py-4 bg-[#f97316] text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-orange-500/20 active:scale-95 transition-all"
+                >
+                  Save
+                </button>
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
     </div>
   );
 };
