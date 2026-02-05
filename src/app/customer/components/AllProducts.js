@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { motion } from 'framer-motion';
@@ -40,6 +40,20 @@ const TopRatedProducts = () => {
 
   const router = useRouter();
   const dispatch = useDispatch();
+  const dropdownRef = useRef(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+
+
+  // Click outside listener for categories dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -142,25 +156,44 @@ const TopRatedProducts = () => {
       {/* Modern Filter Bar */}
       <div className="flex items-center justify-between gap-4 mb-16 w-full">
         <div className="flex flex-col md:flex-row items-center justify-between gap-6 w-full">
-          {/* Category Chips - Horizontally Scrollable */}
-          <div className="flex items-center gap-3 overflow-x-auto pb-2 no-scrollbar w-full md:w-auto">
-            {/* "All" Chip */}
+          {/* Clickable Categories Dropdown */}
+          <div className="relative w-full md:w-auto" ref={dropdownRef}>
             <button
-              onClick={() => handleFilterChange('category', '')}
-              className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${!activeFilters.category ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`flex items-center gap-3 px-8 py-2.5 bg-white border border-gray-200 rounded-full text-[10px] font-black uppercase tracking-widest transition-all shadow-sm ${isDropdownOpen || activeFilters.category ? 'border-orange-500 text-orange-500' : 'text-gray-400 hover:border-black hover:text-black'
+                }`}
             >
-              All Categories
+              <span>{activeFilters.category ? categories.find(c => c.id == activeFilters.category)?.name : 'All Categories'}</span>
+              <FiChevronDown className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
 
-            {categories.map(c => (
-              <button
-                key={c.id}
-                onClick={() => handleFilterChange('category', c.id)}
-                className={`px-6 py-2.5 rounded-full text-[10px] font-black uppercase tracking-widest whitespace-nowrap transition-all ${activeFilters.category == c.id ? 'bg-orange-500 text-white shadow-lg shadow-orange-500/20' : 'bg-gray-50 text-gray-400 hover:bg-gray-100'}`}
-              >
-                {c.name}
-              </button>
-            ))}
+            {isDropdownOpen && (
+              <div className="absolute top-full left-0 md:left-auto md:right-0 mt-3 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-top-2 duration-200">
+                <div className="py-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                  <button
+                    onClick={() => {
+                      handleFilterChange('category', '');
+                      setIsDropdownOpen(false);
+                    }}
+                    className={`w-full text-left px-6 py-3 text-[11px] font-black uppercase tracking-wider transition-colors border-b border-gray-50 ${!activeFilters.category ? 'bg-orange-50 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600'}`}
+                  >
+                    All Categories
+                  </button>
+                  {categories.map((c) => (
+                    <button
+                      key={c.id}
+                      onClick={() => {
+                        handleFilterChange('category', c.id);
+                        setIsDropdownOpen(false);
+                      }}
+                      className={`w-full text-left px-6 py-3 text-[11px] font-black uppercase tracking-wider transition-colors border-b border-gray-50 last:border-0 ${activeFilters.category == c.id ? 'bg-orange-50 text-orange-600' : 'text-gray-500 hover:bg-gray-50 hover:text-orange-600'}`}
+                    >
+                      {c.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="flex items-center gap-4 shrink-0">

@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useState, useMemo, useCallback, memo } from 'react';
+import React, { useEffect, useState, useMemo, useCallback, memo, useRef } from 'react';
 import DigitalCheckoutModal from '../../../components/DigitalCheckoutModal';
 import DownloadProgressModal from '../../../components/DownloadProgressModal';
 import { useRouter } from 'next/navigation';
@@ -58,6 +58,8 @@ const ProductPage = ({ productData }) => {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [userName, setUserName] = useState(null);
   const [linkShare, setLinkShare] = useState(false);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
 
   // Digital Product State
   const isDigital = useMemo(() => product?.productType === 'digital' || product?.type === 'digital', [product]);
@@ -195,6 +197,17 @@ const ProductPage = ({ productData }) => {
     }, 500);
   }, [product?.id]);
 
+
+  // Click outside listener for categories dropdown
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   // Helper Functions
   const getImageUrl = useCallback((url) => {
@@ -723,20 +736,38 @@ const ProductPage = ({ productData }) => {
         </div>
       )}
 
-      {/* Categories Row */}
+      {/* Categories Dropdown */}
       {categories.length > 0 && (
-        <div className="mt-16 mb-12 border-t border-gray-100 pt-12">
-          <div className="flex flex-wrap items-center justify-center gap-4 sm:gap-8">
-            {categories.map((cat) => (
-              <button
-                key={cat.slug}
-                onClick={() => router.push(`/customer/pages/category/${cat.slug}`)}
-                className="text-[10px] sm:text-xs font-black uppercase tracking-[0.2em] text-gray-400 hover:text-orange-500 transition-all hover:scale-110 active:scale-95"
-              >
-                {cat.name}
-              </button>
-            ))}
+        <div className="mt-16 mb-12 border-t border-gray-100 pt-12 flex flex-col items-center">
+          <div className="relative" ref={dropdownRef}>
+            <button
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className={`flex items-center gap-3 px-8 py-3 bg-white border border-gray-200 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm ${isDropdownOpen ? 'border-black text-black' : 'text-gray-500 hover:border-black hover:text-black'
+                }`}
+            >
+              <span>All Categories</span>
+              <FiChevronDown className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
+            </button>
+            {isDropdownOpen && (
+              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
+                <div className="py-2 max-h-[300px] overflow-y-auto custom-scrollbar">
+                  {categories.map((cat) => (
+                    <button
+                      key={cat.id || cat.slug}
+                      onClick={() => {
+                        router.push(`/customer/pages/category/${cat.slug}`);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full text-left px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 hover:bg-gray-50 hover:text-orange-600 transition-colors border-b border-gray-50 last:border-0"
+                    >
+                      {cat.name}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
+          <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Discover more in our shop</p>
         </div>
       )}
 

@@ -10,7 +10,10 @@ export async function GET() {
       console.error('[API/Categories] Prisma client is undefined!');
       throw new Error('Prisma client not initialized');
     }
-    const categories = await prisma.category.findMany();
+    const categories = await prisma.category.findMany().catch(err => {
+      console.error('[API/Categories] Prisma findMany failed:', err);
+      throw err;
+    });
     console.log('[API/Categories] Categories fetched successfully, count:', categories.length);
     return NextResponse.json({
       status: true,
