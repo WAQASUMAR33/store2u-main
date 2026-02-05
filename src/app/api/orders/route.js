@@ -30,7 +30,9 @@ export async function POST(request) {
 
         console.log('Received order data:', { ...data, userId: parsedUserId, finalPaymentInfo });
 
-        // 1. Validate Stock First
+        const stockUpdates = {};
+
+        // 1. Validate Stock & Prepare Updates
         for (const item of items) {
             const productId = parseInt(item.productId);
 
@@ -47,8 +49,19 @@ export async function POST(request) {
                 throw new Error(`Product with ID ${item.productId} not found.`);
             }
 
-            if (product.stock < (Number(item.quantity) || 1)) {
-                throw new Error(`Insufficient stock for product: ${product.name}`);
+            // Skip stock check for digital
+            if (product.productType !== 'digital') {
+                if (product.stock < (Number(item.quantity) || 1)) {
+                    throw new Error(`Insufficient stock for product: ${product.name}`);
+                }
+
+                // Add to stockUpdates only if tangible
+                const quantity = Number(item.quantity) || 1;
+                if (stockUpdates[productId]) {
+                    stockUpdates[productId] += quantity;
+                } else {
+                    stockUpdates[productId] = quantity;
+                }
             }
         }
 
@@ -95,20 +108,7 @@ export async function POST(request) {
             },
         });
 
-        // 3. Deduct Stock - Aggregate quantities by productId
-        const stockUpdates = {};
-        for (const item of items) {
-            const productId = parseInt(item.productId);
-            const quantity = Number(item.quantity) || 1;
-
-            if (stockUpdates[productId]) {
-                stockUpdates[productId] += quantity;
-            } else {
-                stockUpdates[productId] = quantity;
-            }
-        }
-
-        // 3. Deduct Stock - Aggregate quantities by productId
+        // 3. Deduct Stock (Tangible Only)
         await Promise.all(
             Object.entries(stockUpdates).map(([productId, totalQuantity]) =>
                 prisma.product.update({
@@ -124,12 +124,16 @@ export async function POST(request) {
 
         // 4. Send Confirmation Email
         if (shippingAddress.email && shippingAddress.email !== 'N/A') {
-            await sendOrderConfirmation(
-                shippingAddress.email,
-                order.id,
-                order.netTotal,
-                order.orderItems
-            ).catch(err => console.error('Failed to send email:', err));
+            try {
+                await sendOrderConfirmation(
+                    shippingAddress.email,
+                    order.id,
+                    order.netTotal,
+                    order.orderItems
+                );
+            } catch (emailErr) {
+                console.warn('Suppressing email error to save order:', emailErr);
+            }
         }
 
         return NextResponse.json(

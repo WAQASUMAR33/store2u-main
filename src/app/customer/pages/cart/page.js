@@ -188,11 +188,18 @@ const CartPage = () => {
     }
   };
 
+  // Check if cart is digital-only
+  const isDigitalOnly = cart.every(item => item.productType === 'digital' || item.isDigital);
+
   const calculateFinalTotal = (currentSubtotal = subtotal) => {
     const subtotalAfterDiscount = (Number(currentSubtotal) || 0) - (Number(discount) || 0);
     const tax = subtotalAfterDiscount * (Number(taxRate) || 0);
-    const effectiveCodCharge = paymentMethod === 'Cash on Delivery' ? (Number(extraDeliveryCharge) || 0) : 0;
-    const final = subtotalAfterDiscount + tax + (Number(deliveryCharge) || 0) + effectiveCodCharge;
+
+    // No delivery charge for digital items
+    const applicableDeliveryCharge = isDigitalOnly ? 0 : (Number(deliveryCharge) || 0);
+    const effectiveCodCharge = paymentMethod === 'Cash on Delivery' && !isDigitalOnly ? (Number(extraDeliveryCharge) || 0) : 0;
+
+    const final = subtotalAfterDiscount + tax + applicableDeliveryCharge + effectiveCodCharge;
     return Math.max(0, final) || 0;
   };
 
@@ -204,6 +211,25 @@ const CartPage = () => {
   }, [cart, discount, taxRate, deliveryCharge, extraDeliveryCharge, paymentMethod]);
 
   const validateForm = () => {
+    // If digital only, we only need basic info (email/name), skip address
+    if (isDigitalOnly) {
+      const { recipientName, email } = shippingAddress;
+      const errors = {};
+      if (!recipientName?.trim()) errors.recipientName = true;
+      if (!email?.trim()) errors.email = true;
+      // Basic email regex
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (email && !emailRegex.test(email)) errors.emailInvalid = true;
+
+      setFormErrors(errors);
+      if (Object.keys(errors).length > 0) {
+        toast.error('Please provide Name and Email for digital delivery.');
+        return false;
+      }
+      return true;
+    }
+
+    // Existing validation for physical goods
     const { recipientName, streetAddress, city, state, zip, phoneNumber, email } = shippingAddress;
     const errors = {};
 
@@ -481,7 +507,7 @@ const CartPage = () => {
             <div className="bg-white p-8 rounded-3xl shadow-sm space-y-6">
               <h4 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-3">
                 <span className="w-1.5 h-6 bg-orange-500 rounded-full"></span>
-                Shipping Information
+                {isDigitalOnly ? 'Customer Details (Digital Delivery)' : 'Shipping Information'}
               </h4>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -524,106 +550,110 @@ const CartPage = () => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Phone Number</label>
-                    {(formErrors.phoneNumber || formErrors.phoneNumberInvalid) && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
-                  </div>
-                  <div className="relative">
-                    <FiPhone className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formErrors.phoneNumber || formErrors.phoneNumberInvalid ? 'text-red-500' : 'text-gray-400'}`} />
-                    <input
-                      type="tel"
-                      name="phoneNumber"
-                      placeholder="+92XXXXXXXXXX"
-                      value={shippingAddress.phoneNumber}
-                      onChange={handleInputChange}
-                      className={`w-full bg-gray-50 border-2 rounded-2xl py-4 pl-12 pr-10 text-sm focus:ring-4 transition-all outline-none ${formErrors.phoneNumber || formErrors.phoneNumberInvalid ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
-                    />
-                    {(formErrors.phoneNumber || formErrors.phoneNumberInvalid) && <FiX className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500" />}
-                  </div>
-                </div>
+              {!isDigitalOnly && (
+                <>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div className="space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Phone Number</label>
+                        {(formErrors.phoneNumber || formErrors.phoneNumberInvalid) && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                      </div>
+                      <div className="relative">
+                        <FiPhone className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formErrors.phoneNumber || formErrors.phoneNumberInvalid ? 'text-red-500' : 'text-gray-400'}`} />
+                        <input
+                          type="tel"
+                          name="phoneNumber"
+                          placeholder="+92XXXXXXXXXX"
+                          value={shippingAddress.phoneNumber}
+                          onChange={handleInputChange}
+                          className={`w-full bg-gray-50 border-2 rounded-2xl py-4 pl-12 pr-10 text-sm focus:ring-4 transition-all outline-none ${formErrors.phoneNumber || formErrors.phoneNumberInvalid ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
+                        />
+                        {(formErrors.phoneNumber || formErrors.phoneNumberInvalid) && <FiX className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500" />}
+                      </div>
+                    </div>
 
-                <div className="space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Street Address</label>
-                    {formErrors.streetAddress && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                    <div className="space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Street Address</label>
+                        {formErrors.streetAddress && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                      </div>
+                      <div className="relative">
+                        <FiHome className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formErrors.streetAddress ? 'text-red-500' : 'text-gray-400'}`} />
+                        <input
+                          type="text"
+                          name="streetAddress"
+                          placeholder="Street, House No."
+                          value={shippingAddress.streetAddress}
+                          onChange={handleInputChange}
+                          className={`w-full bg-gray-50 border-2 rounded-2xl py-4 pl-12 pr-10 text-sm focus:ring-4 transition-all outline-none ${formErrors.streetAddress ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
+                        />
+                        {formErrors.streetAddress && <FiX className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500" />}
+                      </div>
+                    </div>
                   </div>
-                  <div className="relative">
-                    <FiHome className={`absolute left-4 top-1/2 -translate-y-1/2 transition-colors ${formErrors.streetAddress ? 'text-red-500' : 'text-gray-400'}`} />
-                    <input
-                      type="text"
-                      name="streetAddress"
-                      placeholder="Street, House No."
-                      value={shippingAddress.streetAddress}
-                      onChange={handleInputChange}
-                      className={`w-full bg-gray-50 border-2 rounded-2xl py-4 pl-12 pr-10 text-sm focus:ring-4 transition-all outline-none ${formErrors.streetAddress ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
-                    />
-                    {formErrors.streetAddress && <FiX className="absolute right-4 top-1/2 -translate-y-1/2 text-red-500" />}
-                  </div>
-                </div>
-              </div>
 
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                <div className="col-span-2 space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">City</label>
-                    {formErrors.city && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
-                  </div>
-                  <input
-                    type="text"
-                    name="city"
-                    placeholder="City"
-                    value={shippingAddress.city}
-                    onChange={handleInputChange}
-                    className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.city ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
-                  />
-                </div>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    <div className="col-span-2 space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">City</label>
+                        {formErrors.city && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                      </div>
+                      <input
+                        type="text"
+                        name="city"
+                        placeholder="City"
+                        value={shippingAddress.city}
+                        onChange={handleInputChange}
+                        className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.city ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
+                      />
+                    </div>
 
-                <div className="col-span-2 space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">State / Province</label>
-                    {formErrors.state && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
-                  </div>
-                  <input
-                    type="text"
-                    name="state"
-                    placeholder="State"
-                    value={shippingAddress.state}
-                    onChange={handleInputChange}
-                    className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.state ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
-                  />
-                </div>
+                    <div className="col-span-2 space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">State / Province</label>
+                        {formErrors.state && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                      </div>
+                      <input
+                        type="text"
+                        name="state"
+                        placeholder="State"
+                        value={shippingAddress.state}
+                        onChange={handleInputChange}
+                        className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.state ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
+                      />
+                    </div>
 
-                <div className="col-span-2 space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">ZIP / Postcode</label>
-                    {formErrors.zip && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
-                  </div>
-                  <input
-                    type="text"
-                    name="zip"
-                    placeholder="Postal Code"
-                    value={shippingAddress.zip}
-                    onChange={handleInputChange}
-                    className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.zip ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
-                  />
-                </div>
+                    <div className="col-span-2 space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">ZIP / Postcode</label>
+                        {formErrors.zip && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
+                      </div>
+                      <input
+                        type="text"
+                        name="zip"
+                        placeholder="Postal Code"
+                        value={shippingAddress.zip}
+                        onChange={handleInputChange}
+                        className={`w-full bg-gray-50 border-2 rounded-2xl py-4 px-6 text-sm focus:ring-4 transition-all outline-none ${formErrors.zip ? 'border-red-500 bg-red-50 focus:ring-red-100' : 'border-transparent focus:ring-orange-500/10 focus:bg-white'}`}
+                      />
+                    </div>
 
-                <div className="col-span-2 space-y-1.5 flex flex-col">
-                  <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Country</label>
+                    <div className="col-span-2 space-y-1.5 flex flex-col">
+                      <div className="flex justify-between items-center px-1">
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Country</label>
+                      </div>
+                      <select
+                        name="country"
+                        value={shippingAddress.country}
+                        onChange={handleInputChange}
+                        className="w-full bg-gray-50 border-2 border-transparent rounded-2xl py-4 px-6 text-sm focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all outline-none"
+                      >
+                        <option value="Pakistan">Pakistan</option>
+                      </select>
+                    </div>
                   </div>
-                  <select
-                    name="country"
-                    value={shippingAddress.country}
-                    onChange={handleInputChange}
-                    className="w-full bg-gray-50 border-2 border-transparent rounded-2xl py-4 px-6 text-sm focus:ring-4 focus:ring-orange-500/10 focus:bg-white transition-all outline-none"
-                  >
-                    <option value="Pakistan">Pakistan</option>
-                  </select>
-                </div>
-              </div>
+                </>
+              )}
             </div>
 
             {/* Payment Method */}

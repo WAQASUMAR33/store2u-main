@@ -220,8 +220,39 @@ const FilterableTable = ({
 
   const handleEditItem = (item) => {
     setEditProduct(item);
+
+    let itemColors = [];
+    try {
+      if (Array.isArray(item.colors)) {
+        itemColors = item.colors;
+      } else if (typeof item.colors === 'string') {
+        // Handle "null" string or valid JSON
+        if (item.colors === 'null') itemColors = [];
+        else itemColors = JSON.parse(item.colors);
+      }
+      // Ensure it's an array purely
+      if (!Array.isArray(itemColors)) itemColors = [];
+    } catch (e) {
+      console.error("Error parsing colors for edit:", e);
+      itemColors = [];
+    }
+
+    let itemSizes = [];
+    try {
+      if (Array.isArray(item.sizes)) {
+        itemSizes = item.sizes;
+      } else if (typeof item.sizes === 'string') {
+        if (item.sizes === 'null') itemSizes = [];
+        else itemSizes = JSON.parse(item.sizes);
+      }
+      if (!Array.isArray(itemSizes)) itemSizes = [];
+    } catch (e) {
+      console.error("Error parsing sizes for edit:", e);
+      itemSizes = [];
+    }
+
     const existingColors = colors
-      .filter((color) => item.colors.includes(color.id))
+      .filter((color) => itemColors.includes(color.id))
       .map((color) => ({
         value: color.id,
         label: `${color.name} (${color.hex})`,
@@ -229,7 +260,7 @@ const FilterableTable = ({
       }));
 
     const existingSizes = sizes
-      .filter((size) => item.sizes.includes(size.id))
+      .filter((size) => itemSizes.includes(size.id))
       .map((size) => ({ value: size.id, label: size.name }));
 
     setProductForm({

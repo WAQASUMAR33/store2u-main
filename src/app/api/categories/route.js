@@ -3,8 +3,15 @@ import prisma from '../../util/prisma';
 
 // Get all categories (GET /api/categories)
 export async function GET() {
+  console.log('[API/Categories] GET request received');
+  console.log('[API/Categories] DATABASE_URL present:', !!process.env.DATABASE_URL);
   try {
+    if (!prisma) {
+      console.error('[API/Categories] Prisma client is undefined!');
+      throw new Error('Prisma client not initialized');
+    }
     const categories = await prisma.category.findMany();
+    console.log('[API/Categories] Categories fetched successfully, count:', categories.length);
     return NextResponse.json({
       status: true,
       data: categories,
@@ -12,7 +19,7 @@ export async function GET() {
   } catch (error) {
     console.error('Error fetching categories:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch categories', status: false, error: error.message },
+      { message: 'Failed to fetch categories', status: false, error: error.message, stack: error.stack },
       { status: 500 }
     );
   }

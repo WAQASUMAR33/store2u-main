@@ -11,24 +11,24 @@ export async function GET(req, { params }) {
       return new Response(JSON.stringify({ message: 'User slug is required' }), { status: 400 });
     }
 
-   
+
 
     // Fetch orders for the user's userId
     const orders = await prisma.Order.findMany({
-        include: {
-            orderItems: {
+      include: {
+        orderItems: {
+          include: {
+            product: {
               include: {
-                product: {
-                  include: {
-                    images: {
-                      take: 1 // Take only the first image
-                    }
-                  }
+                images: {
+                  take: 1 // Take only the first image
                 }
-              },
-            },
+              }
+            }
           },
-      where: { userId: parseInt( id) }
+        },
+      },
+      where: { userId: parseInt(id) }
     });
 
     // Check if orders exist

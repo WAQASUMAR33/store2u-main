@@ -3,13 +3,15 @@ import prisma from '../../util/prisma';
 
 
 export async function GET() {
+  console.log('[API/Sizes] GET request received');
   try {
     const sizes = await prisma.size.findMany();
+    console.log('[API/Sizes] Success, count:', sizes.length);
     return NextResponse.json(sizes);
   } catch (error) {
-    console.error('Error fetching sizes:', error);
+    console.error('[API/Sizes] ERROR:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch sizes', error: error.message },
+      { message: 'Failed to fetch sizes', error: error.message, stack: error.stack },
       { status: 500 }
     );
   }

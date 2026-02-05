@@ -17,7 +17,7 @@ export default function RootLayout({ children }) {
   return (
     <Provider store={store}>
       <html lang="en">
-        <body className={poppins.className}>
+        <body className={poppins.className} suppressHydrationWarning={true}>
           <ThemeRegistry>
             <div className='text-black'>
               {/* <WhatsAppButton /> Ensure WhatsAppButton is included in the layout */}

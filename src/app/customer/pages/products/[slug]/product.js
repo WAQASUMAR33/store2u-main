@@ -1,6 +1,8 @@
 'use client';
 
 import React, { useEffect, useState, useMemo, useCallback, memo } from 'react';
+import DigitalCheckoutModal from '../../../components/DigitalCheckoutModal';
+import DownloadProgressModal from '../../../components/DownloadProgressModal';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import dynamic from 'next/dynamic';
@@ -10,9 +12,10 @@ import 'react-toastify/dist/ReactToastify.css';
 import { useDispatch, useSelector } from 'react-redux';
 import { setCart } from '../../../../store/cartSlice';
 import { ThreeDots } from 'react-loader-spinner';
-import { FiMinus, FiPlus, FiShoppingBag, FiMaximize2 } from 'react-icons/fi';
-import { FaShare, FaTimes, FaFacebookF, FaTwitter, FaPinterestP } from 'react-icons/fa';
+import { FiMinus, FiPlus, FiShoppingBag, FiMaximize2, FiChevronDown, FiInfo, FiHeart, FiCalendar, FiTruck, FiMapPin, FiChevronUp, FiSearch, FiRefreshCw } from 'react-icons/fi';
+import { FaShare, FaTimes, FaFacebookF, FaTwitter, FaPinterestP, FaRegHeart } from 'react-icons/fa';
 import { GoStarFill } from "react-icons/go";
+import { MdStars } from "react-icons/md";
 import Image from 'next/image';
 
 // Lazy load heavy components
@@ -55,6 +58,65 @@ const ProductPage = ({ productData }) => {
   const [reviewLoading, setReviewLoading] = useState(false);
   const [userName, setUserName] = useState(null);
   const [linkShare, setLinkShare] = useState(false);
+
+  // Digital Product State
+  const isDigital = useMemo(() => product?.productType === 'digital' || product?.type === 'digital', [product]);
+  const [isPurchased, setIsPurchased] = useState(false);
+  const [isDigitalPaymentOpen, setIsDigitalPaymentOpen] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [activeDownloadUrl, setActiveDownloadUrl] = useState('');
+
+  // Check purchase status
+  useEffect(() => {
+    if (isDigital && typeof window !== 'undefined') {
+      const userId = localStorage.getItem('userId');
+      if (userId && product?.id) {
+        axios.post('/api/orders/check-purchase', { userId, productId: product.id })
+          .then(res => {
+            if (res.data.purchased) setIsPurchased(true);
+          })
+          .catch(err => console.error("Error checking purchase", err));
+      }
+    }
+  }, [isDigital, product]);
+
+  const handleDownload = () => {
+    if (product?.digitalData) {
+      try {
+        const data = typeof product.digitalData === 'string' ? JSON.parse(product.digitalData) : product.digitalData;
+        const fileUrl = data.files?.[0]?.url;
+        if (fileUrl) {
+          const downloadUrl = getFileUrl(fileUrl);
+          setActiveDownloadUrl(downloadUrl);
+          setIsDownloading(true);
+        } else {
+          toast.error("Download link not found.");
+        }
+      } catch (e) {
+        console.error("Error parsing digital data", e);
+        toast.error("Process error.");
+      }
+    }
+  };
+
+  const onDownloadComplete = () => {
+    // Revert button to "Pay Now" logic
+    setIsPurchased(false);
+    setIsDownloading(false);
+
+    // Trigger actual download via the proxy
+    const filename = product?.name || 'download';
+    const proxyUrl = `/api/download?url=${encodeURIComponent(activeDownloadUrl)}&filename=${encodeURIComponent(filename)}`;
+
+    // Using window.location.assign for better reliability with timer-based triggers
+    window.location.assign(proxyUrl);
+  };
+
+  // Helper to resolve file URL (reuses image logic or separate)
+  const getFileUrl = (url) => {
+    if (url.startsWith('http')) return url;
+    return `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+  };
 
   // Fetch all categories for the navigation row
   useEffect(() => {
@@ -191,6 +253,11 @@ const ProductPage = ({ productData }) => {
   };
 
   const handleBuyNow = () => {
+    if (isDigital) {
+      setIsDigitalPaymentOpen(true);
+      return;
+    }
+
     if (product.stock === 0) return toast.error("Out of stock");
     if (sizes.length > 0 && !selectedSize) return toast.error("Select size");
     if (colors.length > 0 && !selectedColor) return toast.error("Select color");
@@ -243,257 +310,382 @@ const ProductPage = ({ productData }) => {
   if (error) return <div className="text-center mt-20">{error}</div>;
 
   return (
-    <div className="container mx-auto px-4 md:px-8 py-12 font-sans text-[#333] max-w-7xl">
+    <div className="container mx-auto px-4 md:px-8 py-4 font-sans text-[#333] max-w-7xl">
       <ToastContainer />
 
-      {/* Main Split Layout */}
-      <div className="flex flex-col lg:flex-row gap-12 lg:gap-20">
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center gap-2 text-[11px] font-bold text-gray-400 mb-8 overflow-hidden whitespace-nowrap">
+        <button onClick={() => router.push('/')} className="hover:text-black underline underline-offset-4 decoration-gray-200">Homepage</button>
+        <FiChevronDown className="rotate-[270deg] flex-shrink-0" size={10} />
+        <button onClick={() => router.push(`/customer/pages/category/${product?.category?.slug}`)} className="hover:text-black underline underline-offset-4 decoration-gray-200 max-w-[150px] truncate">{product?.category?.name || 'Category'}</button>
+        <FiChevronDown className="rotate-[270deg] flex-shrink-0" size={10} />
+        <span className="text-gray-900 truncate">{product?.name}</span>
+      </nav>
 
+      {/* Main Split Layout */}
+      <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
         {/* Left Column: Images */}
-        <div className="w-full lg:w-1/2 flex flex-col md:flex-row gap-6">
-          {/* Thumbnails */}
-          <div className="order-2 md:order-1 flex md:flex-col gap-4 overflow-x-auto md:overflow-visible">
+        <div className="w-full lg:w-3/5 flex flex-col md:flex-row gap-4">
+          {/* Thumbnails - Vertical on Desktop, Horizontal on Mobile */}
+          <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[600px] scrollbar-hide py-1">
             {product?.images?.map((img, idx) => (
-              <div
+              <button
                 key={idx}
-                className={`min-w-[5rem] w-20 h-20 border cursor-pointer transition-all ${currentImageIndex === idx ? 'border-black opacity-100' : 'border-transparent opacity-60 hover:opacity-100'}`}
+                className={`flex-shrink-0 w-16 h-16 md:w-20 md:h-20 border-2 rounded-lg overflow-hidden transition-all duration-200 ${currentImageIndex === idx ? 'border-orange-500 ring-2 ring-orange-100' : 'border-gray-100 hover:border-gray-300'
+                  }`}
                 onClick={() => handleThumbnailClick(idx)}
               >
                 <Image
                   src={getImageUrl(img?.url)}
-                  width={80} height={80}
+                  width={100} height={100}
                   className="w-full h-full object-cover"
-                  alt="Thumbnail"
+                  alt={`Product view ${idx + 1}`}
                   unoptimized={shouldUnoptimize(img?.url)}
                 />
-              </div>
+              </button>
             ))}
           </div>
 
-          {/* Main Image */}
-          <div className="order-1 md:order-2 flex-grow bg-gray-50 aspect-square md:aspect-auto md:h-[600px] relative flex items-center justify-center">
-            {product?.discount && (
-              <span className="absolute top-4 left-4 bg-[#1E4C2F] text-white text-xs font-bold px-3 py-1 rounded-full z-10">
-                {product.discount}% OFF
-              </span>
-            )}
-            {product?.images?.[currentImageIndex] ? (
-              <Image
-                src={getImageUrl(product.images[currentImageIndex].url)}
-                fill
-                className="object-contain p-8 mix-blend-multiply"
-                alt={product.name}
-                priority
-                unoptimized={shouldUnoptimize(product.images[currentImageIndex].url)}
-              />
-            ) : (
-              <span className="text-gray-400">No Image</span>
-            )}
+          {/* Main Image View */}
+          <div className="order-1 md:order-2 flex-grow relative group">
+            <div
+              className="bg-white border border-gray-100 rounded-2xl aspect-[4/5] md:h-[600px] relative flex items-center justify-center overflow-hidden shadow-sm"
+              onClick={() => {
+                if (product?.images?.[currentImageIndex]?.url) {
+                  window.open(getImageUrl(product.images[currentImageIndex].url), '_blank');
+                }
+              }}
+            >
+              <div className="absolute top-4 left-4 z-20 flex flex-col gap-2">
+                {product?.discount && (
+                  <span className="bg-[#E1F2E8] text-[#1E4C2F] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest shadow-sm">
+                    {product.discount}% OFF
+                  </span>
+                )}
+                {product?.isTopRated && (
+                  <span className="bg-[#FFF8E6] text-[#A66E00] text-[10px] font-black px-3 py-1.5 rounded-full uppercase tracking-widest flex items-center gap-1 shadow-sm">
+                    <GoStarFill className="mb-0.5" /> Bestseller
+                  </span>
+                )}
+              </div>
+
+              <div className="absolute top-4 right-4 z-20">
+                <button className="bg-white/80 backdrop-blur-md p-2 rounded-full shadow-md text-gray-700 hover:text-red-500 transition-colors duration-300">
+                  <FaRegHeart size={18} />
+                </button>
+              </div>
+
+              {product?.images?.[currentImageIndex] ? (
+                <Image
+                  src={getImageUrl(product.images[currentImageIndex].url)}
+                  fill
+                  className="object-contain p-4 transition-transform duration-700 group-hover:scale-105"
+                  alt={product.name}
+                  priority
+                  unoptimized={shouldUnoptimize(product.images[currentImageIndex].url)}
+                />
+              ) : (
+                <div className="flex flex-col items-center gap-2 text-gray-300">
+                  <FiMaximize2 size={48} />
+                  <span className="text-sm font-medium">No Image Available</span>
+                </div>
+              )}
+            </div>
           </div>
         </div>
 
         {/* Right Column: details */}
-        <div className="w-full lg:w-1/2 flex flex-col">
-          <p className="text-xs sm:text-sm text-gray-500 tracking-widest uppercase mb-2 font-medium">{product?.category?.name || 'Collection'}</p>
-          <h1 className="text-xl md:text-2xl font-serif font-medium text-gray-900 mb-4">{product?.name}</h1>
+        <div className="w-full lg:w-2/5 flex flex-col">
+          <div className="mb-6">
+            <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-3">{product?.category?.name || 'Collection'}</p>
+            <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{product?.name}</h1>
 
-          {/* Rating */}
-          <div className="flex items-center gap-2 mb-6">
-            <div className="flex text-yellow-400 text-sm">
-              {[...Array(5)].map((_, i) => <span key={i}>&#9733;</span>)}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center gap-1 bg-[#2D2D2D] text-white px-2 py-0.5 rounded text-[10px] font-bold">
+                <GoStarFill className="text-orange-400" />
+                <span>4.9</span>
+              </div>
+              <span className="text-xs text-gray-500 underline underline-offset-4 decoration-gray-300 pointer-events-none">
+                {reviews.length} Shop reviews
+              </span>
             </div>
-            <span className="text-xs text-gray-500">({reviews.length} reviews)</span>
           </div>
 
-          {/* Price */}
-          <div className="mb-8">
-            {product?.discount ? (
-              <div className="flex items-baseline gap-4">
-                <span className="text-3xl font-bold text-gray-900">Rs.{formatPrice(calculateOriginalPrice(product.price, product.discount))}</span>
-                <span className="text-lg text-gray-400 line-through">Rs.{formatPrice(product.price)}</span>
+          <div className="mb-6">
+            <div className="flex items-baseline gap-3">
+              <span className="text-3xl font-black text-gray-900">
+                Rs.{formatPrice(calculateOriginalPrice(product.price, product.discount))}
+              </span>
+              {product?.discount > 0 && (
+                <span className="text-base text-gray-400 line-through font-medium">
+                  Rs.{formatPrice(product.price)}
+                </span>
+              )}
+            </div>
+            <p className="text-[10px] text-gray-500 mt-1 font-medium flex items-center gap-1 italic">
+              <FiInfo className="mb-0.5" /> Inclusive of all taxes
+            </p>
+          </div>
+
+          <div className="h-px bg-gray-100 mb-8 w-full" />
+
+          {/* Selection Area */}
+          <div className="space-y-6 mb-8">
+            {/* Color Selector */}
+            <div>
+              <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">
+                Color {selectedColor && <span className="text-gray-400 font-medium ml-2">— {selectedColor}</span>}
+              </label>
+              {colors.length > 0 ? (
+                <div className="relative group">
+                  <select
+                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
+                    onChange={(e) => setSelectedColor(e.target.value)}
+                    value={selectedColor || ''}
+                  >
+                    <option value="" disabled>Select a color</option>
+                    {colors.map((c, i) => (
+                      <option key={i} value={c.name}>{c.name}</option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                </div>
+              ) : (
+                <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center gap-2 text-sm font-bold text-gray-500 ring-1 ring-orange-50/50">
+                  <div className="w-3 h-3 rounded-full bg-orange-400" /> Neutral (Standard)
+                </div>
+              )}
+            </div>
+
+            {/* Size Selector */}
+            <div>
+              <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">
+                Size {selectedSize && <span className="text-gray-400 font-medium ml-2">— {selectedSize}</span>}
+              </label>
+              {sizes.length > 0 ? (
+                <div className="relative group">
+                  <select
+                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
+                    onChange={(e) => setSelectedSize(e.target.value)}
+                    value={selectedSize || ''}
+                  >
+                    <option value="" disabled>Select a size</option>
+                    {sizes.map((s, i) => (
+                      <option key={i} value={s.name} disabled={s.stock === 0}>
+                        {s.name} {s.stock === 0 ? '(Out of Stock)' : ''}
+                      </option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                </div>
+              ) : (
+                <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
+                  One Size fits all
+                </div>
+              )}
+            </div>
+
+            {/* Quantity Selector - Etsy Style Row */}
+            {!isDigital && (
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Quantity</label>
+                <div className="relative group w-32">
+                  <select
+                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
+                    value={quantity}
+                    onChange={(e) => setQuantity(parseInt(e.target.value))}
+                  >
+                    {[...Array(Math.min(10, product?.stock || 10))].map((_, i) => (
+                      <option key={i + 1} value={i + 1}>{i + 1}</option>
+                    ))}
+                  </select>
+                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                </div>
               </div>
-            ) : (
-              <span className="text-3xl font-bold text-gray-900">Rs.{formatPrice(product?.price)}</span>
             )}
           </div>
 
-          <div className="h-px bg-gray-200 mb-8 w-full" />
+          {/* Action Buttons */}
+          <div className="flex flex-col gap-3 mt-4">
+            {!isPurchased ? (
+              <>
+                <button
+                  onClick={handleBuyNow}
+                  disabled={loading || (!isDigital && product?.stock === 0)}
+                  className="w-full bg-orange-600 text-white h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-orange-700 transition-all shadow-xl shadow-orange-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
+                >
+                  <span className="flex items-center justify-center gap-2">
+                    {isDigital ? 'Download Now' : 'Buy it now'}
+                  </span>
+                </button>
 
-          {/* Selectors */}
-          {colors.length === 0 && (
-            <div className="mb-6">
-              <span className="text-sm font-bold uppercase tracking-wide block mb-3">Color</span>
-              <div className="inline-block px-4 py-2 border border-orange-600 text-orange-600 text-sm font-bold rounded-lg bg-orange-50/50">Neutral</div>
-            </div>
-          )}
-          {colors.length > 0 && (
-            <div className="mb-6">
-              <span className="text-sm font-bold uppercase tracking-wide block mb-3">Color: <span className="font-normal capitalize">{selectedColor}</span></span>
-              <div className="flex gap-3">
-                {colors.map((c, i) => (
+                {!isDigital && (
                   <button
-                    key={i}
-                    onClick={() => setSelectedColor(c.name)}
-                    className={`w-8 h-8 rounded-full border border-gray-300 shadow-sm focus:outline-none ring-1 ring-offset-2 ${selectedColor === c.name ? 'ring-orange-600' : 'ring-transparent'}`}
-                    style={{ backgroundColor: c.hex }}
-                    title={c.name}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-
-          {sizes.length === 0 && (
-            <div className="mb-6">
-              <span className="text-sm font-bold uppercase tracking-wide block mb-3">Size</span>
-              <div className="inline-block px-4 py-2 border border-orange-600 text-orange-600 text-sm font-bold rounded-lg bg-orange-50/50">One Size</div>
-            </div>
-          )}
-          {sizes.length > 0 && (
-            <div className="mb-6">
-              <span className="text-sm font-bold uppercase tracking-wide block mb-3">Size: <span className="font-normal capitalize">{selectedSize}</span></span>
-              <div className="flex gap-2">
-                {sizes.map((s, i) => (
-                  <button
-                    key={i}
-                    onClick={() => setSelectedSize(s.name)}
-                    disabled={s.stock === 0}
-                    className={`min-w-[3rem] h-10 px-3 border border-gray-300 text-sm font-medium transition-all
-                                ${selectedSize === s.name ? 'bg-orange-600 text-white border-orange-600' : 'hover:border-orange-600 bg-white text-gray-900'}
-                                ${s.stock === 0 ? 'opacity-50 cursor-not-allowed line-through' : ''}
-                             `}
+                    onClick={handleAddToCart}
+                    disabled={loading || product?.stock === 0}
+                    className="w-full bg-white text-black border-2 border-black h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-[0.98] disabled:opacity-50"
                   >
-                    {s.name}
+                    {product?.stock === 0 ? 'Out of Stock' : 'Add to basket'}
                   </button>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Quantity & Actions */}
-          <div className="flex flex-col sm:flex-row gap-4 mb-8 mt-4">
-            {/* Quantity */}
-            <div className="border border-gray-300 flex items-center h-12 w-32 px-4 justify-between">
-              <button onClick={handleQuantityDecrease} disabled={quantity <= 1} className="text-gray-500 hover:text-black"><FiMinus size={14} /></button>
-              <span className="font-medium text-gray-900">{quantity}</span>
-              <button onClick={handleQuantityIncrease} className="text-gray-500 hover:text-black"><FiPlus size={14} /></button>
-            </div>
-
-            {/* Buttons */}
-            <div className="flex-grow flex gap-4">
+                )}
+              </>
+            ) : (
               <button
-                onClick={handleAddToCart}
-                disabled={loading || product?.stock === 0}
-                className="flex-1 bg-white text-orange-600 border border-orange-600 h-12 rounded-xl uppercase font-bold text-sm tracking-widest hover:bg-orange-600 hover:text-white transition-colors disabled:opacity-50"
+                onClick={handleDownload}
+                className="w-full bg-[#1E4C2F] text-white h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-[#153a23] transition-all shadow-xl shadow-green-900/10 active:scale-[0.98]"
               >
-                {product?.stock === 0 ? 'Out of Stock' : 'Add to Bag'}
+                Download product
               </button>
-              <button
-                onClick={handleBuyNow}
-                disabled={loading || product?.stock === 0}
-                className="flex-1 bg-orange-600 text-white h-12 rounded-xl uppercase font-bold text-sm tracking-widest hover:bg-orange-700 transition-all shadow-lg shadow-orange-600/20 active:scale-95 disabled:opacity-50"
-              >
-                Buy Now
-              </button>
-            </div>
+            )}
           </div>
 
-          {/* Social Share */}
-          <div className="flex gap-4 text-gray-500 mt-2">
-            <a href="#" className="hover:text-black"><FaFacebookF /></a>
-            <a href="#" className="hover:text-black"><FaTwitter /></a>
-            <a href="#" className="hover:text-black"><FaPinterestP /></a>
-          </div>
 
         </div>
       </div>
 
-      {/* Info Tabs Section - Card Style */}
-      <div className="mt-20">
-        <div className="bg-white shadow-lg rounded-xl overflow-hidden border border-gray-100">
+      {/* Bottom Section: Reviews and Accordions */}
+      <div className="mt-16 pt-16 border-t border-gray-100 flex flex-col lg:flex-row gap-16">
+        {/* Left Side: Reviews */}
+        <div className="w-full lg:w-3/5">
+          <div className="mb-10">
+            <h2 className="text-2xl font-serif font-bold text-gray-900 mb-8">Reviews for this item ({reviews.length})</h2>
 
-          {/* Tab Headers */}
-          <div className="flex border-b border-gray-100 bg-gray-50/50 overflow-x-auto">
-            {['info', 'delivery', 'reviews'].map(tab => (
-              <button
-                key={tab}
-                onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-4 md:py-5 px-4 md:px-8 text-xs md:text-sm font-bold uppercase tracking-widest transition-all relative whitespace-nowrap text-center
-                          ${activeTab === tab ? 'text-black bg-white' : 'text-gray-400 hover:text-gray-600 hover:bg-white/50'}
-                      `}
-              >
-                {tab === 'info' ? 'Product Info' : tab === 'delivery' ? 'Delivery & Returns' : 'Reviews'}
-                {activeTab === tab && (
-                  <motion.div
-                    layoutId="activeTab"
-                    className="absolute top-0 left-0 right-0 h-0.5 bg-orange-600"
-                  />
-                )}
-              </button>
-            ))}
-          </div>
-
-          {/* Tab Content */}
-          <div className="px-4 py-6 md:px-10 md:py-12 bg-white min-h-[200px]">
-            {activeTab === 'info' && (
-              <div className="prose prose-sm max-w-none text-gray-600 leading-relaxed whitespace-normal break-words" dangerouslySetInnerHTML={{ __html: product?.description || 'No description available.' }} />
-            )}
-            {activeTab === 'delivery' && (
-              <div className="text-gray-600 text-sm leading-relaxed max-w-3xl">
-                <p className="mb-4">We offer free standard shipping on all orders over Rs.5000. Expected delivery within 3-5 business days.</p>
-                <div className="grid md:grid-cols-2 gap-6">
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h5 className="font-bold text-gray-900 mb-2">Standard Delivery</h5>
-                    <p>3-5 working days</p>
+            {reviews.length > 0 && (
+              <>
+                <div className="flex flex-wrap items-center gap-8 mb-10">
+                  <div className="flex flex-col items-center">
+                    <div className="flex items-center gap-2 text-3xl font-bold text-gray-900">
+                      <GoStarFill className="text-gray-900" size={24} />
+                      <span>4.9</span>
+                      <span className="text-gray-300 text-xl font-normal">/5</span>
+                    </div>
+                    <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Item average</span>
                   </div>
-                  <div className="bg-gray-50 p-4 rounded-lg">
-                    <h5 className="font-bold text-gray-900 mb-2">Express Delivery</h5>
-                    <p>1-2 working days</p>
+
+                  <div className="flex flex-wrap gap-4">
+                    {[
+                      { label: "Item quality", score: "4.9" },
+                      { label: "Delivery", score: "4.8" },
+                      { label: "Customer service", score: "4.9" },
+                      { label: "Buyers recommend", score: "98%" }
+                    ].map((stat, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1">
+                        <div className="w-12 h-12 rounded-full border-[3px] border-orange-100 flex items-center justify-center text-[10px] font-black text-gray-900">
+                          {stat.score}
+                        </div>
+                        <span className="text-[9px] font-bold text-center text-gray-400 uppercase tracking-tighter leading-none max-w-[60px]">{stat.label}</span>
+                      </div>
+                    ))}
                   </div>
                 </div>
-                <ul className="list-disc pl-5 space-y-2 mt-6">
-                  <li>Returns accepted within 14 days of delivery</li>
-                  <li>Items must be unworn and in original packaging</li>
-                </ul>
-              </div>
-            )}
-            {activeTab === 'reviews' && (
-              <>
-                {/* Review Form */}
-                <div className="mb-10 p-6 md:p-8 bg-gray-50 rounded-xl border border-gray-100">
-                  <h4 className="font-bold text-lg mb-6 flex items-center gap-2">Write a Review <span className="text-gray-400 text-sm font-normal">(Required fields marked *)</span></h4>
 
-                  <div className="flex items-center gap-4 mb-6">
-                    <span className="text-sm font-bold">Rating *</span>
-                    <div className="flex gap-1">
-                      {[1, 2, 3, 4, 5].map(star => (
-                        <button key={star} onClick={() => setRating(star)} className={`text-2xl transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
-                      ))}
-                    </div>
+                <div className="flex flex-wrap gap-2 mb-8">
+                  {['Quality (32)', 'Delivery & Packaging (24)', 'Description accuracy (21)', 'Appearance (11)'].map((tag, i) => (
+                    <button key={i} className="px-4 py-2 border border-gray-200 rounded-full text-xs font-bold hover:border-black transition-colors">{tag}</button>
+                  ))}
+                </div>
+              </>
+            )}
+          </div>
+
+          {/* Review Form */}
+          <div className="mb-12 p-8 bg-gray-50 rounded-2xl border border-gray-100">
+            <h4 className="font-bold text-lg mb-6">Write a Review</h4>
+            <div className="flex items-center gap-4 mb-6">
+              <span className="text-xs font-black uppercase tracking-widest">Rating</span>
+              <div className="flex gap-1">
+                {[1, 2, 3, 4, 5].map(star => (
+                  <button key={star} onClick={() => setRating(star)} className={`text-2xl transition-transform hover:scale-110 ${star <= rating ? 'text-yellow-400' : 'text-gray-300'}`}>★</button>
+                ))}
+              </div>
+            </div>
+            <textarea
+              className="w-full border border-gray-200 rounded-xl p-4 text-sm mb-4 focus:ring-1 focus:ring-black outline-none shadow-sm"
+              rows="4"
+              placeholder="Share your thoughts..."
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+            ></textarea>
+            <div className="flex justify-end">
+              <button
+                onClick={handleReviewSubmit}
+                disabled={reviewLoading}
+                className="bg-orange-600 text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.1em] hover:bg-orange-700 disabled:opacity-50 transition-all shadow-lg shadow-orange-600/20"
+              >
+                {reviewLoading ? 'Submitting...' : 'Submit Review'}
+              </button>
+            </div>
+          </div>
+
+          <ReviewsSection reviews={reviews} />
+
+          <button className="w-full mt-10 py-3 border-2 border-gray-900 rounded-full text-xs font-black uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all">
+            View all reviews for this item
+          </button>
+        </div>
+
+        {/* Right Side: Accordions */}
+        <div className="w-full lg:w-2/5">
+
+          <div className="space-y-2">
+            {/* Item Details Accordion */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => setActiveTab(activeTab === 'info' ? '' : 'info')}
+                className="w-full flex items-center justify-between py-6 group"
+              >
+                <div className="flex items-center gap-3">
+                  <span className="text-sm font-black uppercase tracking-widest text-gray-900">Item details</span>
+                </div>
+                <FiChevronUp className={`transition-transform duration-300 ${activeTab === 'info' ? '' : 'rotate-180'}`} />
+              </button>
+              {activeTab === 'info' && (
+                <div className="pb-8 prose prose-sm max-w-none text-gray-700 text-[14px] leading-relaxed"
+                  dangerouslySetInnerHTML={{ __html: product?.description || 'No description available.' }} />
+              )}
+            </div>
+
+            {/* Delivery & Return Policies */}
+            <div className="border-b border-gray-100">
+              <button
+                onClick={() => setActiveTab(activeTab === 'delivery' ? '' : 'delivery')}
+                className="w-full flex items-center justify-between py-6 group"
+              >
+                <span className="text-sm font-black uppercase tracking-widest text-gray-900">Delivery and return policies</span>
+                <FiChevronUp className={`transition-transform duration-300 ${activeTab === 'delivery' ? '' : 'rotate-180'}`} />
+              </button>
+              {activeTab === 'delivery' && (
+                <div className="pb-8 space-y-6">
+                  <div className="flex items-start gap-4 text-[14px] text-gray-700 font-medium leading-relaxed">
+                    <FiCalendar className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
+                    <p>Order today to get by <span className="font-bold underline decoration-dotted decoration-gray-300">18-28 Feb</span></p>
+                  </div>
+                  <div className="flex items-start gap-4 text-[14px] text-gray-700 font-medium leading-relaxed">
+                    <FiRefreshCw className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
+                    <p className="underline decoration-dotted decoration-gray-300">Returns & exchanges not accepted</p>
+                  </div>
+                  <div className="flex items-start gap-4 text-[14px] text-gray-700 font-medium leading-relaxed">
+                    <FiTruck className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
+                    <p>Delivery cost: <span className="font-bold">Rs. 450</span></p>
+                  </div>
+                  <div className="flex items-start gap-4 text-[14px] text-gray-700 font-medium leading-relaxed">
+                    <FiMapPin className="text-gray-400 mt-0.5 flex-shrink-0" size={18} />
+                    <p>Dispatched from: <span className="font-bold underline decoration-dotted decoration-gray-300 text-gray-900">United States</span></p>
                   </div>
 
-                  <textarea
-                    className="w-full border border-gray-200 rounded-lg p-4 text-sm mb-4 focus:ring-1 focus:ring-black outline-none shadow-sm"
-                    rows="4"
-                    placeholder="Share your thoughts about this product..."
-                    value={comment}
-                    onChange={(e) => setComment(e.target.value)}
-                  ></textarea>
-
-                  <div className="flex justify-end">
-                    <button
-                      onClick={handleReviewSubmit}
-                      disabled={reviewLoading}
-                      className="bg-orange-600 text-white px-8 py-3 rounded-lg text-sm font-bold uppercase tracking-wider hover:bg-orange-700 disabled:opacity-50 transition-all transform active:scale-95 shadow-lg shadow-orange-600/20"
-                    >
-                      {reviewLoading ? 'Submitting...' : 'Submit Review'}
+                  <div className="mt-8 pt-8 border-t border-gray-100 flex flex-col gap-4">
+                    <button className="w-full flex items-center justify-between group py-2">
+                      <span className="text-sm font-black uppercase tracking-widest text-gray-900">Did you know?</span>
+                      <FiChevronDown />
+                    </button>
+                    <button className="w-full flex items-center justify-between group py-2">
+                      <span className="text-sm font-black uppercase tracking-widest text-gray-900">Meet your sellers</span>
+                      <FiChevronDown />
                     </button>
                   </div>
                 </div>
-
-                <ReviewsSection reviews={reviews} />
-              </>
-            )}
+              )}
+            </div>
           </div>
         </div>
       </div>
@@ -507,6 +699,29 @@ const ProductPage = ({ productData }) => {
         shouldUnoptimize={shouldUnoptimize}
         router={router}
       />
+
+      {/* Explore Related Searches Section */}
+      {((product?.meta_keywords && product.meta_keywords.trim().length > 0) || (product?.category?.name)) && (
+        <div className="mt-20">
+          <h3 className="text-[1.5rem] md:text-[2rem] font-serif mb-8 text-gray-800">Explore more related searches</h3>
+          <div className="flex flex-wrap gap-2">
+            {[
+              ...(product?.meta_keywords ? product.meta_keywords.split(',').map(t => t.trim()).filter(t => t) : []),
+              ...(product?.category?.name ? [`Gifts for ${product.category.name}`] : []),
+              'Handmade Finds',
+              'Trending Items'
+            ].slice(0, 12).map((tag, i) => (
+              <button
+                key={i}
+                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-full transition-all active:scale-95"
+                onClick={() => router.push(`/customer/pages/products?search=${encodeURIComponent(tag)}`)}
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Categories Row */}
       {categories.length > 0 && (
@@ -534,7 +749,7 @@ const ProductPage = ({ productData }) => {
           ariaHideApp={false}
           style={{
             overlay: { zIndex: 10000, backgroundColor: 'rgba(0, 0, 0, 0.5)' },
-            content: { zIndex: 10001, margin: 'auto', width: 'fit-content', maxWidth: '90vw', padding: '20px', borderRadius: '0' } // Sharp corners
+            content: { zIndex: 10001, margin: 'auto', width: 'fit-content', maxWidth: '90vw', padding: '20px', borderRadius: '0' }
           }}
         >
           <div className="flex flex-col items-center p-4">
@@ -548,6 +763,26 @@ const ProductPage = ({ productData }) => {
         </Modal>
       )}
 
+      {/* Digital Payment Modal */}
+      {isDigitalPaymentOpen && product && (
+        <DigitalCheckoutModal
+          isOpen={isDigitalPaymentOpen}
+          onRequestClose={() => setIsDigitalPaymentOpen(false)}
+          product={product}
+          onSuccess={() => {
+            setIsPurchased(true);
+            setIsDigitalPaymentOpen(false);
+          }}
+        />
+      )}
+
+      {/* Download Progress Modal */}
+      <DownloadProgressModal
+        isOpen={isDownloading}
+        onRequestClose={() => setIsDownloading(false)}
+        fileName={product?.name}
+        onComplete={onDownloadComplete}
+      />
     </div>
   );
 };
@@ -568,9 +803,7 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
               className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 cursor-pointer"
               onClick={() => router.push(`/customer/pages/products/${product.slug}`)}
             >
-              <div
-                className="relative aspect-square bg-[#F3F4FB] overflow-hidden"
-              >
+              <div className="relative aspect-square bg-[#F3F4FB] overflow-hidden">
                 {/* Discount Badge */}
                 {product.discount && (
                   <div className="absolute top-3 left-3 z-20 bg-[#1E4C2F] text-white text-[10px] font-bold px-2 py-1 rounded-full drop-shadow-sm">
@@ -625,9 +858,7 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
                   </div>
                 </div>
 
-                <h4
-                  className="text-sm font-bold text-gray-900 mb-2 leading-snug cursor-pointer group-hover:text-black transition-colors line-clamp-2 h-[2.8em]"
-                >
+                <h4 className="text-sm font-bold text-gray-900 mb-2 leading-snug cursor-pointer group-hover:text-black transition-colors line-clamp-2 h-[2.8em]">
                   {product.name}
                 </h4>
 
@@ -649,7 +880,7 @@ const RelatedProductsSection = memo(({ relatedProducts, calculateOriginalPrice, 
 RelatedProductsSection.displayName = 'RelatedProductsSection';
 
 const ReviewsSection = memo(({ reviews }) => {
-  if (!reviews?.length) return <div className="text-gray-500 py-8">No reviews yet. Be the first to leave a review!</div>;
+  if (!reviews?.length) return <div className="text-gray-500 py-8 text-center text-sm font-medium">No reviews yet. Be the first to leave a review!</div>;
 
   return (
     <div className="flex flex-col space-y-6">
@@ -657,14 +888,14 @@ const ReviewsSection = memo(({ reviews }) => {
         <div key={review.id || index} className="border-b border-gray-100 pb-6 last:border-0">
           <div className="flex justify-between items-start mb-2">
             <div>
-              <h5 className="font-bold text-gray-900">{review.reviewer || 'Anonymous'}</h5>
-              <div className="text-yellow-400 text-xs">
+              <h5 className="font-bold text-sm text-gray-900 uppercase tracking-wider">{review.reviewer || 'Anonymous'}</h5>
+              <div className="text-yellow-400 text-xs mt-1">
                 {[...Array(5)].map((_, i) => <span key={i}>{i < (review.rating || 0) ? '★' : '☆'}</span>)}
               </div>
             </div>
-            <span className="text-xs text-gray-400">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</span>
+            <span className="text-[10px] font-bold uppercase tracking-widest text-gray-400">{review.createdAt ? new Date(review.createdAt).toLocaleDateString() : ''}</span>
           </div>
-          <p className="text-sm text-gray-600 leading-relaxed">{review.comment}</p>
+          <p className="text-sm text-gray-600 leading-relaxed font-medium">{review.comment}</p>
         </div>
       ))}
     </div>

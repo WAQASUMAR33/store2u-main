@@ -79,6 +79,7 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
       message: error.message,
       code: error.code
     });
-    throw new Error('Failed to send order confirmation email');
+    // Don't throw error to prevent blocking order creation
+    return null;
   }
 }

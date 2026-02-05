@@ -80,6 +80,8 @@ model Product {
   subcategorySlug  String
   colors           String?     @db.LongText
   sizes            String?     @db.LongText
+  productType      String      @default("tangible") // "tangible" or "digital"
+  digitalData      String?     @db.LongText // Stores JSON for digital files, dimensions, tags
   createdAt        DateTime    @default(now())
   updatedAt        DateTime    @updatedAt
   meta_title       String?

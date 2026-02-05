@@ -3,7 +3,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
-import { FiChevronLeft, FiChevronRight, FiHeart, FiMaximize2, FiShoppingBag, FiShoppingCart } from 'react-icons/fi';
+import { FiChevronLeft, FiChevronRight, FiHeart, FiMaximize2, FiShoppingBag, FiShoppingCart, FiDownload } from 'react-icons/fi';
 import { GoStarFill } from 'react-icons/go';
 import { useDispatch } from 'react-redux';
 import { addToCart } from '../../store/cartSlice';
@@ -11,6 +11,7 @@ import { ThreeDots } from 'react-loader-spinner';
 import { motion } from 'framer-motion';
 import Image from 'next/image';
 import { ProductCardShimmer, GridShimmer } from './Shimmer';
+import DigitalCheckoutModal from './DigitalCheckoutModal';
 
 const Products = () => {
   const [categories, setCategories] = useState([]);
@@ -19,8 +20,11 @@ const Products = () => {
   const [loading, setLoading] = useState(true);
   const router = useRouter();
   const dispatch = useDispatch();
+
   const [productIndices, setProductIndices] = useState({});
   const [windowWidth, setWindowWidth] = useState(0);
+  const [isDigitalModalOpen, setIsDigitalModalOpen] = useState(false);
+  const [selectedDigitalProduct, setSelectedDigitalProduct] = useState(null);
 
   useEffect(() => {
     const fetchCategoriesAndSubcategories = async () => {
@@ -45,7 +49,11 @@ const Products = () => {
 
         setLoading(false);
       } catch (error) {
-        console.error('Error fetching categories and products:', error);
+        console.error('PRODUCTS COMPONENT FETCH ERROR:', error);
+        if (error.response) {
+          console.error('Error Response Data:', error.response.data);
+          console.error('Error Status:', error.response.status);
+        }
         setLoading(false);
       }
     };
@@ -216,10 +224,20 @@ const Products = () => {
                                 <FiMaximize2 size={14} />
                               </button>
                               <button
-                                className="bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110"
-                                onClick={(e) => handleAddToCart(product, e)}
+                                className={`bg-white p-2 rounded-full shadow-lg text-gray-700 hover:bg-orange-500 hover:text-white transition-all transform hover:scale-110 ${product.productType === 'digital' ? 'text-blue-600' : ''}`}
+                                onClick={(e) => {
+                                  if (product.productType === 'digital') {
+                                    e.preventDefault();
+                                    e.stopPropagation();
+                                    setSelectedDigitalProduct(product);
+                                    setIsDigitalModalOpen(true);
+                                  } else {
+                                    handleAddToCart(product, e);
+                                  }
+                                }}
+                                title={product.productType === 'digital' ? "Pay to Download" : "Add to Cart"}
                               >
-                                <FiShoppingBag size={14} />
+                                {product.productType === 'digital' ? <FiDownload size={14} /> : <FiShoppingBag size={14} />}
                               </button>
                             </div>
 
@@ -292,7 +310,23 @@ const Products = () => {
           );
         })}
       </div>
-    </section>
+
+      {/* Digital Payment Modal */}
+      {
+        selectedDigitalProduct && (
+          <DigitalCheckoutModal
+            isOpen={isDigitalModalOpen}
+            onRequestClose={() => setIsDigitalModalOpen(false)}
+            product={selectedDigitalProduct}
+            onSuccess={() => {
+              setIsDigitalModalOpen(false);
+              // Optionally redirect to product page to download
+              router.push(`/customer/pages/products/${selectedDigitalProduct.slug}`);
+            }}
+          />
+        )
+      }
+    </section >
   );
 };
 

@@ -150,19 +150,19 @@ const FilterableTable = ({ subcategories = [], fetchSubcategories }) => {
 
       const response = newSubcategory.slug
         ? await fetch(`/api/subcategories/${newSubcategory.slug}`, {
-            method: 'PUT',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(subcategoryToSubmit),
-          })
+          method: 'PUT',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(subcategoryToSubmit),
+        })
         : await fetch('/api/subcategories', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(subcategoryToSubmit),
-          });
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(subcategoryToSubmit),
+        });
 
       const result = await response.json();
 
@@ -172,9 +172,11 @@ const FilterableTable = ({ subcategories = [], fetchSubcategories }) => {
         resetForm();
       } else {
         console.error('Failed to add/update subcategory:', result.message);
+        alert(`Failed to add/update subcategory: ${result.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error adding or updating subcategory:', error);
+      alert(`Error: ${error.message}`);
     }
     setIsLoading(false);
   };

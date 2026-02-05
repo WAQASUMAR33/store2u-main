@@ -2,13 +2,15 @@ import { NextResponse } from 'next/server';
 import prisma from '../../util/prisma';
 
 export async function GET() {
+  console.log('[API/Colors] GET request received');
   try {
     const colors = await prisma.color.findMany();
+    console.log('[API/Colors] Success, count:', colors.length);
     return NextResponse.json(colors);
   } catch (error) {
-    console.error('Error fetching colors:', error);
+    console.error('[API/Colors] ERROR:', error);
     return NextResponse.json(
-      { message: 'Failed to fetch colors', error: error.message },
+      { message: 'Failed to fetch colors', error: error.message, stack: error.stack },
       { status: 500 }
     );
   }

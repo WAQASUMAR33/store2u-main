@@ -28,6 +28,9 @@ import {
   Stack,
   Card,
   CardContent,
+  Chip,
+  ToggleButton,
+  ToggleButtonGroup,
 } from '@mui/material';
 import {
   Close as CloseIcon,
@@ -70,7 +73,12 @@ const AddProductPageContent = () => {
     meta_description: '',
     meta_keywords: '',
     sku: '',
+    productType: 'tangible', // Default to tangible
   });
+
+  const [digitalFiles, setDigitalFiles] = useState([]);
+  const [dimensions, setDimensions] = useState({ px: '', inch: '', cm: '' });
+  const [digitalTags, setDigitalTags] = useState('');
 
   const [categories, setCategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
@@ -111,6 +119,7 @@ const AddProductPageContent = () => {
       setFilteredSubcategories(data?.data || []);
     } catch (error) {
       console.error('Error fetching subcategories:', error);
+      // alert(`Failed to fetch subcategories: ${error.message}`); // Optional: Don't spam alert on load, maybe just log or toast
       setFilteredSubcategories([]);
     }
   };
@@ -197,14 +206,22 @@ const AddProductPageContent = () => {
       { name: 'slug', label: 'Slug' },
       { name: 'richDescription', label: 'Description' },
       { name: 'price', label: 'Price' },
-      { name: 'stock', label: 'Stock' },
       { name: 'categorySlug', label: 'Category' },
       { name: 'subcategorySlug', label: 'Subcategory' },
     ];
 
-    const missingFields = requiredFields
+    if (newProduct.productType === 'tangible') {
+      requiredFields.push({ name: 'stock', label: 'Stock' });
+    }
+
+    let missingFields = requiredFields
       .filter((field) => typeof newProduct[field.name] === 'string' && !newProduct[field.name].trim())
       .map((field) => field.label);
+
+    // Specific check for stock as number
+    if (newProduct.productType === 'tangible' && (newProduct.stock === '' || newProduct.stock === null || newProduct.stock === undefined)) {
+      if (!missingFields.includes('Stock')) missingFields.push('Stock');
+    }
 
     if (missingFields.length > 0) {
       alert(`Please fill in the following fields: ${missingFields.join(', ')}`);
@@ -223,6 +240,7 @@ const AddProductPageContent = () => {
         return;
       }
 
+      // Upload Images
       const uploadedImages = await Promise.all(
         images.map(async (img) => {
           const imageBase64 = await convertToBase64(img);
@@ -239,14 +257,35 @@ const AddProductPageContent = () => {
 
       const imageUrls = uploadedImages.map((filename) => `${filename}`);
 
+      // Upload Digital Files (Reuse Image API for now or handle appropriately)
+      const uploadedDigitalFiles = await Promise.all(
+        digitalFiles.map(async (file) => {
+          const fileBase64 = await convertToBase64(file);
+          const response = await fetch(`${process.env.NEXT_PUBLIC_UPLOAD_IMAGE_API}`, { // Using same endpoint for demo/simplicity as we don't have a specific file endpoint yet
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: fileBase64 }),
+          });
+          const result = await response.json();
+          if (response.ok) return { name: file.name, url: result.image_url };
+          throw new Error(result.error || 'Failed to upload digital file');
+        })
+      );
+
+      const digitalData = {
+        files: uploadedDigitalFiles,
+        dimensions: dimensions,
+        tags: digitalTags.split(',').map(tag => tag.trim()).filter(tag => tag)
+      };
+
       const productToSubmit = {
         ...newProduct,
         description: newProduct.richDescription,
         price: parseFloat(newProduct.price),
-        stock: parseInt(newProduct.stock, 10),
+        stock: newProduct.productType === 'tangible' ? parseInt(newProduct.stock, 10) : 0, // 0 or -1 for digital?
         subcategorySlug: newProduct.subcategorySlug,
-        colors: JSON.stringify(newProduct.colors.map((color) => color.value)),
-        sizes: JSON.stringify(newProduct.sizes.map((size) => size.value)),
+        colors: newProduct.productType === 'tangible' ? JSON.stringify(newProduct.colors.map((color) => color.value)) : null,
+        sizes: newProduct.productType === 'tangible' ? JSON.stringify(newProduct.sizes.map((size) => size.value)) : null,
         images: imageUrls,
         discount: newProduct.discount ? roundToTwoDecimalPlaces(parseFloat(newProduct.discount)) : null,
         isTopRated: newProduct.isTopRated,
@@ -254,6 +293,8 @@ const AddProductPageContent = () => {
         meta_description: newProduct.meta_description,
         meta_keywords: newProduct.meta_keywords,
         sku: newProduct.sku,
+        productType: newProduct.productType,
+        digitalData: newProduct.productType === 'digital' ? digitalData : null
       };
 
       const response = await fetch('/api/products', {
@@ -265,9 +306,20 @@ const AddProductPageContent = () => {
       if (response.ok) {
         router.push('/admin/pages/Products');
       } else {
-        const errorData = await response.json();
-        console.error('Failed to create product:', errorData.message);
-        alert(`Failed to create product: ${errorData.message}`);
+        console.error('Create product failed. Status:', response.status, response.statusText);
+        const errorText = await response.text();
+        console.error('Raw error response:', errorText);
+
+        let errorData = {};
+        try {
+          errorData = JSON.parse(errorText);
+        } catch (e) {
+          console.error('Failed to parse error response as JSON');
+          errorData = { message: errorText || 'Unknown error (non-JSON response)' };
+        }
+
+        console.error('Parsed error data:', errorData);
+        alert(`Failed to create product: ${errorData.error || errorData.message || 'Unknown error'}`);
       }
     } catch (error) {
       console.error('Error adding item:', error);
@@ -441,6 +493,27 @@ const AddProductPageContent = () => {
         </Box>
       </Box>
 
+      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'center' }}>
+        <ToggleButtonGroup
+          value={newProduct.productType}
+          exclusive
+          onChange={(e, newType) => {
+            if (newType !== null) {
+              setNewProduct({ ...newProduct, productType: newType });
+            }
+          }}
+          aria-label="product type"
+          sx={{ bgcolor: '#fff', borderRadius: '12px', boxShadow: '0 2px 4px rgba(0,0,0,0.05)' }}
+        >
+          <ToggleButton value="tangible" sx={{ px: 4, py: 1.5, borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}>
+            Tangible Product
+          </ToggleButton>
+          <ToggleButton value="digital" sx={{ px: 4, py: 1.5, borderRadius: '12px', textTransform: 'none', fontWeight: 600 }}>
+            Digital Product
+          </ToggleButton>
+        </ToggleButtonGroup>
+      </Box>
+
       <Grid container spacing={3}>
         {/* Left Column: General & Description & Attributes */}
         <Grid item xs={12} lg={8}>
@@ -457,6 +530,7 @@ const AddProductPageContent = () => {
               <Grid container spacing={3}>
                 <Grid item xs={12}>
                   <TextField
+                    id="product-name"
                     fullWidth
                     label="Product Name"
                     value={newProduct.name}
@@ -467,6 +541,7 @@ const AddProductPageContent = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <TextField
+                    id="product-slug"
                     fullWidth
                     label="Product URL Slug"
                     value={newProduct.slug}
@@ -477,6 +552,7 @@ const AddProductPageContent = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <TextField
+                    id="product-sku"
                     fullWidth
                     label="SKU ID"
                     value={newProduct.sku}
@@ -487,8 +563,10 @@ const AddProductPageContent = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth sx={inputStyles}>
-                    <InputLabel>Category</InputLabel>
+                    <InputLabel id="category-label">Category</InputLabel>
                     <Select
+                      labelId="category-label"
+                      id="category-select"
                       value={newProduct.categorySlug}
                       onChange={(e) => {
                         const categorySlug = e.target.value;
@@ -508,8 +586,10 @@ const AddProductPageContent = () => {
                 </Grid>
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth sx={inputStyles} disabled={!filteredSubcategories.length}>
-                    <InputLabel>Subcategory</InputLabel>
+                    <InputLabel id="subcategory-label">Subcategory</InputLabel>
                     <Select
+                      labelId="subcategory-label"
+                      id="subcategory-select"
                       value={newProduct.subcategorySlug}
                       onChange={(e) => setNewProduct({ ...newProduct, subcategorySlug: e.target.value })}
                       label="Subcategory"
@@ -538,6 +618,8 @@ const AddProductPageContent = () => {
                 '& .ql-container': { borderRadius: '0 0 12px 12px', borderColor: '#E5E7EB', minHeight: '250px', fontSize: '1rem' }
               }}>
                 <ReactQuill
+                  theme="snow"
+                  id="product-description"
                   value={newProduct.richDescription}
                   onChange={(value) => setNewProduct({ ...newProduct, richDescription: value })}
                   placeholder="Tell customers about your product..."
@@ -557,6 +639,7 @@ const AddProductPageContent = () => {
               </Box>
               <Stack spacing={3}>
                 <TextField
+                  id="meta-title"
                   fullWidth
                   label="Meta Title"
                   value={newProduct.meta_title}
@@ -565,6 +648,7 @@ const AddProductPageContent = () => {
                   helperText={`${newProduct.meta_title.length}/60 characters`}
                 />
                 <TextField
+                  id="meta-description"
                   fullWidth
                   multiline
                   rows={4}
@@ -575,6 +659,7 @@ const AddProductPageContent = () => {
                   helperText={`${newProduct.meta_description.length}/160 characters`}
                 />
                 <TextField
+                  id="meta-keywords"
                   fullWidth
                   label="Meta Keywords"
                   value={newProduct.meta_keywords}
@@ -600,6 +685,7 @@ const AddProductPageContent = () => {
               </Box>
               <Stack spacing={3}>
                 <TextField
+                  id="product-price"
                   fullWidth
                   label="Display Price (Rs.)"
                   type="number"
@@ -609,6 +695,7 @@ const AddProductPageContent = () => {
                   InputProps={{ inputProps: { min: 0, step: 0.01 } }}
                 />
                 <TextField
+                  id="product-discount"
                   fullWidth
                   label="Discount Percentage (%)"
                   type="number"
@@ -617,30 +704,36 @@ const AddProductPageContent = () => {
                   sx={inputStyles}
                   InputProps={{ inputProps: { min: 0, max: 100, step: 0.01 } }}
                 />
-                <Box sx={{
-                  bgcolor: '#F9FAFB',
-                  p: 2,
-                  borderRadius: '16px',
-                  border: '1px solid #E5E7EB',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between'
-                }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <InventoryIcon sx={{ color: '#6B7280' }} />
-                    <Typography variant="body2" sx={{ fontWeight: 700, color: '#4B5563' }}>Current Stock</Typography>
+
+                {newProduct.productType === 'tangible' && (
+                  <Box sx={{
+                    bgcolor: '#F9FAFB',
+                    p: 2,
+                    borderRadius: '16px',
+                    border: '1px solid #E5E7EB',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <InventoryIcon sx={{ color: '#6B7280' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: '#4B5563' }}>Current Stock</Typography>
+                    </Box>
+                    <TextField
+                      id="product-stock"
+                      type="number"
+                      size="small"
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                      sx={{ width: '100px', '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff' } }}
+                    />
                   </Box>
-                  <TextField
-                    type="number"
-                    size="small"
-                    value={newProduct.stock}
-                    onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                    sx={{ width: '100px', '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff' } }}
-                  />
-                </Box>
+                )}
+
                 <FormControlLabel
                   control={
                     <Checkbox
+                      id="product-is-top-rated"
                       checked={newProduct.isTopRated}
                       onChange={(e) => setNewProduct({ ...newProduct, isTopRated: e.target.checked })}
                       sx={{ color: '#3B82F6', '&.Mui-checked': { color: '#3B82F6' } }}
@@ -677,6 +770,7 @@ const AddProductPageContent = () => {
                 <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Click to upload images</Typography>
                 <Typography variant="caption" sx={{ color: '#9CA3AF' }}>Multiple images supported (JPG, PNG)</Typography>
                 <input
+                  id="image-upload-input"
                   type="file"
                   hidden
                   ref={fileInputRef}
@@ -729,74 +823,183 @@ const AddProductPageContent = () => {
             </Paper>
 
             {/* Attributes Card */}
-            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
-              <Box sx={sectionHeaderStyles}>
-                <Box sx={{ p: 1, bgcolor: '#FEF3C7', borderRadius: '10px', color: '#D97706', display: 'flex' }}>
-                  <StyleIcon sx={{ fontSize: '1.25rem' }} />
+            {newProduct.productType === 'tangible' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+                <Box sx={sectionHeaderStyles}>
+                  <Box sx={{ p: 1, bgcolor: '#FEF3C7', borderRadius: '10px', color: '#D97706', display: 'flex' }}>
+                    <StyleIcon sx={{ fontSize: '1.25rem' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Attributes & Options</Typography>
                 </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Attributes & Options</Typography>
-              </Box>
-              <Stack spacing={3}>
-                <FormControl fullWidth sx={inputStyles}>
-                  <InputLabel>Available Colors</InputLabel>
-                  <Select
-                    multiple
-                    value={newProduct.colors}
-                    onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
-                    label="Available Colors"
-                    MenuProps={selectMenuProps}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((color) => (
-                          <Chip
-                            key={color.value}
-                            label={color.label}
-                            size="small"
-                            sx={{
-                              bgcolor: '#F3F4F6',
-                              fontWeight: 600,
-                              '& .MuiChip-label': { display: 'flex', alignItems: 'center', gap: 1 }
-                            }}
-                            icon={<Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color.hex, ml: 1 }} />}
-                          />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {colors.map((color) => (
-                      <MenuItem key={color.value} value={color}>
-                        <Checkbox checked={newProduct.colors.some((c) => c.value === color.value)} sx={{ color: color.hex, '&.Mui-checked': { color: color.hex } }} />
-                        {color.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-                <FormControl fullWidth sx={inputStyles}>
-                  <InputLabel>Available Sizes</InputLabel>
-                  <Select
-                    multiple
-                    value={newProduct.sizes}
-                    onChange={(e) => setNewProduct({ ...newProduct, sizes: e.target.value })}
-                    label="Available Sizes"
-                    MenuProps={selectMenuProps}
-                    renderValue={(selected) => (
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {selected.map((size) => (
-                          <Chip key={size.value} label={size.label} size="small" sx={{ bgcolor: '#F3F4F6', fontWeight: 600 }} />
-                        ))}
-                      </Box>
-                    )}
-                  >
-                    {sizes.map((size) => (
-                      <MenuItem key={size.value} value={size}>
-                        <Checkbox checked={newProduct.sizes.some((s) => s.value === size.value)} />
-                        {size.label}
-                      </MenuItem>
-                    ))}
-                  </Select>
-                </FormControl>
-              </Stack>
-            </Paper>
+                <Stack spacing={3}>
+                  <FormControl fullWidth sx={inputStyles}>
+                    <InputLabel id="colors-label">Available Colors</InputLabel>
+                    <Select
+                      labelId="colors-label"
+                      id="product-colors"
+                      multiple
+                      value={newProduct.colors}
+                      onChange={(e) => setNewProduct({ ...newProduct, colors: e.target.value })}
+                      label="Available Colors"
+                      MenuProps={selectMenuProps}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((color) => (
+                            <Chip
+                              key={color.value}
+                              label={color.label}
+                              size="small"
+                              sx={{
+                                bgcolor: '#F3F4F6',
+                                fontWeight: 600,
+                                '& .MuiChip-label': { display: 'flex', alignItems: 'center', gap: 1 }
+                              }}
+                              icon={<Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color.hex, ml: 1 }} />}
+                            />
+                          ))}
+                        </Box>
+                      )}
+                    >
+                      {colors.map((color) => (
+                        <MenuItem key={color.value} value={color}>
+                          <Checkbox checked={newProduct.colors.some((c) => c.value === color.value)} sx={{ color: color.hex, '&.Mui-checked': { color: color.hex } }} />
+                          {color.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                  <FormControl fullWidth sx={inputStyles}>
+                    <InputLabel id="sizes-label">Available Sizes</InputLabel>
+                    <Select
+                      labelId="sizes-label"
+                      id="product-sizes"
+                      multiple
+                      value={newProduct.sizes}
+                      onChange={(e) => setNewProduct({ ...newProduct, sizes: e.target.value })}
+                      label="Available Sizes"
+                      MenuProps={selectMenuProps}
+                      renderValue={(selected) => (
+                        <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                          {selected.map((size) => (
+                            <Chip key={size.value} label={size.label} size="small" sx={{ bgcolor: '#F3F4F6', fontWeight: 600 }} />
+                          ))}
+                        </Box>
+                      )}
+                    >
+                      {sizes.map((size) => (
+                        <MenuItem key={size.value} value={size}>
+                          <Checkbox checked={newProduct.sizes.some((s) => s.value === size.value)} />
+                          {size.label}
+                        </MenuItem>
+                      ))}
+                    </Select>
+                  </FormControl>
+                </Stack>
+              </Paper>
+            )}
+
+            {/* Digital Product Details */}
+            {newProduct.productType === 'digital' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+                <Box sx={sectionHeaderStyles}>
+                  <Box sx={{ p: 1, bgcolor: '#DBEAFE', borderRadius: '10px', color: '#3B82F6', display: 'flex' }}>
+                    <CloudUploadIcon sx={{ fontSize: '1.25rem' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Digital Assets</Typography>
+                </Box>
+                <Stack spacing={3}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Upload Files (PNG, SVG, ZIP)</Typography>
+                    {/* Reuse Image Upload logic for now, or create separate file input. Using same state just for simplicity but labeling it 'Files' */}
+                    <Box
+                      onClick={() => document.getElementById('digital-file-input').click()}
+                      sx={{
+                        border: '2px dashed #D1D5DB',
+                        borderRadius: '16px',
+                        p: 3,
+                        textAlign: 'center',
+                        cursor: 'pointer',
+                        '&:hover': { bgcolor: '#F9FAFB', borderColor: '#3B82F6' },
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Click to upload digital files</Typography>
+                      <input
+                        id="digital-file-input"
+                        type="file"
+                        hidden
+                        onChange={(e) => {
+                          const files = Array.from(e.target.files);
+                          setDigitalFiles(prev => [...prev, ...files]);
+                        }}
+                        multiple
+                      />
+                    </Box>
+                    <Grid container spacing={1} sx={{ mt: 1 }}>
+                      {digitalFiles.map((file, i) => (
+                        <Grid item xs={12} key={i}>
+                          <Box sx={{ p: 1, border: '1px solid #e5e7eb', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <Typography variant="body2" noWrap>{file.name}</Typography>
+                            <IconButton size="small" onClick={() => setDigitalFiles(prev => prev.filter((_, idx) => idx !== i))}>
+                              <CloseIcon fontSize="small" />
+                            </IconButton>
+                          </Box>
+                        </Grid>
+                      ))}
+                    </Grid>
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Dimensions</Typography>
+                    <Grid container spacing={2}>
+                      <Grid item xs={4}>
+                        <TextField
+                          id="product-dim-px"
+                          label="Pixels (px)"
+                          placeholder="1000x1000"
+                          fullWidth
+                          size="small"
+                          value={dimensions.px}
+                          onChange={(e) => setDimensions({ ...dimensions, px: e.target.value })}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <TextField
+                          id="product-dim-inch"
+                          label="Inches (in)"
+                          placeholder="10x10"
+                          fullWidth
+                          size="small"
+                          value={dimensions.inch}
+                          onChange={(e) => setDimensions({ ...dimensions, inch: e.target.value })}
+                        />
+                      </Grid>
+                      <Grid item xs={4}>
+                        <TextField
+                          id="product-dim-cm"
+                          label="Centimeters (cm)"
+                          placeholder="25x25"
+                          fullWidth
+                          size="small"
+                          value={dimensions.cm}
+                          onChange={(e) => setDimensions({ ...dimensions, cm: e.target.value })}
+                        />
+                      </Grid>
+                    </Grid>
+                  </Box>
+
+                  <TextField
+                    id="product-tags"
+                    label="Tags"
+                    placeholder="christmas, floral, svg"
+                    fullWidth
+                    value={digitalTags}
+                    onChange={(e) => setDigitalTags(e.target.value)}
+                    helperText="Comma separated tags"
+                  />
+                </Stack>
+              </Paper>
+            )}
           </Stack>
         </Grid>
       </Grid>

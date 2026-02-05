@@ -34,7 +34,11 @@ const TopCategories = () => {
         // Access the categories correctly from response.data.data
         setCategories(Array.isArray(response.data.data) ? response.data.data : []);
       } catch (error) {
-        console.error('Error fetching categories:', error);
+        console.error('TOP CATEGORIES FETCH ERROR:', error);
+        if (error.response) {
+          console.error('Error Response Data:', error.response.data);
+          console.error('Error Status:', error.response.status);
+        }
         setCategories([]); // Set categories as an empty array if error occurs
       } finally {
         setLoading(false);
