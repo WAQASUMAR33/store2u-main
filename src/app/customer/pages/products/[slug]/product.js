@@ -244,7 +244,9 @@ const ProductPage = ({ productData }) => {
     images: product.images,
     name: product.name,
     discount: product.discount,
-    slug: product.slug
+    slug: product.slug,
+    productType: product.productType || product.type || 'tangible',
+    digitalData: product.digitalData || null
   });
 
   const handleAddToCart = () => {

@@ -27,6 +27,8 @@ const CartPage = () => {
   const [isReadyForPayment, setIsReadyForPayment] = useState(false);
   const [isScriptLoaded, setIsScriptLoaded] = useState(false);
   const [formErrors, setFormErrors] = useState({});
+  const [isMixedCartModalOpen, setIsMixedCartModalOpen] = useState(false);
+  const [digitalItemsToDownload, setDigitalItemsToDownload] = useState([]);
 
   useEffect(() => {
     setHasMounted(true);
@@ -188,8 +190,47 @@ const CartPage = () => {
     }
   };
 
-  // Check if cart is digital-only
-  const isDigitalOnly = cart.every(item => item.productType === 'digital' || item.isDigital);
+  // Check cart composition
+  const hasDigital = cart.some(item => item.productType === 'digital' || item.isDigital);
+  const hasTangible = cart.some(item => item.productType !== 'digital' && !item.isDigital);
+  const isDigitalOnly = hasDigital && !hasTangible;
+  const isMixedCart = hasDigital && hasTangible;
+
+  const triggerBatchDownload = (items) => {
+    const digitalItems = items.filter(item => item.productType === 'digital' || item.isDigital);
+    if (digitalItems.length === 0) return;
+
+    toast.info(`Preparing ${digitalItems.length} download${digitalItems.length > 1 ? 's' : ''}...`);
+
+    digitalItems.forEach((item, index) => {
+      if (item.digitalData) {
+        try {
+          const data = typeof item.digitalData === 'string' ? JSON.parse(item.digitalData) : item.digitalData;
+          const fileUrl = data.files?.[0]?.url;
+          if (fileUrl) {
+            const resolveUrl = (url) => url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+            const actualUrl = resolveUrl(fileUrl);
+            const filename = item.name || `product-${index}`;
+            const proxyUrl = `/api/download?url=${encodeURIComponent(actualUrl)}&filename=${encodeURIComponent(filename)}`;
+
+            // Trigger download with a delay to prevent browser blocking multiple popups
+            setTimeout(() => {
+              const link = document.createElement('a');
+              link.href = proxyUrl;
+              link.setAttribute('download', filename);
+              document.body.appendChild(link);
+              link.click();
+              document.body.removeChild(link);
+            }, index * 2000);
+          }
+        } catch (e) {
+          console.error("Error parsing digital data for item", item.name, e);
+        }
+      } else {
+        console.warn("Digital item missing digitalData:", item.name);
+      }
+    });
+  };
 
   const calculateFinalTotal = (currentSubtotal = subtotal) => {
     const subtotalAfterDiscount = (Number(currentSubtotal) || 0) - (Number(discount) || 0);
@@ -279,13 +320,22 @@ const CartPage = () => {
     if (e) e.preventDefault();
     if (!validateForm()) return;
 
+    // Mixed cart confirmation check
+    if (isMixedCart && !isMixedCartModalOpen) {
+      setIsMixedCartModalOpen(true);
+      return;
+    }
+
     if (paymentMethod === 'Credit Card') {
       setIsReadyForPayment(true);
       toast.info('Please complete payment via PayPal below.');
       return;
     }
 
-    // COD flow remains the same
+    await executeOrderPlacement();
+  };
+
+  const executeOrderPlacement = async () => {
     try {
       const finalTotal = calculateFinalTotal();
 
@@ -321,6 +371,12 @@ const CartPage = () => {
 
       console.log('Placing COD order with details:', orderDetails);
       const response = await axios.post('/api/orders', orderDetails);
+
+      // Trigger digital downloads if any
+      if (hasDigital) {
+        triggerBatchDownload(cart);
+      }
+
       setIsModalOpen(true);
       localStorage.removeItem('cart');
       dispatch(setCart([]));
@@ -420,6 +476,12 @@ const CartPage = () => {
 
             console.log('Saving PayPal order with details:', orderDetails);
             const response = await axios.post('/api/orders', orderDetails);
+
+            // Trigger digital downloads if any
+            if (hasDigital) {
+              triggerBatchDownload(cart);
+            }
+
             setIsModalOpen(true);
             localStorage.removeItem('cart');
             dispatch(setCart([]));
@@ -803,6 +865,48 @@ const CartPage = () => {
 
         </div>
       </div>
+
+      {/* Mixed Cart Confirmation Modal */}
+      <Modal
+        isOpen={isMixedCartModalOpen}
+        onRequestClose={() => setIsMixedCartModalOpen(false)}
+        className="bg-white p-12 rounded-[3rem] shadow-2xl max-w-lg w-full m-4 outline-none relative"
+        overlayClassName="fixed inset-0 bg-black/60 backdrop-blur-sm z-[100] flex items-center justify-center"
+      >
+        <div className="text-center">
+          <div className="w-20 h-20 bg-orange-100 text-orange-600 rounded-full flex items-center justify-center mx-auto mb-8">
+            <FiCreditCard size={40} />
+          </div>
+          <h4 className="text-2xl font-black uppercase tracking-tight mb-4 text-gray-900">Mixed Cart detected</h4>
+          <p className="text-gray-500 text-sm font-medium mb-10 leading-relaxed">
+            Your cart contains both <span className="text-black font-bold">tangible</span> and <span className="text-black font-bold">digital</span> items.
+            Proceeding will place an order for the tangible items and start downloads for the digital items.
+            Are you sure you want to continue?
+          </p>
+          <div className="flex gap-4">
+            <button
+              onClick={() => setIsMixedCartModalOpen(false)}
+              className="flex-1 bg-gray-100 text-gray-600 font-black uppercase tracking-widest py-4 rounded-2xl hover:bg-gray-200 transition-all"
+            >
+              No, Wait
+            </button>
+            <button
+              onClick={() => {
+                setIsMixedCartModalOpen(false);
+                if (paymentMethod === 'Credit Card') {
+                  setIsReadyForPayment(true);
+                  toast.info('Please complete payment via PayPal below.');
+                } else {
+                  executeOrderPlacement();
+                }
+              }}
+              className="flex-1 bg-black text-white font-black uppercase tracking-widest py-4 rounded-2xl hover:bg-gray-800 transition-all shadow-xl"
+            >
+              Yes, Proceed
+            </button>
+          </div>
+        </div>
+      </Modal>
 
       {/* Success Modal */}
       <Modal
