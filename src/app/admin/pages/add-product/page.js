@@ -77,8 +77,19 @@ const AddProductPageContent = () => {
   });
 
   const [digitalFiles, setDigitalFiles] = useState([]);
-  const [dimensions, setDimensions] = useState({ px: '', inch: '', cm: '' });
-  const [digitalTags, setDigitalTags] = useState('');
+  const [digitalDimensions, setDigitalDimensions] = useState({
+    height: { value: '', unit: 'px' },
+    width: { value: '', unit: 'px' }
+  });
+  const [digitalTags, setDigitalTags] = useState([]); // Array for tags
+  const [digitalMaterials, setDigitalMaterials] = useState([]); // Array for materials
+  const [personalization, setPersonalization] = useState({ enabled: false, instruction: '' });
+  const [settings, setSettings] = useState({
+    shopSection: '',
+    featureListing: false,
+    renewalOption: 'automatic'
+  });
+  const [colorsMeta, setColorsMeta] = useState({ primary: '', secondary: '' });
 
   const [categories, setCategories] = useState([]);
   const [filteredSubcategories, setFilteredSubcategories] = useState([]);
@@ -274,8 +285,12 @@ const AddProductPageContent = () => {
 
       const digitalData = {
         files: uploadedDigitalFiles,
-        dimensions: dimensions,
-        tags: digitalTags.split(',').map(tag => tag.trim()).filter(tag => tag)
+        dimensions: digitalDimensions,
+        tags: digitalTags,
+        materials: digitalMaterials,
+        personalization: personalization,
+        settings: settings,
+        colorsMeta: colorsMeta
       };
 
       const productToSubmit = {
@@ -532,11 +547,12 @@ const AddProductPageContent = () => {
                   <TextField
                     id="product-name"
                     fullWidth
-                    label="Product Name"
+                    label={newProduct.productType === 'digital' ? "Title *" : "Product Name *"}
                     value={newProduct.name}
-                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value })}
-                    placeholder="Enter a descriptive product name"
+                    onChange={(e) => setNewProduct({ ...newProduct, name: e.target.value.slice(0, 140) })}
+                    placeholder={newProduct.productType === 'digital' ? "e.g. Low Battery Santa PNG Funny Christmas Shirt" : "Enter a descriptive product name"}
                     sx={inputStyles}
+                    helperText={newProduct.productType === 'digital' ? `${newProduct.name.length}/140. A good title focuses on your item and doesn't use repetitive or subjective words, or info about pricing or shipping.` : ""}
                   />
                 </Grid>
                 <Grid item xs={12} md={6}>
@@ -767,8 +783,12 @@ const AddProductPageContent = () => {
                 }}
               >
                 <CloudUploadIcon sx={{ fontSize: '2.5rem', color: '#9CA3AF', mb: 1.5 }} />
-                <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Click to upload images</Typography>
-                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>Multiple images supported (JPG, PNG)</Typography>
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>
+                  {newProduct.productType === 'digital' ? "Drag and drop files or click to upload" : "Click to upload images"}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
+                  {newProduct.productType === 'digital' ? "Add up to 20 photos and 1 video" : "Multiple images supported (JPG, PNG)"}
+                </Typography>
                 <input
                   id="image-upload-input"
                   type="file"
@@ -854,7 +874,7 @@ const AddProductPageContent = () => {
                                 fontWeight: 600,
                                 '& .MuiChip-label': { display: 'flex', alignItems: 'center', gap: 1 }
                               }}
-                              icon={<Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color.hex, ml: 1 }} />}
+                              icon={<Box sx={{ width: 10, height: 10, borderRadius: '50%', bgcolor: color.hex, ml: 1 }}></Box>}
                             />
                           ))}
                         </Box>
@@ -898,48 +918,64 @@ const AddProductPageContent = () => {
               </Paper>
             )}
 
-            {/* Digital Product Details */}
+            {/* Digital Files & Core Details Card */}
             {newProduct.productType === 'digital' && (
               <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
                 <Box sx={sectionHeaderStyles}>
                   <Box sx={{ p: 1, bgcolor: '#DBEAFE', borderRadius: '10px', color: '#3B82F6', display: 'flex' }}>
                     <CloudUploadIcon sx={{ fontSize: '1.25rem' }} />
                   </Box>
-                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Digital Assets</Typography>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Digital files *</Typography>
                 </Box>
-                <Stack spacing={3}>
+                <Typography variant="body2" sx={{ mb: 2, color: '#6B7280' }}>
+                  Buyers can download these files as soon as they complete their purchase. Add up to 5 files.
+                </Typography>
+                <Stack spacing={4}>
                   <Box>
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Upload Files (PNG, SVG, ZIP)</Typography>
-                    {/* Reuse Image Upload logic for now, or create separate file input. Using same state just for simplicity but labeling it 'Files' */}
                     <Box
                       onClick={() => document.getElementById('digital-file-input').click()}
                       sx={{
                         border: '2px dashed #D1D5DB',
                         borderRadius: '16px',
-                        p: 3,
+                        p: 4,
                         textAlign: 'center',
                         cursor: 'pointer',
                         '&:hover': { bgcolor: '#F9FAFB', borderColor: '#3B82F6' },
-                        transition: 'all 0.2s'
+                        transition: 'all 0.2s',
+                        display: 'flex',
+                        flexDirection: 'column',
+                        alignItems: 'center',
+                        gap: 1
                       }}
                     >
-                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Click to upload digital files</Typography>
+                      <CloudUploadIcon sx={{ fontSize: '2rem', color: '#9CA3AF' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Drag and drop or click to add files</Typography>
                       <input
                         id="digital-file-input"
                         type="file"
                         hidden
                         onChange={(e) => {
                           const files = Array.from(e.target.files);
+                          if (digitalFiles.length + files.length > 5) {
+                            alert('You can only upload up to 5 files.');
+                            return;
+                          }
                           setDigitalFiles(prev => [...prev, ...files]);
                         }}
                         multiple
                       />
                     </Box>
-                    <Grid container spacing={1} sx={{ mt: 1 }}>
+                    <Grid container spacing={1.5} sx={{ mt: 2 }}>
                       {digitalFiles.map((file, i) => (
                         <Grid item xs={12} key={i}>
-                          <Box sx={{ p: 1, border: '1px solid #e5e7eb', borderRadius: '8px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                            <Typography variant="body2" noWrap>{file.name}</Typography>
+                          <Box sx={{ p: 2, border: '1px solid #e5e7eb', borderRadius: '12px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', bgcolor: '#fff' }}>
+                            <Stack direction="row" spacing={2} alignItems="center">
+                              <DescriptionIcon sx={{ color: '#9CA3AF' }} />
+                              <Box>
+                                <Typography variant="body2" sx={{ fontWeight: 600 }}>{file.name}</Typography>
+                                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>{(file.size / 1024 / 1024).toFixed(2)} MB</Typography>
+                              </Box>
+                            </Stack>
                             <IconButton size="small" onClick={() => setDigitalFiles(prev => prev.filter((_, idx) => idx !== i))}>
                               <CloseIcon fontSize="small" />
                             </IconButton>
@@ -949,61 +985,374 @@ const AddProductPageContent = () => {
                     </Grid>
                   </Box>
 
-                  <Box>
-                    <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 600 }}>Dimensions</Typography>
-                    <Grid container spacing={2}>
-                      <Grid item xs={4}>
-                        <TextField
-                          id="product-dim-px"
-                          label="Pixels (px)"
-                          placeholder="1000x1000"
-                          fullWidth
-                          size="small"
-                          value={dimensions.px}
-                          onChange={(e) => setDimensions({ ...dimensions, px: e.target.value })}
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          id="product-dim-inch"
-                          label="Inches (in)"
-                          placeholder="10x10"
-                          fullWidth
-                          size="small"
-                          value={dimensions.inch}
-                          onChange={(e) => setDimensions({ ...dimensions, inch: e.target.value })}
-                        />
-                      </Grid>
-                      <Grid item xs={4}>
-                        <TextField
-                          id="product-dim-cm"
-                          label="Centimeters (cm)"
-                          placeholder="25x25"
-                          fullWidth
-                          size="small"
-                          value={dimensions.cm}
-                          onChange={(e) => setDimensions({ ...dimensions, cm: e.target.value })}
-                        />
-                      </Grid>
+                  <Box sx={{ borderTop: '1px solid #F3F4F6', pt: 3 }}>
+                    <Typography variant="subtitle2" sx={{ mb: 2, fontWeight: 700, color: '#111827' }}>Core details *</Typography>
+                    <Box sx={{ display: 'flex', gap: 2, alignItems: 'center', p: 2, bgcolor: '#F9FAFB', borderRadius: '12px', border: '1px solid #E5E7EB' }}>
+                      <Box sx={{ p: 1, bgcolor: '#fff', borderRadius: '8px', border: '1px solid #E5E7EB' }}>
+                        <CloudUploadIcon sx={{ color: '#3B82F6' }} />
+                      </Box>
+                      <Box>
+                        <Typography variant="body2" sx={{ fontWeight: 700 }}>Digital files</Typography>
+                        <Typography variant="body2" sx={{ color: '#6B7280' }}>Instant download</Typography>
+                        <Typography variant="caption" sx={{ color: '#9CA3AF' }}>I did • A finished product • 2020 - 2026</Typography>
+                      </Box>
+                    </Box>
+                  </Box>
+                </Stack>
+              </Paper>
+            )}
+
+            {/* Attributes Section */}
+            {newProduct.productType === 'digital' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+                <Box sx={sectionHeaderStyles}>
+                  <Box sx={{ p: 1, bgcolor: '#FEF3C7', borderRadius: '10px', color: '#D97706', display: 'flex' }}>
+                    <StyleIcon sx={{ fontSize: '1.25rem' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Attributes</Typography>
+                </Box>
+                <Stack spacing={4}>
+                  {/* Colors */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth sx={inputStyles}>
+                        <InputLabel id="primary-color-label">Primary color</InputLabel>
+                        <Select
+                          labelId="primary-color-label"
+                          value={colorsMeta.primary}
+                          onChange={(e) => setColorsMeta({ ...colorsMeta, primary: e.target.value })}
+                          label="Primary color"
+                          MenuProps={selectMenuProps}
+                        >
+                          <MenuItem value="">Select color</MenuItem>
+                          {colors.map((color) => (
+                            <MenuItem key={color.value} value={color.label}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color.hex }}></Box>
+                                {color.label}
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
                     </Grid>
+                    <Grid item xs={12} md={6}>
+                      <FormControl fullWidth sx={inputStyles}>
+                        <InputLabel id="secondary-color-label">Secondary color</InputLabel>
+                        <Select
+                          labelId="secondary-color-label"
+                          value={colorsMeta.secondary}
+                          onChange={(e) => setColorsMeta({ ...colorsMeta, secondary: e.target.value })}
+                          label="Secondary color"
+                          MenuProps={selectMenuProps}
+                        >
+                          <MenuItem value="">Select color</MenuItem>
+                          {colors.map((color) => (
+                            <MenuItem key={color.value} value={color.label}>
+                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color.hex }}></Box>
+                                {color.label}
+                              </Box>
+                            </MenuItem>
+                          ))}
+                        </Select>
+                      </FormControl>
+                    </Grid>
+                  </Grid>
+
+                  {/* Dimensions */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField
+                          label="Height"
+                          value={digitalDimensions.height.value}
+                          onChange={(e) => setDigitalDimensions({
+                            ...digitalDimensions,
+                            height: { ...digitalDimensions.height, value: e.target.value }
+                          })}
+                          sx={inputStyles}
+                          fullWidth
+                        />
+                        <FormControl sx={{ minWidth: 100, ...inputStyles }}>
+                          <Select
+                            value={digitalDimensions.height.unit}
+                            onChange={(e) => setDigitalDimensions({
+                              ...digitalDimensions,
+                              height: { ...digitalDimensions.height, unit: e.target.value }
+                            })}
+                            MenuProps={selectMenuProps}
+                          >
+                            <MenuItem value="px">px</MenuItem>
+                            <MenuItem value="inch">in</MenuItem>
+                            <MenuItem value="cm">cm</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <Box sx={{ display: 'flex', gap: 1 }}>
+                        <TextField
+                          label="Width"
+                          value={digitalDimensions.width.value}
+                          onChange={(e) => setDigitalDimensions({
+                            ...digitalDimensions,
+                            width: { ...digitalDimensions.width, value: e.target.value }
+                          })}
+                          sx={inputStyles}
+                          fullWidth
+                        />
+                        <FormControl sx={{ minWidth: 100, ...inputStyles }}>
+                          <Select
+                            value={digitalDimensions.width.unit}
+                            onChange={(e) => setDigitalDimensions({
+                              ...digitalDimensions,
+                              width: { ...digitalDimensions.width, unit: e.target.value }
+                            })}
+                            MenuProps={selectMenuProps}
+                          >
+                            <MenuItem value="px">px</MenuItem>
+                            <MenuItem value="inch">in</MenuItem>
+                            <MenuItem value="cm">cm</MenuItem>
+                          </Select>
+                        </FormControl>
+                      </Box>
+                    </Grid>
+                  </Grid>
+
+                  {/* Tags & Materials */}
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Tags</Typography>
+                    <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#6B7280' }}>
+                      Add up to 13 tags to help people search for your listings.
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                      <TextField
+                        id="tag-input"
+                        placeholder="Shape, color, style, function, etc."
+                        fullWidth
+                        size="small"
+                        sx={inputStyles}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const val = e.target.value.trim();
+                            if (val && digitalTags.length < 13) {
+                              setDigitalTags([...digitalTags, val]);
+                              e.target.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          const input = document.getElementById('tag-input');
+                          const val = input.value.trim();
+                          if (val && digitalTags.length < 13) {
+                            setDigitalTags([...digitalTags, val]);
+                            input.value = '';
+                          }
+                        }}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 700 }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                    <Typography variant="caption" sx={{ color: '#9CA3AF' }}>{13 - digitalTags.length} left</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
+                      {digitalTags.map((tag, idx) => (
+                        <Chip
+                          key={idx}
+                          label={tag}
+                          onDelete={() => setDigitalTags(digitalTags.filter((_, i) => i !== idx))}
+                          sx={{ borderRadius: '8px', bgcolor: '#F3F4FB', fontWeight: 600 }}
+                        />
+                      ))}
+                    </Box>
                   </Box>
 
-                  <TextField
-                    id="product-tags"
-                    label="Tags"
-                    placeholder="christmas, floral, svg"
-                    fullWidth
-                    value={digitalTags}
-                    onChange={(e) => setDigitalTags(e.target.value)}
-                    helperText="Comma separated tags"
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Materials</Typography>
+                    <Typography variant="caption" sx={{ display: 'block', mb: 1.5, color: '#6B7280' }}>
+                      Buyers value transparency—tell them what’s used to make your item.
+                    </Typography>
+                    <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
+                      <TextField
+                        id="material-input"
+                        placeholder="Ingredients, components, etc."
+                        fullWidth
+                        size="small"
+                        sx={inputStyles}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            e.preventDefault();
+                            const val = e.target.value.trim();
+                            if (val && digitalMaterials.length < 13) {
+                              setDigitalMaterials([...digitalMaterials, val]);
+                              e.target.value = '';
+                            }
+                          }
+                        }}
+                      />
+                      <Button
+                        variant="outlined"
+                        onClick={() => {
+                          const input = document.getElementById('material-input');
+                          const val = input.value.trim();
+                          if (val && digitalMaterials.length < 13) {
+                            setDigitalMaterials([...digitalMaterials, val]);
+                            input.value = '';
+                          }
+                        }}
+                        sx={{ borderRadius: '12px', textTransform: 'none', fontWeight: 700 }}
+                      >
+                        Add
+                      </Button>
+                    </Box>
+                    <Typography variant="caption" sx={{ color: '#9CA3AF' }}>{13 - digitalMaterials.length} left</Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1.5 }}>
+                      {digitalMaterials.map((mat, idx) => (
+                        <Chip
+                          key={idx}
+                          label={mat}
+                          onDelete={() => setDigitalMaterials(digitalMaterials.filter((_, i) => i !== idx))}
+                          sx={{ borderRadius: '8px', bgcolor: '#F3F4FB', fontWeight: 600 }}
+                        />
+                      ))}
+                    </Box>
+                  </Box>
+                </Stack>
+              </Paper>
+            )}
+            {/* Variations Notice (Digital) */}
+            {newProduct.productType === 'digital' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB', borderStyle: 'dashed', bgcolor: '#F9FAFB' }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                  <InfoIcon sx={{ color: '#9CA3AF' }} />
+                  <Typography variant="body2" sx={{ color: '#6B7280', fontWeight: 500 }}>
+                    Variations are not available for digital items.
+                  </Typography>
+                </Box>
+              </Paper>
+            )}
+
+            {/* Personalization Card */}
+            {newProduct.productType === 'digital' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <Box sx={{ p: 1, bgcolor: '#FEF3C7', borderRadius: '10px', color: '#D97706', display: 'flex' }}>
+                      <DescriptionIcon sx={{ fontSize: '1.25rem' }} />
+                    </Box>
+                    <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Personalization</Typography>
+                  </Box>
+                  <Checkbox
+                    checked={personalization.enabled}
+                    onChange={(e) => setPersonalization({ ...personalization, enabled: e.target.checked })}
+                    sx={{ color: '#3B82F6', '&.Mui-checked': { color: '#3B82F6' } }}
                   />
+                </Box>
+                <Typography variant="body2" sx={{ mb: 3, color: '#6B7280' }}>
+                  Collect personalized information for this listing.
+                </Typography>
+                {personalization.enabled && (
+                  <Stack spacing={2}>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700 }}>Instructions for buyers</Typography>
+                    <Typography variant="caption" sx={{ color: '#6B7280', mb: 1 }}>
+                      Enter the personalization instructions you want buyers to see.
+                    </Typography>
+                    <TextField
+                      fullWidth
+                      multiline
+                      rows={4}
+                      value={personalization.instruction}
+                      onChange={(e) => setPersonalization({ ...personalization, instruction: e.target.value })}
+                      placeholder="e.g. Please enter the name you want on the design..."
+                      sx={inputStyles}
+                    />
+                  </Stack>
+                )}
+              </Paper>
+            )}
+
+            {/* Settings & Renewal Card */}
+            {newProduct.productType === 'digital' && (
+              <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+                <Box sx={sectionHeaderStyles}>
+                  <Box sx={{ p: 1, bgcolor: '#F3E8FF', borderRadius: '10px', color: '#7E22CE', display: 'flex' }}>
+                    <InventoryIcon sx={{ fontSize: '1.25rem' }} />
+                  </Box>
+                  <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Settings</Typography>
+                </Box>
+                <Stack spacing={4}>
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 1 }}>Returns and exchanges *</Typography>
+                    <Box sx={{ p: 3, bgcolor: '#F9FAFB', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                      <Typography variant="body2" sx={{ fontWeight: 700, mb: 1 }}>No returns or exchanges</Typography>
+                      <Typography variant="body2" sx={{ color: '#6B7280' }}>
+                        Digital items aren't eligible for returns or exchanges because of the nature of these items.
+                      </Typography>
+                    </Box>
+                  </Box>
+
+                  <FormControl fullWidth sx={inputStyles}>
+                    <InputLabel id="shop-section-label">Shop section</InputLabel>
+                    <Select
+                      labelId="shop-section-label"
+                      value={settings.shopSection}
+                      onChange={(e) => setSettings({ ...settings, shopSection: e.target.value })}
+                      label="Shop section"
+                      MenuProps={selectMenuProps}
+                    >
+                      <MenuItem value="">None</MenuItem>
+                      <MenuItem value="featured">Featured Items</MenuItem>
+                      <MenuItem value="new">New Arrivals</MenuItem>
+                    </Select>
+                  </FormControl>
+
+                  <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', p: 2, bgcolor: '#F9FAFB', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                    <Box>
+                      <Typography variant="body2" sx={{ fontWeight: 700 }}>Feature this listing</Typography>
+                      <Typography variant="caption" sx={{ color: '#6B7280' }}>Showcase this listing at the top of your shop's homepage</Typography>
+                    </Box>
+                    <Checkbox
+                      checked={settings.featureListing}
+                      onChange={(e) => setSettings({ ...settings, featureListing: e.target.checked })}
+                      sx={{ color: '#3B82F6', '&.Mui-checked': { color: '#3B82F6' } }}
+                    />
+                  </Box>
+
+                  <Box>
+                    <Typography variant="subtitle2" sx={{ fontWeight: 700, mb: 2 }}>Renewal options *</Typography>
+                    <FormControl component="fieldset">
+                      <ToggleButtonGroup
+                        value={settings.renewalOption}
+                        exclusive
+                        onChange={(e, newOption) => {
+                          if (newOption !== null) setSettings({ ...settings, renewalOption: newOption });
+                        }}
+                        sx={{ bgcolor: '#fff', borderRadius: '12px' }}
+                      >
+                        <ToggleButton value="automatic" sx={{ px: 3, py: 1.5, textTransform: 'none', fontWeight: 600 }}>
+                          Automatic
+                        </ToggleButton>
+                        <ToggleButton value="manual" sx={{ px: 3, py: 1.5, textTransform: 'none', fontWeight: 600 }}>
+                          Manual
+                        </ToggleButton>
+                      </ToggleButtonGroup>
+                    </FormControl>
+                    <Typography variant="caption" sx={{ display: 'block', mt: 1, color: '#6B7280' }}>
+                      Each renewal lasts for four months or until the listing sells out.
+                    </Typography>
+                  </Box>
                 </Stack>
               </Paper>
             )}
           </Stack>
         </Grid>
-      </Grid>
-    </Box>
+      </Grid >
+    </Box >
   );
 };
 
