@@ -400,16 +400,32 @@ const Header = () => {
             </div>
 
             {/* Category Links - Stacked if two words */}
-            {categories.slice(0, 5).map((category) => (
-              <Link
-                key={category.slug}
-                href={`/customer/pages/category/${category.slug}`}
-                className="relative group py-2 h-14 flex items-center hover:text-black transition-colors text-center whitespace-nowrap"
-              >
-                {category.name}
-                <span className="absolute bottom-3 left-0 w-0 h-[3px] bg-black transition-all duration-300 group-hover:w-full rounded-full"></span>
-              </Link>
-            ))}
+            <div className="hidden xl:flex items-center space-x-2 xl:space-x-4">
+              {categories.slice(0, 5).map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/customer/pages/category/${category.slug}`}
+                  className="relative group py-2 h-14 flex items-center hover:text-black transition-colors text-center whitespace-nowrap"
+                >
+                  {category.name}
+                  <span className="absolute bottom-3 left-0 w-0 h-[3px] bg-black transition-all duration-300 group-hover:w-full rounded-full"></span>
+                </Link>
+              ))}
+            </div>
+
+            {/* Shorter list for LG breakpoint to avoid overflow */}
+            <div className="flex xl:hidden items-center space-x-2">
+              {categories.slice(0, 3).map((category) => (
+                <Link
+                  key={category.slug}
+                  href={`/customer/pages/category/${category.slug}`}
+                  className="relative group py-2 h-14 flex items-center hover:text-black transition-colors text-center whitespace-nowrap"
+                >
+                  {category.name}
+                  <span className="absolute bottom-3 left-0 w-0 h-[3px] bg-black transition-all duration-300 group-hover:w-full rounded-full"></span>
+                </Link>
+              ))}
+            </div>
 
             <Link
               href={`/customer/pages/blog`}

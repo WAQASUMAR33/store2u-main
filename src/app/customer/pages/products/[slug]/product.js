@@ -338,7 +338,7 @@ const ProductPage = ({ productData }) => {
       {/* Main Split Layout */}
       <div className="flex flex-col lg:flex-row gap-8 lg:gap-12 items-start">
         {/* Left Column: Images */}
-        <div className="w-full lg:w-3/5 flex flex-col md:flex-row gap-4">
+        <div className="w-full lg:flex-[3] min-w-0 flex flex-col md:flex-row gap-4">
           {/* Thumbnails - Vertical on Desktop, Horizontal on Mobile */}
           <div className="order-2 md:order-1 flex md:flex-col gap-3 overflow-x-auto md:overflow-y-auto max-h-[600px] scrollbar-hide py-1">
             {product?.images?.map((img, idx) => (
@@ -408,7 +408,7 @@ const ProductPage = ({ productData }) => {
         </div>
 
         {/* Right Column: details */}
-        <div className="w-full lg:w-2/5 flex flex-col">
+        <div className="w-full lg:flex-[2] min-w-0 flex flex-col">
           <div className="mb-6">
             <p className="text-[10px] font-black text-orange-600 uppercase tracking-[0.2em] mb-3">{product?.category?.name || 'Collection'}</p>
             <h1 className="text-2xl md:text-3xl font-black text-gray-900 leading-tight mb-2">{product?.name}</h1>
@@ -559,7 +559,7 @@ const ProductPage = ({ productData }) => {
       {/* Bottom Section: Reviews and Accordions */}
       <div className="mt-16 pt-16 border-t border-gray-100 flex flex-col lg:flex-row gap-16">
         {/* Left Side: Reviews */}
-        <div className="w-full lg:w-3/5">
+        <div className="w-full lg:flex-[3] min-w-0">
           <div className="mb-10">
             <h2 className="text-2xl font-serif font-bold text-gray-900 mb-8">Reviews for this item ({reviews.length})</h2>
 
@@ -638,7 +638,7 @@ const ProductPage = ({ productData }) => {
         </div>
 
         {/* Right Side: Accordions */}
-        <div className="w-full lg:w-2/5">
+        <div className="w-full lg:flex-[2] min-w-0">
 
           <div className="space-y-2">
             {/* Item Details Accordion */}
@@ -653,7 +653,7 @@ const ProductPage = ({ productData }) => {
                 <FiChevronUp className={`transition-transform duration-300 ${activeTab === 'info' ? '' : 'rotate-180'}`} />
               </button>
               {activeTab === 'info' && (
-                <div className="pb-8 prose prose-sm max-w-none text-gray-700 text-[14px] leading-relaxed"
+                <div className="pb-8 prose prose-sm max-w-none text-gray-700 text-[14px] leading-relaxed whitespace-pre-wrap break-words overflow-hidden w-full"
                   dangerouslySetInnerHTML={{ __html: product?.description || 'No description available.' }} />
               )}
             </div>
