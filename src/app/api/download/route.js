@@ -36,11 +36,14 @@ export async function GET(request) {
 
         const contentType = response.headers['content-type'] || 'application/octet-stream';
 
+        // RFC 5987: Encoding the filename to support non-ASCII characters (emojis, etc.)
+        const encodedFilename = encodeURIComponent(finalFilename);
+
         return new NextResponse(response.data, {
             status: 200,
             headers: {
                 'Content-Type': contentType,
-                'Content-Disposition': `attachment; filename="${finalFilename}"`,
+                'Content-Disposition': `attachment; filename="${finalFilename.replace(/[^\x00-\x7F]/g, "_")}"; filename*=UTF-8''${encodedFilename}`,
             },
         });
     } catch (error) {
