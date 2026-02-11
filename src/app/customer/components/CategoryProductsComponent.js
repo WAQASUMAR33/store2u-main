@@ -13,7 +13,7 @@ const SubcategoryProductsComponent = () => {
   const [subcategories, setSubcategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [filteredProducts, setFilteredProducts] = useState([]);
-  const [selectedSubcategory, setSelectedSubcategory] = useState(null);
+  const [selectedSubcategorySlug, setSelectedSubcategorySlug] = useState(null);
   const [currentPage, setCurrentPage] = useState(1);
   const productsPerPage = 5;
 
@@ -33,9 +33,9 @@ const SubcategoryProductsComponent = () => {
     fetchSubcategories();
   }, []);
 
-  const fetchProducts = async (subcategoryId) => {
+  const fetchProducts = async (subcategorySlug) => {
     try {
-      const productsResponse = await axios.get(`/api/products?subcategoryId=${subcategoryId}`);
+      const productsResponse = await axios.get(`/api/products?subcategorySlug=${subcategorySlug}`);
       const productsData = productsResponse.data;
       setProducts(productsData);
       setFilteredProducts(productsData.slice(0, productsPerPage));
@@ -52,9 +52,9 @@ const SubcategoryProductsComponent = () => {
     }
   };
 
-  const handleSubcategoryClick = async (subcategoryId) => {
-    setSelectedSubcategory(subcategoryId);
-    await fetchProducts(subcategoryId);
+  const handleSubcategoryClick = async (subcategorySlug) => {
+    setSelectedSubcategorySlug(subcategorySlug);
+    await fetchProducts(subcategorySlug);
   };
 
   const handleNextPage = () => {
@@ -73,8 +73,8 @@ const SubcategoryProductsComponent = () => {
     setCurrentPage(previousPage);
   };
 
-  const handleProductClick = (productId) => {
-    router.push(`/customer/pages/products/${productId}`);
+  const handleProductClick = (slug) => {
+    router.push(`/customer/pages/products/${slug}`);
   };
 
   const handleAddToCart = (product) => {
@@ -89,15 +89,15 @@ const SubcategoryProductsComponent = () => {
         {subcategories.map((subcategory) => (
           <button
             key={subcategory.id}
-            className={`cursor-pointer p-2 rounded ${selectedSubcategory === subcategory.id ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'} border border-gray-300`}
-            onClick={() => handleSubcategoryClick(subcategory.id)}
+            className={`cursor-pointer p-2 rounded ${selectedSubcategorySlug === subcategory.slug ? 'bg-blue-500 text-white' : 'bg-white text-gray-700'} border border-gray-300`}
+            onClick={() => handleSubcategoryClick(subcategory.slug)}
           >
             {subcategory.name}
           </button>
         ))}
       </div>
 
-      {selectedSubcategory && (
+      {selectedSubcategorySlug && (
         <div className="mt-8">
           <h3 className="text-[1.5rem] md:text-[2rem] font-black uppercase tracking-tighter mb-6">Products</h3>
           <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
@@ -106,13 +106,13 @@ const SubcategoryProductsComponent = () => {
                 <motion.div
                   key={product.id}
                   className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 relative cursor-pointer"
-                  onClick={() => handleProductClick(product.id)}
+                  onClick={() => handleProductClick(product.slug)}
                 >
                   <div className="relative aspect-square bg-[#F3F4FB] overflow-hidden">
                     {product.images && product.images.length > 0 ? (
                       <Image
                         fill
-                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                        src={product.images[0].url.startsWith('http') ? product.images[0].url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
                         alt={product.name}
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                         unoptimized

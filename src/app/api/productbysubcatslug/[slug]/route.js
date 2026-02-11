@@ -16,7 +16,11 @@ export async function GET(request, { params }) {
         slug: slug,
       },
       include: {
-        products: true, // Include associated products
+        products: {
+          include: {
+            images: true,
+          },
+        }, // Include associated products with images
       },
     });
 

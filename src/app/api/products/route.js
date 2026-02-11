@@ -140,9 +140,18 @@ export async function POST(request) {
 //     );
 //   }
 // }
-export async function GET() {
+export async function GET(request) {
   try {
+    const { searchParams } = new URL(request.url);
+    const subcategorySlug = searchParams.get('subcategorySlug');
+
+    const where = {};
+    if (subcategorySlug) {
+      where.subcategorySlug = subcategorySlug;
+    }
+
     const products = await prisma.product.findMany({
+      where,
       include: {
         images: true, // Include related images
       },
