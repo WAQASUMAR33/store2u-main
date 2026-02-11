@@ -789,7 +789,7 @@ const CartPage = () => {
               <div className="flex flex-col gap-6 mb-8 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {cart.map((item, index) => (
                   <div key={index} className="flex gap-4 group">
-                    <div className="w-16 h-16 bg-gray-50 rounded-2xl flex-shrink-0 relative overflow-hidden border border-gray-100 p-2">
+                    <Link href={`/customer/pages/products/${item.slug || ''}`} className="w-16 h-16 bg-gray-50 rounded-2xl flex-shrink-0 relative overflow-hidden border border-gray-100 p-2 hover:opacity-80 transition-opacity">
                       {item.images?.[0] ? (
                         <Image
                           src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${item.images[0].url || item.images[0]}`}
@@ -799,11 +799,13 @@ const CartPage = () => {
                           alt={item.name}
                         />
                       ) : <FiX className="m-auto text-gray-200" />}
-                    </div>
+                    </Link>
 
                     <div className="flex-grow flex flex-col justify-center">
                       <div className="flex justify-between items-start">
-                        <h4 className="text-[11px] font-black uppercase tracking-tight text-gray-800 line-clamp-1">{item.name}</h4>
+                        <Link href={`/customer/pages/products/${item.slug || ''}`} className="hover:text-orange-500 transition-colors">
+                          <h4 className="text-[11px] font-black uppercase tracking-tight text-gray-800 line-clamp-1">{item.name}</h4>
+                        </Link>
                         <button onClick={() => handleRemoveFromCart(item.id)} className="text-gray-300 hover:text-red-500 transition-colors">
                           <FiX size={14} />
                         </button>
