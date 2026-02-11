@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server';
 import axios from 'axios';
+import https from 'https';
 
 export async function GET(request) {
     const { searchParams } = new URL(request.url);
@@ -15,6 +16,12 @@ export async function GET(request) {
             url: url,
             method: 'GET',
             responseType: 'arraybuffer',
+            httpsAgent: new https.Agent({
+                rejectUnauthorized: false
+            }),
+            headers: {
+                'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36'
+            }
         });
 
         // Determine final filename with extension
@@ -37,7 +44,13 @@ export async function GET(request) {
             },
         });
     } catch (error) {
-        console.error('Download error:', error);
-        return NextResponse.json({ error: 'Failed to download file' }, { status: 500 });
+        console.error('Download error for URL:', url);
+        if (error.response) {
+            console.error('Status:', error.response.status);
+            console.error('Data:', error.response.data);
+        } else {
+            console.error('Message:', error.message);
+        }
+        return NextResponse.json({ error: 'Failed to download file', details: error.message }, { status: 500 });
     }
 }

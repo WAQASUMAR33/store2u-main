@@ -645,204 +645,7 @@ const AddProductPageContent = () => {
 
 
 
-            {/* SEO Card */}
-            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
-              <Box sx={sectionHeaderStyles}>
-                <Box sx={{ p: 1, bgcolor: '#ECFDF5', borderRadius: '10px', color: '#059669', display: 'flex' }}>
-                  <PublicIcon sx={{ fontSize: '1.25rem' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Search Optimization</Typography>
-              </Box>
-              <Stack spacing={3}>
-                <TextField
-                  id="meta-title"
-                  fullWidth
-                  label="Meta Title"
-                  value={newProduct.meta_title}
-                  onChange={(e) => setNewProduct({ ...newProduct, meta_title: e.target.value.slice(0, 60) })}
-                  sx={inputStyles}
-                  helperText={`${newProduct.meta_title.length}/60 characters`}
-                />
-                <TextField
-                  id="meta-description"
-                  fullWidth
-                  multiline
-                  rows={4}
-                  label="Meta Description"
-                  value={newProduct.meta_description}
-                  onChange={(e) => setNewProduct({ ...newProduct, meta_description: e.target.value.slice(0, 160) })}
-                  sx={inputStyles}
-                  helperText={`${newProduct.meta_description.length}/160 characters`}
-                />
-                <TextField
-                  id="meta-keywords"
-                  fullWidth
-                  label="Meta Keywords"
-                  value={newProduct.meta_keywords}
-                  onChange={(e) => setNewProduct({ ...newProduct, meta_keywords: e.target.value })}
-                  placeholder="e.g. clothing, fashion, summer"
-                  sx={inputStyles}
-                />
-              </Stack>
-            </Paper>
-          </Stack>
-        </Grid>
-
-        {/* Right Column: Pricing & Media */}
-        <Grid item xs={12} lg={4}>
-          <Stack spacing={4}>
-            {/* Pricing Card */}
-            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
-              <Box sx={sectionHeaderStyles}>
-                <Box sx={{ p: 1, bgcolor: '#DCFCE7', borderRadius: '10px', color: '#16A34A', display: 'flex' }}>
-                  <LocalOfferIcon sx={{ fontSize: '1.25rem' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Pricing & Stock</Typography>
-              </Box>
-              <Stack spacing={3}>
-                <TextField
-                  id="product-price"
-                  fullWidth
-                  label="Display Price (Rs.)"
-                  type="number"
-                  value={newProduct.price}
-                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
-                  sx={inputStyles}
-                  InputProps={{ inputProps: { min: 0, step: 0.01 } }}
-                />
-                <TextField
-                  id="product-discount"
-                  fullWidth
-                  label="Discount Percentage (%)"
-                  type="number"
-                  value={newProduct.discount}
-                  onChange={(e) => setNewProduct({ ...newProduct, discount: e.target.value })}
-                  sx={inputStyles}
-                  InputProps={{ inputProps: { min: 0, max: 100, step: 0.01 } }}
-                />
-
-                {newProduct.productType === 'tangible' && (
-                  <Box sx={{
-                    bgcolor: '#F9FAFB',
-                    p: 2,
-                    borderRadius: '16px',
-                    border: '1px solid #E5E7EB',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between'
-                  }}>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                      <InventoryIcon sx={{ color: '#6B7280' }} />
-                      <Typography variant="body2" sx={{ fontWeight: 700, color: '#4B5563' }}>Current Stock</Typography>
-                    </Box>
-                    <TextField
-                      id="product-stock"
-                      type="number"
-                      size="small"
-                      value={newProduct.stock}
-                      onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
-                      sx={{ width: '100px', '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff' } }}
-                    />
-                  </Box>
-                )}
-
-                <FormControlLabel
-                  control={
-                    <Checkbox
-                      id="product-is-top-rated"
-                      checked={newProduct.isTopRated}
-                      onChange={(e) => setNewProduct({ ...newProduct, isTopRated: e.target.checked })}
-                      sx={{ color: '#3B82F6', '&.Mui-checked': { color: '#3B82F6' } }}
-                    />
-                  }
-                  label={<Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Mark as Top Rated</Typography>}
-                />
-              </Stack>
-            </Paper>
-
-            {/* Media Card */}
-            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
-              <Box sx={sectionHeaderStyles}>
-                <Box sx={{ p: 1, bgcolor: '#FFEDD5', borderRadius: '10px', color: '#EA580C', display: 'flex' }}>
-                  <CloudUploadIcon sx={{ fontSize: '1.25rem' }} />
-                </Box>
-                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Media Gallery</Typography>
-              </Box>
-
-              <Box
-                onClick={() => fileInputRef.current.click()}
-                sx={{
-                  border: '2px dashed #D1D5DB',
-                  borderRadius: '16px',
-                  p: 4,
-                  textAlign: 'center',
-                  cursor: 'pointer',
-                  '&:hover': { bgcolor: '#F9FAFB', borderColor: '#3B82F6' },
-                  transition: 'all 0.2s',
-                  mb: 3
-                }}
-              >
-                <CloudUploadIcon sx={{ fontSize: '2.5rem', color: '#9CA3AF', mb: 1.5 }} />
-                <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>
-                  {newProduct.productType === 'digital' ? "Drag and drop files or click to upload" : "Click to upload images"}
-                </Typography>
-                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
-                  {newProduct.productType === 'digital' ? "Add up to 20 photos and 1 video" : "Multiple images supported (JPG, PNG)"}
-                </Typography>
-                <input
-                  id="image-upload-input"
-                  type="file"
-                  hidden
-                  ref={fileInputRef}
-                  onChange={handleImageChange}
-                  multiple
-                  accept="image/*"
-                />
-              </Box>
-
-              <Grid container spacing={1.5}>
-                {existingImages.map((img, index) => (
-                  <Grid item xs={4} key={`existing-${index}`}>
-                    <Box sx={{ position: 'relative', pt: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E5E7EB' }}>
-                      <Image
-                        fill
-                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${img}`}
-                        alt="Existing"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveExistingImage(index)}
-                        sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: '#FEE2E2', color: '#EF4444' } }}
-                      >
-                        <CloseIcon sx={{ fontSize: '0.8rem' }} />
-                      </IconButton>
-                    </Box>
-                  </Grid>
-                ))}
-                {images.map((img, index) => (
-                  <Grid item xs={4} key={`new-${index}`}>
-                    <Box sx={{ position: 'relative', pt: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #3B82F6' }}>
-                      <Image
-                        fill
-                        src={URL.createObjectURL(img)}
-                        alt="New"
-                        style={{ objectFit: 'cover' }}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={() => handleRemoveImage(index)}
-                        sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: '#FEE2E2', color: '#EF4444' } }}
-                      >
-                        <CloseIcon sx={{ fontSize: '0.8rem' }} />
-                      </IconButton>
-                    </Box>
-                  </Grid>
-                ))}
-              </Grid>
-            </Paper>
-
-            {/* Attributes Card */}
+            {/* Attributes & Options (Tangible) */}
             {newProduct.productType === 'tangible' && (
               <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
                 <Box sx={sectionHeaderStyles}>
@@ -1002,7 +805,7 @@ const AddProductPageContent = () => {
               </Paper>
             )}
 
-            {/* Attributes Section */}
+            {/* Attributes Section (Digital) */}
             {newProduct.productType === 'digital' && (
               <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
                 <Box sx={sectionHeaderStyles}>
@@ -1225,6 +1028,7 @@ const AddProductPageContent = () => {
                 </Stack>
               </Paper>
             )}
+
             {/* Variations Notice (Digital) */}
             {newProduct.productType === 'digital' && (
               <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB', borderStyle: 'dashed', bgcolor: '#F9FAFB' }}>
@@ -1275,6 +1079,203 @@ const AddProductPageContent = () => {
                 )}
               </Paper>
             )}
+          </Stack>
+        </Grid>
+
+        {/* Right Column: Pricing & Media */}
+        <Grid item xs={12} lg={4}>
+          <Stack spacing={4}>
+            {/* Pricing Card */}
+            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+              <Box sx={sectionHeaderStyles}>
+                <Box sx={{ p: 1, bgcolor: '#DCFCE7', borderRadius: '10px', color: '#16A34A', display: 'flex' }}>
+                  <LocalOfferIcon sx={{ fontSize: '1.25rem' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Pricing & Stock</Typography>
+              </Box>
+              <Stack spacing={3}>
+                <TextField
+                  id="product-price"
+                  fullWidth
+                  label="Display Price (Rs.)"
+                  type="number"
+                  value={newProduct.price}
+                  onChange={(e) => setNewProduct({ ...newProduct, price: e.target.value })}
+                  sx={inputStyles}
+                  InputProps={{ inputProps: { min: 0, step: 0.01 } }}
+                />
+                <TextField
+                  id="product-discount"
+                  fullWidth
+                  label="Discount Percentage (%)"
+                  type="number"
+                  value={newProduct.discount}
+                  onChange={(e) => setNewProduct({ ...newProduct, discount: e.target.value })}
+                  sx={inputStyles}
+                  InputProps={{ inputProps: { min: 0, max: 100, step: 0.01 } }}
+                />
+
+                {newProduct.productType === 'tangible' && (
+                  <Box sx={{
+                    bgcolor: '#F9FAFB',
+                    p: 2,
+                    borderRadius: '16px',
+                    border: '1px solid #E5E7EB',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between'
+                  }}>
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                      <InventoryIcon sx={{ color: '#6B7280' }} />
+                      <Typography variant="body2" sx={{ fontWeight: 700, color: '#4B5563' }}>Current Stock</Typography>
+                    </Box>
+                    <TextField
+                      id="product-stock"
+                      type="number"
+                      size="small"
+                      value={newProduct.stock}
+                      onChange={(e) => setNewProduct({ ...newProduct, stock: e.target.value })}
+                      sx={{ width: '100px', '& .MuiOutlinedInput-root': { borderRadius: '10px', bgcolor: '#fff' } }}
+                    />
+                  </Box>
+                )}
+
+                <FormControlLabel
+                  control={
+                    <Checkbox
+                      id="product-is-top-rated"
+                      checked={newProduct.isTopRated}
+                      onChange={(e) => setNewProduct({ ...newProduct, isTopRated: e.target.checked })}
+                      sx={{ color: '#3B82F6', '&.Mui-checked': { color: '#3B82F6' } }}
+                    />
+                  }
+                  label={<Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>Mark as Top Rated</Typography>}
+                />
+              </Stack>
+            </Paper>
+
+            {/* Media Card */}
+            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+              <Box sx={sectionHeaderStyles}>
+                <Box sx={{ p: 1, bgcolor: '#FFEDD5', borderRadius: '10px', color: '#EA580C', display: 'flex' }}>
+                  <CloudUploadIcon sx={{ fontSize: '1.25rem' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Media Gallery</Typography>
+              </Box>
+
+              <Box
+                onClick={() => fileInputRef.current.click()}
+                sx={{
+                  border: '2px dashed #D1D5DB',
+                  borderRadius: '16px',
+                  p: 4,
+                  textAlign: 'center',
+                  cursor: 'pointer',
+                  '&:hover': { bgcolor: '#F9FAFB', borderColor: '#3B82F6' },
+                  transition: 'all 0.2s',
+                  mb: 3
+                }}
+              >
+                <CloudUploadIcon sx={{ fontSize: '2.5rem', color: '#9CA3AF', mb: 1.5 }} />
+                <Typography variant="body2" sx={{ fontWeight: 600, color: '#4B5563' }}>
+                  {newProduct.productType === 'digital' ? "Drag and drop files or click to upload" : "Click to upload images"}
+                </Typography>
+                <Typography variant="caption" sx={{ color: '#9CA3AF' }}>
+                  {newProduct.productType === 'digital' ? "Add up to 20 photos and 1 video" : "Multiple images supported (JPG, PNG)"}
+                </Typography>
+                <input
+                  id="image-upload-input"
+                  type="file"
+                  hidden
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  multiple
+                  accept="image/*"
+                />
+              </Box>
+
+              <Grid container spacing={1.5}>
+                {existingImages.map((img, index) => (
+                  <Grid item xs={4} key={`existing-${index}`}>
+                    <Box sx={{ position: 'relative', pt: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #E5E7EB' }}>
+                      <Image
+                        fill
+                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${img}`}
+                        alt="Existing"
+                        style={{ objectFit: 'cover' }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveExistingImage(index)}
+                        sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: '#FEE2E2', color: '#EF4444' } }}
+                      >
+                        <CloseIcon sx={{ fontSize: '0.8rem' }} />
+                      </IconButton>
+                    </Box>
+                  </Grid>
+                ))}
+                {images.map((img, index) => (
+                  <Grid item xs={4} key={`new-${index}`}>
+                    <Box sx={{ position: 'relative', pt: '100%', borderRadius: '12px', overflow: 'hidden', border: '1px solid #3B82F6' }}>
+                      <Image
+                        fill
+                        src={URL.createObjectURL(img)}
+                        alt="New"
+                        style={{ objectFit: 'cover' }}
+                      />
+                      <IconButton
+                        size="small"
+                        onClick={() => handleRemoveImage(index)}
+                        sx={{ position: 'absolute', top: 4, right: 4, bgcolor: 'rgba(255,255,255,0.8)', '&:hover': { bgcolor: '#FEE2E2', color: '#EF4444' } }}
+                      >
+                        <CloseIcon sx={{ fontSize: '0.8rem' }} />
+                      </IconButton>
+                    </Box>
+                  </Grid>
+                ))}
+              </Grid>
+            </Paper>
+
+            {/* SEO Card */}
+            <Paper elevation={0} sx={{ p: 4, borderRadius: '24px', border: '1px solid #E5E7EB' }}>
+              <Box sx={sectionHeaderStyles}>
+                <Box sx={{ p: 1, bgcolor: '#ECFDF5', borderRadius: '10px', color: '#059669', display: 'flex' }}>
+                  <PublicIcon sx={{ fontSize: '1.25rem' }} />
+                </Box>
+                <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Search Optimization</Typography>
+              </Box>
+              <Stack spacing={3}>
+                <TextField
+                  id="meta-title"
+                  fullWidth
+                  label="Meta Title"
+                  value={newProduct.meta_title}
+                  onChange={(e) => setNewProduct({ ...newProduct, meta_title: e.target.value.slice(0, 60) })}
+                  sx={inputStyles}
+                  helperText={`${newProduct.meta_title.length}/60 characters`}
+                />
+                <TextField
+                  id="meta-description"
+                  fullWidth
+                  multiline
+                  rows={4}
+                  label="Meta Description"
+                  value={newProduct.meta_description}
+                  onChange={(e) => setNewProduct({ ...newProduct, meta_description: e.target.value.slice(0, 160) })}
+                  sx={inputStyles}
+                  helperText={`${newProduct.meta_description.length}/160 characters`}
+                />
+                <TextField
+                  id="meta-keywords"
+                  fullWidth
+                  label="Meta Keywords"
+                  value={newProduct.meta_keywords}
+                  onChange={(e) => setNewProduct({ ...newProduct, meta_keywords: e.target.value })}
+                  placeholder="e.g. clothing, fashion, summer"
+                  sx={inputStyles}
+                />
+              </Stack>
+            </Paper>
 
             {/* Settings & Renewal Card */}
             {newProduct.productType === 'digital' && (
