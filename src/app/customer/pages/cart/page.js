@@ -293,7 +293,23 @@ const CartPage = () => {
     if (Object.keys(errors).length > 0) {
       if (errors.emailInvalid) toast.error('Please enter a valid email address.');
       else if (errors.phoneNumberInvalid) toast.error('Please enter a valid phone number (+92 followed by 10 digits).');
-      else toast.error('Please fill in all the required fields.');
+      else {
+        // Collect missing field names for a better error message
+        const missingFields = [];
+        if (errors.recipientName) missingFields.push('Recipient Name');
+        if (errors.email) missingFields.push('Email');
+        if (errors.phoneNumber) missingFields.push('Phone Number');
+        if (errors.streetAddress) missingFields.push('Street Address');
+        if (errors.city) missingFields.push('City');
+        if (errors.state) missingFields.push('State');
+        if (errors.zip) missingFields.push('ZIP');
+
+        if (missingFields.length > 0) {
+          toast.error(`Please fill in required fields: ${missingFields.join(', ')}`);
+        } else {
+          toast.error('Please fill in all the required fields.');
+        }
+      }
       return false;
     }
 
@@ -575,7 +591,7 @@ const CartPage = () => {
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-1.5 flex flex-col">
                   <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Recipient Name</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Recipient Name <span className="text-red-500">*</span></label>
                     {formErrors.recipientName && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                   </div>
                   <div className="relative">
@@ -594,7 +610,7 @@ const CartPage = () => {
 
                 <div className="space-y-1.5 flex flex-col">
                   <div className="flex justify-between items-center px-1">
-                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Email Address</label>
+                    <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Email Address <span className="text-red-500">*</span></label>
                     {(formErrors.email || formErrors.emailInvalid) && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                   </div>
                   <div className="relative">
@@ -617,7 +633,7 @@ const CartPage = () => {
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div className="space-y-1.5 flex flex-col">
                       <div className="flex justify-between items-center px-1">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Phone Number</label>
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Phone Number <span className="text-red-500">*</span></label>
                         {(formErrors.phoneNumber || formErrors.phoneNumberInvalid) && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                       </div>
                       <div className="relative">
@@ -636,7 +652,7 @@ const CartPage = () => {
 
                     <div className="space-y-1.5 flex flex-col">
                       <div className="flex justify-between items-center px-1">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Street Address</label>
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">Street Address <span className="text-red-500">*</span></label>
                         {formErrors.streetAddress && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                       </div>
                       <div className="relative">
@@ -657,7 +673,7 @@ const CartPage = () => {
                   <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                     <div className="col-span-2 space-y-1.5 flex flex-col">
                       <div className="flex justify-between items-center px-1">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">City</label>
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">City <span className="text-red-500">*</span></label>
                         {formErrors.city && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                       </div>
                       <input
@@ -672,7 +688,7 @@ const CartPage = () => {
 
                     <div className="col-span-2 space-y-1.5 flex flex-col">
                       <div className="flex justify-between items-center px-1">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">State / Province</label>
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">State / Province <span className="text-red-500">*</span></label>
                         {formErrors.state && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                       </div>
                       <input
@@ -687,7 +703,7 @@ const CartPage = () => {
 
                     <div className="col-span-2 space-y-1.5 flex flex-col">
                       <div className="flex justify-between items-center px-1">
-                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">ZIP / Postcode</label>
+                        <label className="text-[11px] font-black uppercase tracking-widest text-gray-400">ZIP / Postcode <span className="text-red-500">*</span></label>
                         {formErrors.zip && <span className="bg-red-500 text-white text-[9px] font-bold px-2 py-0.5 rounded-md animate-pulse">Required</span>}
                       </div>
                       <input
