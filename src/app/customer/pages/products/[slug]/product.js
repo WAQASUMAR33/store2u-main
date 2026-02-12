@@ -715,61 +715,21 @@ const ProductPage = ({ productData }) => {
         router={router}
       />
 
-      {/* Explore Related Searches Section */}
-      {((product?.meta_keywords && product.meta_keywords.trim().length > 0) || (product?.category?.name)) && (
-        <div className="mt-20">
-          <h3 className="text-[1.5rem] md:text-[2rem] font-serif mb-8 text-gray-800">Explore more related searches</h3>
-          <div className="flex flex-wrap gap-2">
-            {[
-              ...(product?.meta_keywords ? product.meta_keywords.split(',').map(t => t.trim()).filter(t => t) : []),
-              ...(product?.category?.name ? [`Gifts for ${product.category.name}`] : []),
-              'Handmade Finds',
-              'Trending Items'
-            ].slice(0, 12).map((tag, i) => (
+      {/* Categories Tags */}
+      {categories.length > 0 && (
+        <div className="mt-16 mb-12 border-t border-gray-100 pt-12">
+          <h3 className="text-center text-xs font-black uppercase tracking-[0.2em] text-gray-400 mb-6">Browse Categories</h3>
+          <div className="flex flex-wrap justify-center gap-2">
+            {categories.map((cat) => (
               <button
-                key={i}
-                className="px-5 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-800 text-sm font-bold rounded-full transition-all active:scale-95"
-                onClick={() => router.push(`/customer/pages/products?search=${encodeURIComponent(tag)}`)}
+                key={cat.id || cat.slug}
+                onClick={() => router.push(`/customer/pages/category/${cat.slug}`)}
+                className="px-5 py-2.5 bg-gray-50 hover:bg-orange-50 border border-gray-200 hover:border-orange-300 text-gray-700 hover:text-orange-600 text-xs font-bold rounded-full transition-all active:scale-95 uppercase tracking-wider"
               >
-                {tag}
+                {cat.name}
               </button>
             ))}
           </div>
-        </div>
-      )}
-
-      {/* Categories Dropdown */}
-      {categories.length > 0 && (
-        <div className="mt-16 mb-12 border-t border-gray-100 pt-12 flex flex-col items-center">
-          <div className="relative" ref={dropdownRef}>
-            <button
-              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-              className={`flex items-center gap-3 px-8 py-3 bg-white border border-gray-200 rounded-full text-xs font-bold uppercase tracking-widest transition-all shadow-sm ${isDropdownOpen ? 'border-black text-black' : 'text-gray-500 hover:border-black hover:text-black'
-                }`}
-            >
-              <span>All Categories</span>
-              <FiChevronDown className={`transition-transform duration-300 ${isDropdownOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isDropdownOpen && (
-              <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-4 w-64 bg-white border border-gray-100 rounded-2xl shadow-2xl z-50 overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-200">
-                <div className="py-2 max-h-[300px] overflow-y-auto custom-scrollbar">
-                  {categories.map((cat) => (
-                    <button
-                      key={cat.id || cat.slug}
-                      onClick={() => {
-                        router.push(`/customer/pages/category/${cat.slug}`);
-                        setIsDropdownOpen(false);
-                      }}
-                      className="w-full text-left px-6 py-3 text-[11px] font-bold uppercase tracking-wider text-gray-500 hover:bg-gray-50 hover:text-orange-600 transition-colors border-b border-gray-50 last:border-0"
-                    >
-                      {cat.name}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-          </div>
-          <p className="mt-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest">Discover more in our shop</p>
         </div>
       )}
 
