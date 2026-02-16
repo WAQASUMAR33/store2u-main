@@ -430,19 +430,19 @@ const FilterableTable = ({ data = [], fetchData }) => {
                       )}
                     </TableCell>
                     <TableCell sx={{ fontSize: '0.8rem' }}>
-                      {item.user ? (
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                          <Avatar sx={{ width: 28, height: 28, bgcolor: '#F3F4F6', color: '#F25C2C', fontSize: '0.75rem', fontWeight: 'bold' }}>
-                            {item.user?.name?.charAt(0) || 'U'}
-                          </Avatar>
-                          <Box>
-                            <Typography variant="body2" sx={{ fontWeight: 600, color: '#111827', fontSize: '0.8rem' }}>{item.user?.name || item.recipientName || 'Guest'}</Typography>
-                            <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem' }}>ID: {item.userId || 'Guest'}</Typography>
-                          </Box>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                        <Avatar sx={{ width: 28, height: 28, bgcolor: '#F3F4F6', color: '#F25C2C', fontSize: '0.75rem', fontWeight: 'bold' }}>
+                          {(item.user?.name || item.recipientName || 'G').charAt(0).toUpperCase()}
+                        </Avatar>
+                        <Box>
+                          <Typography variant="body2" sx={{ fontWeight: 600, color: '#111827', fontSize: '0.8rem' }}>
+                            {item.user?.name || item.recipientName || 'Guest User'}
+                          </Typography>
+                          <Typography variant="caption" sx={{ color: '#6B7280', fontSize: '0.7rem' }}>
+                            {item.user ? `ID: ${item.userId}` : (item.email && item.email !== 'N/A' ? item.email : 'Guest')}
+                          </Typography>
                         </Box>
-                      ) : (
-                        <Typography variant="body2" sx={{ color: '#9CA3AF', fontStyle: 'italic', fontSize: '0.8rem' }}>Guest User</Typography>
-                      )}
+                      </Box>
                     </TableCell>
                     <TableCell sx={{ fontWeight: 700, color: '#111827', fontSize: '0.8rem' }}>
                       {item.total?.toLocaleString() || 0} Rs.
