@@ -15,6 +15,11 @@ if (process.env.NODE_ENV === 'production') {
         global.prisma = new PrismaClient();
     }
     prisma = global.prisma;
+
+    // Test connection immediately
+    prisma.$connect()
+        .then(() => console.log('[PRISMA] Database connected successfully'))
+        .catch((e) => console.error('[PRISMA] Database connection failed:', e.message));
 }
 
 export default prisma;

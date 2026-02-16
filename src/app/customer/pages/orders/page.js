@@ -212,7 +212,20 @@ const UserOrders = () => {
                     <div className="flex-grow pr-4">
                       <div className="flex justify-between items-center w-full">
                         <h3 className="text-md font-semibold text-gray-600">{item.product.name.toUpperCase()}</h3>
-                        <p className="text-md font-bold text-gray-600">Rs.{item.price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                        <div className="flex flex-col items-end">
+                          <p className="text-md font-bold text-gray-600">Rs.{item.price.toLocaleString('en-US', { minimumFractionDigits: 0, maximumFractionDigits: 0 })}</p>
+                          {item.product.productType === 'digital' && (
+                            <button
+                              onClick={() => window.location.href = `/api/download?id=${item.product.id}`}
+                              className="mt-2 flex items-center gap-1.5 bg-blue-500 hover:bg-blue-600 text-white text-xs font-bold py-1.5 px-3 rounded-full transition-colors shadow-sm"
+                            >
+                              <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor" className="w-4 h-4">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 0 0 5.25 21h13.5A2.25 2.25 0 0 0 21 18.75V16.5M7.5 12 12 16.5m0 0L16.5 12M12 16.5V3" />
+                              </svg>
+                              Download Product
+                            </button>
+                          )}
+                        </div>
                       </div>
                       <p className="text-sm font-normal text-gray-600">Size: {item.selectedSize || 'N/A'}</p>
                       <p className="text-sm font-normal text-gray-600">Color: {item.selectedColor || 'N/A'}</p>

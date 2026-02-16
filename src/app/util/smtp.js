@@ -15,7 +15,7 @@ export const getTransporter = () => {
         return null;
     }
 
-    return nodemailer.createTransport({
+    const transporter = nodemailer.createTransport({
         host: mailHost,
         port: mailPort,
         secure: mailPort === 465, // true for 465, false for 587
@@ -28,6 +28,17 @@ export const getTransporter = () => {
             rejectUnauthorized: false
         }
     });
+
+    // Test the connection immediately
+    transporter.verify((error, success) => {
+        if (error) {
+            console.error('[SMTP] Verification failed:', error);
+        } else {
+            console.log('[SMTP] Server is ready to take our messages');
+        }
+    });
+
+    return transporter;
 };
 
 export const getMailUser = () => process.env.MAIL_USER || process.env.EMAIL_USERNAME;

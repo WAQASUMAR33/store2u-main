@@ -1,31 +1,30 @@
-'use client';
-
 import { Poppins } from 'next/font/google';
-import { Provider } from 'react-redux';
-import ThemeRegistry from '../components/ThemeRegistry/ThemeRegistry';
-
-import store from './store/store';
+import ClientLayout from './ClientLayout';
 import './globals.css';
-import WhatsAppButton from './customer/components/whatsappbutton';
 
 const poppins = Poppins({
   weight: ['400', '700'],
   subsets: ['latin'],
 });
 
+export const metadata = {
+  title: 'Store2U - Your Gateway to Digital & Physical Goods',
+  description: 'Shop the latest digital and physical products on Store2U.',
+  manifest: '/manifest.json',
+  icons: {
+    icon: '/store2ulogo.png',
+    apple: '/store2ulogo.png',
+  },
+};
+
 export default function RootLayout({ children }) {
   return (
-    <Provider store={store}>
-      <html lang="en">
-        <body className={poppins.className} suppressHydrationWarning={true}>
-          <ThemeRegistry>
-            <div className='text-black'>
-              {/* <WhatsAppButton /> Ensure WhatsAppButton is included in the layout */}
-              {children}
-            </div>
-          </ThemeRegistry>
-        </body>
-      </html>
-    </Provider>
+    <html lang="en">
+      <body className={poppins.className} suppressHydrationWarning={true}>
+        <ClientLayout>
+          {children}
+        </ClientLayout>
+      </body>
+    </html>
   );
 }

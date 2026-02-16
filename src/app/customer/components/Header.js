@@ -626,7 +626,7 @@ const Header = () => {
                     <div className="bg-orange-500 p-1.5 rounded-full text-white shadow-sm">
                       <FiUser className="w-4 h-4" />
                     </div>
-                    <span className="text-[11px] font-bold text-orange-600 uppercase tracking-tight hidden xl:block">Admin</span>
+                    <span className="text-[11px] font-bold text-orange-600 uppercase tracking-tight hidden xl:block">Login</span>
                   </Link>
                 ) : (
                   /* Customer Profile Icon */
@@ -671,6 +671,7 @@ const Header = () => {
                 className="group p-2 flex items-center justify-center"
               >
                 <FiUser className="w-6 h-6 text-gray-700 group-hover:text-black transition-colors" />
+                <span className="ml-2 text-[11px] font-bold text-gray-700 uppercase tracking-tight hidden xl:block">Login</span>
               </Link>
             )}
           </div>
@@ -884,7 +885,7 @@ const Header = () => {
                     className="text-white font-bold py-3 px-2 text-[14px] text-center bg-black rounded-xl transition-all hover:bg-gray-800 shadow-lg"
                     onClick={() => setIsMobileMenuOpen(false)}
                   >
-                    Sign In to Account
+                    Login
                   </Link>
                 )}
 
