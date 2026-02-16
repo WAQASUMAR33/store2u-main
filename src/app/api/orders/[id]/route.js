@@ -91,12 +91,33 @@ export async function PUT(request) {
 
     // Send email on status change
     if (updatedOrder) {
-      await sendStatusUpdateEmail({
-        email: updatedOrder.email,
-        name: updatedOrder.recipientName || 'Customer',
-        orderId: updatedOrder.id,
-        status: updatedOrder.status,
-      });
+      console.log(`[StatusUpdate] Triggering email for Order #${updatedOrder.id}. Initial email: ${updatedOrder.email}`);
+
+      let targetEmail = updatedOrder.email;
+      let targetName = updatedOrder.recipientName || 'Customer';
+
+      // Robustness: Fallback to account email if order email is 'N/A' or missing
+      if (!targetEmail || targetEmail === 'N/A') {
+        if (updatedOrder.userId) {
+          const user = await prisma.user.findUnique({ where: { id: updatedOrder.userId } });
+          if (user?.email) {
+            targetEmail = user.email;
+            targetName = user.name || targetName;
+            console.log(`[StatusUpdate] Using fallback User email: ${targetEmail}`);
+          }
+        }
+      }
+
+      if (targetEmail && targetEmail !== 'N/A') {
+        await sendStatusUpdateEmail({
+          email: targetEmail,
+          name: targetName,
+          orderId: updatedOrder.id,
+          status: updatedOrder.status,
+        });
+      } else {
+        console.warn(`[StatusUpdate] No valid email found for Order #${updatedOrder.id}`);
+      }
     }
 
     return NextResponse.json(updatedOrder);
