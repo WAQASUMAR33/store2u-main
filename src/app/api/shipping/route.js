@@ -7,8 +7,8 @@ export async function POST(request) {
   try {
     const { email, orderId, shippingMethod, shippingTerms, shipmentDate, deliveryDate } = await request.json();
 
-    if (!email || !orderId || !shippingMethod || !shippingTerms || !shipmentDate || !deliveryDate) {
-      return NextResponse.json({ message: "All fields are required", status: false }, { status: 400 });
+    if (!email || !orderId) {
+      return NextResponse.json({ message: "Email and Order ID are required", status: false }, { status: 400 });
     }
 
     // Ensure orderId is the correct type
@@ -17,10 +17,10 @@ export async function POST(request) {
     const updatedOrder = await prisma.order.update({
       where: { id: parsedOrderId },
       data: {
-        shippingMethod,
-        shippingTerms,
-        shipmentDate: new Date(shipmentDate),
-        deliveryDate: new Date(deliveryDate),
+        shippingMethod: shippingMethod || "",
+        shippingTerms: shippingTerms || "",
+        shipmentDate: shipmentDate ? new Date(shipmentDate) : null,
+        deliveryDate: deliveryDate ? new Date(deliveryDate) : null,
       },
     });
 

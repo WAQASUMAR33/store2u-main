@@ -102,6 +102,13 @@ const getPaymentMethodStyles = (method) => {
   return { color: '#6B7280', bgcolor: '#F9FAFB' };
 };
 
+// Helper to get correct image URL
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+};
+
 const FilterableTable = ({ data = [], fetchData }) => {
   const [filter, setFilter] = useState('');
   const [filteredData, setFilteredData] = useState(data);
@@ -408,11 +415,12 @@ const FilterableTable = ({ data = [], fetchData }) => {
                           }}
                         >
                           <Image
-                            src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${item.orderItems[0].product.images[0].url}`}
+                            src={getImageUrl(item.orderItems[0].product.images[0].url)}
                             alt="Product"
                             width={36}
                             height={36}
                             style={{ objectFit: 'cover' }}
+                            unoptimized={item.orderItems[0].product.images[0].url.includes('rapidtechpro.com')}
                           />
                         </Box>
                       ) : (

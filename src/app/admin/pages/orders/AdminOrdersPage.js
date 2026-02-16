@@ -92,6 +92,13 @@ const AnimatedLabel = styled(Typography)(({ theme }) => ({
   },
 }));
 
+// Helper to get correct image URL
+const getImageUrl = (url) => {
+  if (!url) return null;
+  if (url.startsWith('http')) return url;
+  return `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+};
+
 const AdminOrdersPage = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
@@ -578,9 +585,10 @@ const AdminOrdersPage = () => {
                             }}>
                               <Image
                                 fill
-                                src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${item.product.images[0].url}`}
+                                src={getImageUrl(item.product.images[0].url)}
                                 alt={item.product.name}
                                 style={{ objectFit: 'cover' }}
+                                unoptimized={item.product.images[0].url.includes('rapidtechpro.com')}
                               />
                             </Box>
                           ) : (
