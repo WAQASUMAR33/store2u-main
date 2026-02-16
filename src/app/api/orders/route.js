@@ -155,7 +155,6 @@ export async function GET() {
     try {
         const orders = await prisma.order.findMany({
             include: {
-                user: true,
                 orderItems: {
                     include: {
                         product: {
@@ -170,7 +169,19 @@ export async function GET() {
                 createdAt: 'desc'
             }
         });
-        return NextResponse.json(orders, { status: 200 });
+
+        // Manually fetch users to avoid schema relation missing error (500)
+        const userIds = Array.from(new Set(orders.map(o => o.userId).filter(id => id !== null)));
+        const users = await prisma.user.findMany({
+            where: { id: { in: userIds } }
+        });
+
+        const ordersWithUsers = orders.map(order => ({
+            ...order,
+            user: users.find(u => u.id === order.userId) || null
+        }));
+
+        return NextResponse.json(ordersWithUsers, { status: 200 });
     } catch (error) {
         console.error('Error fetching orders:', error);
         return NextResponse.json({ message: 'Failed to fetch orders', error: error.message }, { status: 500 });
