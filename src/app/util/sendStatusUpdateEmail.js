@@ -1,20 +1,15 @@
-import nodemailer from 'nodemailer';
+import { getTransporter, getMailUser } from './smtp';
 
 // Function to send email notification when order status is updated
 export async function sendStatusUpdateEmail({ email, name, orderId, status }) {
     try {
-        const transporter = nodemailer.createTransport({
-            host: 'smtp.titan.email', // Hostinger's SMTP server
-            port: 465, // Secure port for SMTP over SSL
-            secure: true, // Use SSL
-            auth: {
-                user: process.env.MAIL_USER, // Your Hostinger email address
-                pass: process.env.MAIL_PASSWORD, // Your Hostinger email password
-            },
-        });
+        const transporter = getTransporter();
+        if (!transporter) return;
+
+        const mailUser = getMailUser();
 
         const mailOptions = {
-            from: process.env.MAIL_USER,
+            from: mailUser,
             to: email,
             subject: `Order Status Updated - Order ID #${orderId}`,
             html: `

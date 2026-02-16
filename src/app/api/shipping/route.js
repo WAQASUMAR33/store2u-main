@@ -1,7 +1,7 @@
 // server/api/shipping.js
 import { NextResponse } from "next/server";
 import prisma from "../../util/prisma";
-import nodemailer from "nodemailer";
+import { getTransporter, getMailUser } from "../../util/smtp";
 
 export async function POST(request) {
   try {
@@ -48,18 +48,12 @@ export async function POST(request) {
 // Function to send status update email
 async function sendStatusUpdateEmail({ email, orderid, shippingMethod, shippingTerms, shipmentDate, deliveryDate }) {
   try {
-    const transporter = nodemailer.createTransport({
-      host: "smtp.titan.email",
-      port: 465,
-      secure: true,
-      auth: {
-        user: process.env.MAIL_USER,
-        pass: process.env.MAIL_PASSWORD,
-      },
-    });
+    const transporter = getTransporter();
+    if (!transporter) return;
+    const mailUser = getMailUser();
 
     const mailOptions = {
-      from: process.env.MAIL_USER,
+      from: mailUser,
       to: email,
       subject: `Shipment Update - Order ID #${orderid}`,
       html: `

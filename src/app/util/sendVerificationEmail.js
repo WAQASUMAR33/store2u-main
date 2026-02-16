@@ -1,35 +1,15 @@
-import nodemailer from 'nodemailer';
+import { getTransporter, getMailUser } from './smtp';
 
 export async function sendVerificationEmail(email, token) {
-  // Use either MAIL_USER or EMAIL_USERNAME as fallback
-  const mailUser = process.env.MAIL_USER || process.env.EMAIL_USERNAME;
-  const mailPass = process.env.MAIL_PASSWORD || process.env.EMAIL_PASSWORD;
-  const mailHost = process.env.MAIL_HOST || 'smtp.titan.email';
-  const mailPort = parseInt(process.env.MAIL_PORT || '465', 10);
+  const mailUser = getMailUser();
   const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://www.store2u.ca';
 
-  console.log(`[SMTP] Attempting send to: ${email} via ${mailHost}:${mailPort} as ${mailUser}`);
-
-  if (!mailUser || !mailPass) {
-    console.error('[SMTP] Missing credentials! MAIL_USER or MAIL_PASSWORD not set.');
+  const transporter = getTransporter();
+  if (!transporter) {
     throw new Error('SMTP Configuration Error: Missing credentials');
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: mailHost,
-      port: mailPort,
-      secure: mailPort === 465, // true for 465, false for 587
-      auth: {
-        user: mailUser,
-        pass: mailPass,
-      },
-      tls: {
-        // Do not fail on invalid certificates (helpful for some shared hosting)
-        rejectUnauthorized: false
-      }
-    });
-
     // Verification step
     await transporter.verify();
 

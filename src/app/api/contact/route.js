@@ -1,21 +1,19 @@
-import nodemailer from 'nodemailer';
+import { getTransporter, getMailUser } from '../../util/smtp';
 
 export async function POST(request) {
   try {
     const { name, email, message } = await request.json();
 
     // Create a transporter
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USERNAME, // Use environment variables for security
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+    const transporter = getTransporter();
+    if (!transporter) {
+      return new Response(JSON.stringify({ message: 'SMTP Configuration Error' }), { status: 500 });
+    }
+    const mailUser = getMailUser();
 
     // Send the email
     await transporter.sendMail({
-      from: email, // sender address
+      from: mailUser, // sender address
       to: 'mrafybasra2020@gmail.com', // recipient email
       subject: `New message from ${name}`, // Subject line
       html: `

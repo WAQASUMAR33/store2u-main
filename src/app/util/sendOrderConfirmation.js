@@ -1,37 +1,15 @@
-import nodemailer from 'nodemailer';
+import { getTransporter, getMailUser } from './smtp';
 
 export async function sendOrderConfirmation(email, orderId, total, items) {
-  // Use either MAIL_USER or EMAIL_USERNAME as fallback
-  const mailUser = process.env.MAIL_USER || process.env.EMAIL_USERNAME;
-  const mailPass = process.env.MAIL_PASSWORD || process.env.EMAIL_PASSWORD;
-  const mailHost = process.env.MAIL_HOST || 'smtp.titan.email';
-  const mailPort = parseInt(process.env.MAIL_PORT || '465', 10);
+  const mailUser = getMailUser();
 
-  console.log(`[SMTP] Configuration Check:`);
-  console.log(`  - Host: ${mailHost}`);
-  console.log(`  - Port: ${mailPort}`);
-  console.log(`  - User: ${mailUser ? mailUser : 'UNDEFINED'}`);
-  console.log(`  - Pass: ${mailPass ? '******' : 'UNDEFINED'}`);
-
-  if (!mailUser || !mailPass) {
-    console.error('[SMTP] Missing credentials! MAIL_USER or MAIL_PASSWORD not set.');
-    throw new Error('SMTP Configuration Error: Missing credentials');
+  const transporter = getTransporter();
+  if (!transporter) {
+    console.error('[SMTP] Missing credentials for order confirmation.');
+    return null;
   }
 
   try {
-    const transporter = nodemailer.createTransport({
-      host: mailHost,
-      port: mailPort,
-      secure: mailPort === 465, // true for 465, false for 587
-      auth: {
-        user: mailUser,
-        pass: mailPass,
-      },
-      tls: {
-        rejectUnauthorized: false
-      }
-    });
-
     // Verification step
     await transporter.verify();
 

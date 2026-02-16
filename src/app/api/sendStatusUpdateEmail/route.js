@@ -1,20 +1,18 @@
 import { NextResponse } from 'next/server';
-import nodemailer from 'nodemailer';
+import { getTransporter, getMailUser } from '../../util/smtp';
 
 export async function POST(request) {
   try {
     const { email, name, orderId, status } = await request.json();
 
-    const transporter = nodemailer.createTransport({
-      service: 'gmail',
-      auth: {
-        user: process.env.EMAIL_USERNAME,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+    const transporter = getTransporter();
+    if (!transporter) {
+      return NextResponse.json({ message: 'SMTP Configuration Error' }, { status: 500 });
+    }
+    const mailUser = getMailUser();
 
     const mailOptions = {
-      from: process.env.EMAIL_USERNAME,
+      from: mailUser,
       to: email,
       subject: `Order Status Updated - Order ID #${orderId}`,
       html: `

@@ -1,15 +1,7 @@
 import nodemailer from 'nodemailer';
-import SMTPTransport from 'nodemailer/lib/smtp-transport';
+import { getTransporter } from './smtp';
 
-const transport = nodemailer.createTransport({
-  host: process.env.MAIL_HOST,
-  port: Number(process.env.MAIL_PORT), // Ensure the port is a number
-  secure: process.env.NODE_ENV !== 'development', // Use secure in non-development environments
-  auth: {
-    user: process.env.MAIL_USER,
-    pass: process.env.MAIL_PASSWORD,
-  },
-} as SMTPTransport.Options);
+const transport = getTransporter();
 
 type SendEmailDto = {
   sender: string; // Change from Mail.Address to string
