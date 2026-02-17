@@ -1,4 +1,5 @@
 import { getTransporter, getMailUser } from './smtp';
+import { wrapEmailBody } from './emailTemplate';
 
 export async function sendVerificationEmail(email, token) {
   const mailUser = getMailUser();
@@ -15,21 +16,26 @@ export async function sendVerificationEmail(email, token) {
 
     const verificationUrl = `${baseUrl}/customer/pages/verify?token=${token}`;
 
+    const emailContent = `
+      <p>Thank you for joining us! We're excited to have you on board.</p>
+      <p>Please confirm your email address to activate your account and start shopping.</p>
+      <div style="text-align: center;">
+        <a href="${verificationUrl}" class="button">Verify Email Address</a>
+      </div>
+      <p style="margin-top: 30px; font-size: 13px; color: #666;">
+        If the button doesn't work, copy and paste this link into your browser:<br/>
+        <a href="${verificationUrl}">${verificationUrl}</a>
+      </p>
+    `;
+
+    const htmlBody = wrapEmailBody('Welcome to Store2U!', emailContent);
+
     const mailOptions = {
       from: `"Store2U Info" <${mailUser}>`,
       to: email,
-      subject: 'Verify Your Email - Store2U',
+      subject: 'Welcome to Store2U! Verify Your Email',
       text: `Welcome to Store2U! Please verify your email by clicking: ${verificationUrl}`,
-      html: `
-        <div style="font-family: sans-serif; padding: 20px; color: #333;">
-          <h2 style="color: #F25C2C;">Welcome to Store2U!</h2>
-          <p>Thank you for joining us. Please click the button below to verify your email address and activate your account.</p>
-          <a href="${verificationUrl}" style="display: inline-block; padding: 12px 24px; background-color: #F25C2C; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; margin: 20px 0;">Verify Email</a>
-          <p>If the button doesn't work, copy and paste this link: <br/> <a href="${verificationUrl}">${verificationUrl}</a></p>
-          <br/>
-          <p>Best regards,<br/>Store2U Team</p>
-        </div>
-      `,
+      html: htmlBody,
     };
 
     const info = await transporter.sendMail(mailOptions);

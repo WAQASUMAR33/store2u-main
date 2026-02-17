@@ -1,4 +1,5 @@
 import { getTransporter, getMailUser } from './smtp';
+import { wrapEmailBody } from './emailTemplate';
 
 export async function sendResetPasswordEmail(email, token) {
   try {
@@ -6,19 +7,35 @@ export async function sendResetPasswordEmail(email, token) {
     if (!transporter) throw new Error('SMTP Configuration Error');
 
     const mailUser = getMailUser();
+    const baseUrl = process.env.BASE_URL || 'https://www.store2u.ca';
+    const resetUrl = `${baseUrl}/customer/pages/reset?token=${token}`;
+
+    const emailContent = `
+      <p>You requested a password reset for your Store2U account.</p>
+      <p>Please click the button below to set a new password. This link is valid for 1 hour.</p>
+      <div style="text-align: center;">
+        <a href="${resetUrl}" class="button">Reset Password</a>
+      </div>
+      <p style="margin-top: 30px; font-size: 13px; color: #666;">
+        If you didn't request this, you can safely ignore this email.<br/>
+        Button key working? Copy and paste this link:<br/>
+        <a href="${resetUrl}">${resetUrl}</a>
+      </p>
+    `;
+
+    const htmlBody = wrapEmailBody('Password Reset Request', emailContent);
 
     const mailOptions = {
-      from: mailUser,
+      from: `"Store2U Security" <${mailUser}>`,
       to: email,
-      subject: 'Password Reset',
-      text: `You requested a password reset. Please reset your password by clicking the following link: ${process.env.BASE_URL}/customer/pages/reset?token=${token}`,
-      html: `<p>You requested a password reset. Please reset your password by clicking the following link: <a href="${process.env.BASE_URL}/customer/pages/reset?token=${token}">Reset Password</a></p>`,
+      subject: 'Reset Your Password - Store2U',
+      text: `You requested a password reset. Please reset your password by clicking the following link: ${resetUrl}`,
+      html: htmlBody,
     };
 
     const ok = await transporter.sendMail(mailOptions);
-    const result = ok.response;
-    console.log("Response is : ", ok, "And result is : ", result);
     console.log('Password reset email sent successfully to ', email);
+    return ok;
   } catch (error) {
     console.error('Error sending password reset email:', error);
     throw new Error('Failed to send password reset email');

@@ -1,4 +1,5 @@
 import { getTransporter, getMailUser } from './smtp';
+import { wrapEmailBody } from './emailTemplate';
 
 export async function sendOrderConfirmation(email, orderId, total, items) {
   const mailUser = getMailUser();
@@ -16,37 +17,42 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
     // Create order items list for the email
     const itemsList = items
       .map(item => `
-        <li style="margin-bottom: 10px;">
-          <strong>${item.quantity}x</strong> ${item.product.name} 
-          <br/>
-          <span style="color: #666; font-size: 12px;">Price: Rs.${item.price.toLocaleString()}</span>
-        </li>`
+        <tr style="border-bottom: 1px solid #eee;">
+          <td style="padding: 10px; color: #333;">${item.product.name} <span style="color: #888; font-size: 12px;">x${item.quantity}</span></td>
+          <td style="padding: 10px; text-align: right; color: #333;">Rs.${item.price.toLocaleString()}</td>
+        </tr>`
       )
       .join('');
+
+    const emailContent = `
+      <p style="text-align: center;">Transaction ID: <strong>#${orderId}</strong></p>
+      
+      <div style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
+        <p style="margin: 0; font-weight: bold;">Order Summary</p>
+        <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
+          ${itemsList}
+          <tr>
+            <td style="padding: 15px 10px; font-weight: bold; font-size: 16px;">Total</td>
+            <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; color: #F25C2C;">Rs.${total.toLocaleString()}</td>
+          </tr>
+        </table>
+      </div>
+
+      <p style="text-align: center; color: #666; font-size: 13px;">
+        We've received your order and will notify you once it ships. You can view your order details in your dashboard.
+      </p>
+      <div style="text-align: center;">
+        <a href="https://store2u.ca/customer/pages/orders" class="button">View My Orders</a>
+      </div>
+    `;
+
+    const htmlBody = wrapEmailBody('Thank You for Your Order!', emailContent);
 
     const mailOptions = {
       from: `"Store2U Orders" <${mailUser}>`,
       to: email,
       subject: `Order Confirmation - Order ID #${orderId}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #eee; border-radius: 10px;">
-          <h2 style="color: #F25C2C; text-align: center;">Thank you for your order!</h2>
-          <p style="text-align: center; font-size: 16px;">Your order ID is: <strong style="color: #000;">#${orderId}</strong></p>
-          
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-          
-          <h3 style="color: #333;">Order Summary</h3>
-          <ul style="list-style-type: none; padding: 0;">${itemsList}</ul>
-          
-          <hr style="border: 0; border-top: 1px solid #eee; margin: 20px 0;" />
-          
-          <p style="font-size: 18px; font-weight: bold; text-align: right;">Total Amount: <span style="color: #F25C2C;">Rs.${total.toLocaleString()}</span></p>
-          
-          <p style="text-align: center; color: #777; font-size: 12px; margin-top: 30px;">
-            We will notify you once your order has been shipped.
-          </p>
-        </div>
-      `,
+      html: htmlBody,
     };
 
     const info = await transporter.sendMail(mailOptions);

@@ -1,4 +1,5 @@
 import { getTransporter, getMailUser } from './smtp';
+import { wrapEmailBody } from './emailTemplate';
 
 // Function to send email notification when order status is updated
 export async function sendStatusUpdateEmail({ email, name, orderId, status }) {
@@ -8,18 +9,35 @@ export async function sendStatusUpdateEmail({ email, name, orderId, status }) {
 
     const mailUser = getMailUser();
 
+    // Color code status
+    let statusColor = '#333';
+    if (status.toLowerCase() === 'shipped') statusColor = '#2196F3';
+    if (status.toLowerCase() === 'delivered') statusColor = '#4CAF50';
+    if (status.toLowerCase() === 'cancelled') statusColor = '#F44336';
+    if (status.toLowerCase() === 'processing') statusColor = '#FF9800';
+
+    const emailContent = `
+      <p>Hello <strong>${name}</strong>,</p>
+      <p>We wanted to let you know that your order <strong>#${orderId}</strong> status has been updated.</p>
+      
+      <div style="background-color: #f5f5f5; padding: 20px; text-align: center; border-radius: 8px; margin: 20px 0;">
+        <span style="font-size: 14px; color: #666; display: block; margin-bottom: 5px;">New Status</span>
+        <span style="font-size: 24px; font-weight: bold; color: ${statusColor}; text-transform: uppercase;">${status}</span>
+      </div>
+
+      <p>You can check the latest details in your account dashboard.</p>
+      <div style="text-align: center;">
+        <a href="https://store2u.ca/customer/pages/orders" class="button">View Order Details</a>
+      </div>
+    `;
+
+    const htmlBody = wrapEmailBody(`Order Update: #${orderId}`, emailContent);
+
     const mailOptions = {
-      from: mailUser,
+      from: `"Store2U Orders" <${mailUser}>`,
       to: email,
-      subject: `Order Status Updated - Order ID #${orderId}`,
-      html: `
-        <div style="font-family: Arial, sans-serif; color: #333; padding: 20px;">
-          <h2>Hello ${name},</h2>
-          <p>Your order with ID <strong>#${orderId}</strong> has been updated to <strong>${status.toUpperCase()}</strong>.</p>
-          <p>If you have any questions, feel free to reply to this email.</p>
-          <p>Thank you for shopping with us!</p>
-        </div>
-      `,
+      subject: `Order #${orderId} - Status Update`,
+      html: htmlBody,
     };
 
     console.log(`[SMTP] Attempting to send status update email to: ${email} for Order #${orderId}`);
