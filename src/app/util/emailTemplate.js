@@ -5,11 +5,11 @@
  * @returns {string} - The complete HTML email string.
  */
 export const wrapEmailBody = (title, bodyContent) => {
-    const currentYear = new Date().getFullYear();
-    const brandColor = '#F25C2C';
-    const logoUrl = 'https://store2u-main.vercel.app/store2ulogo.png'; // Using Vercel deployment for logo
+  const currentYear = new Date().getFullYear();
+  const brandColor = '#F25C2C';
+  const logoUrl = 'https://store2u-main.vercel.app/store2ulogo.png'; // Using Vercel deployment for logo
 
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -51,7 +51,7 @@ export const wrapEmailBody = (title, bodyContent) => {
           <div class="footer">
             <p>&copy; ${currentYear} Store2U. All rights reserved.</p>
             <p>You are receiving this email because you signed up on our website.</p>
-            <p><a href="https://store2u.ca">Visit Store2U.ca</a></p>
+            <p><a href="https://store2u-main.vercel.app">Visit Store2U.ca</a></p>
           </div>
         </div>
       </div>

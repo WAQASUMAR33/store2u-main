@@ -119,6 +119,9 @@ export async function generateMetadata({ params }) {
         }
       ] : [],
     },
+    alternates: {
+      canonical: `/customer/pages/products/${product.slug}`,
+    },
     twitter: {
       card: 'summary_large_image',
       title: `${title} | Store2U`,
@@ -141,11 +144,39 @@ const ProductDetailsPage = async ({ params }) => {
 
     const productData = await getProductData(slug);
 
-    if (!productData?.product) {
-      return notFound();
-    }
+    const { product } = productData;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u-main.vercel.app';
 
-    return <ProductPage productData={productData} />;
+    // Construct Product Schema
+    const jsonLd = {
+      '@context': 'https://schema.org',
+      '@type': 'Product',
+      name: product.name,
+      image: product.images?.[0]?.url ? (
+        product.images[0].url.startsWith('http')
+          ? product.images[0].url
+          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`
+      ) : [],
+      description: product.description,
+      sku: product.sku || product.slug,
+      offers: {
+        '@type': 'Offer',
+        url: `${baseUrl}/customer/pages/products/${product.slug}`,
+        priceCurrency: 'PKR',
+        price: product.price,
+        availability: product.stock > 0 ? 'https://schema.org/InStock' : 'https://schema.org/OutOfStock',
+      },
+    };
+
+    return (
+      <>
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+        <ProductPage productData={productData} />
+      </>
+    );
   } catch (error) {
     console.error('Error in ProductDetailsPage:', error);
     return notFound();

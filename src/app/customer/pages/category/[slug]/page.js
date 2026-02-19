@@ -97,6 +97,9 @@ export async function generateMetadata({ params }) {
       description,
       type: 'website',
     },
+    alternates: {
+      canonical: `/customer/pages/category/${category.slug}`,
+    },
     twitter: {
       card: 'summary',
       title: `${title} | Store2U`,

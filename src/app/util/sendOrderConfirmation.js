@@ -42,7 +42,7 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
         We've received your order and will notify you once it ships. You can view your order details in your dashboard.
       </p>
       <div style="text-align: center;">
-        <a href="https://store2u.ca/customer/pages/orders" class="button">View My Orders</a>
+        <a href="https://store2u-main.vercel.app/customer/pages/orders" class="button">View My Orders</a>
       </div>
     `;
 

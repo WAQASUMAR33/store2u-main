@@ -22,7 +22,10 @@ export async function generateMetadata({ params }) {
     return {
       title: blog.title || 'SolveAndWins',
       description: blog.description || 'Best website',
-      keywords: blog.meta_focusKeyword || "SolveAndWins blogs keyword"
+      keywords: blog.meta_focusKeyword || "SolveAndWins blogs keyword",
+      alternates: {
+        canonical: `/customer/pages/blog/${params.id}`,
+      },
     };
   } catch (error) {
     console.error('Error fetching blog data:', error);
@@ -36,12 +39,44 @@ export async function generateMetadata({ params }) {
   }
 }
 
-export default function Home({ params }) {
+export default async function Home({ params }) {
+  const { id } = await params;
+  const headersList = await headers();
+  const host = headersList.get('host') || 'localhost:3000';
+  const protocol = headersList.get('x-forwarded-proto') || 'http';
+  const baseUrl = `${protocol}://${host}`;
+
+  let blog = null;
+  try {
+    const res = await fetch(`${baseUrl}/api/blog/${id}`);
+    if (res.ok) {
+      blog = await res.json();
+    }
+  } catch (e) { }
+
+  const jsonLd = blog ? {
+    '@context': 'https://schema.org',
+    '@type': 'BlogPosting',
+    headline: blog.title,
+    image: `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${blog.image}`,
+    datePublished: blog.createdAt,
+    dateModified: blog.updatedAt,
+    description: blog.meta_description || blog.description.substring(0, 160).replace(/<[^>]*>/g, ''),
+    author: {
+      '@type': 'Organization',
+      name: 'Store2U',
+    },
+  } : null;
+
   return (
     <>
-
-      <BlogDetailPage id={params.id} />
-
+      {jsonLd && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        />
+      )}
+      <BlogDetailPage id={id} />
     </>
   );
 }

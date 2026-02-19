@@ -8,12 +8,16 @@ const poppins = Poppins({
 });
 
 export const metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u-main.vercel.app'),
   title: 'Store2U - Your Gateway to Digital & Physical Goods',
   description: 'Shop the latest digital and physical products on Store2U.',
   manifest: '/manifest.json',
   icons: {
     icon: '/store2ulogo.png',
     apple: '/store2ulogo.png',
+  },
+  alternates: {
+    canonical: '/',
   },
 };
 
