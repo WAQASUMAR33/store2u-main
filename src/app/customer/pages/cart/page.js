@@ -208,10 +208,7 @@ const CartPage = () => {
           const data = typeof item.digitalData === 'string' ? JSON.parse(item.digitalData) : item.digitalData;
           const fileUrl = data.files?.[0]?.url;
           if (fileUrl) {
-            const resolveUrl = (url) => (typeof url === 'string' && url.startsWith('http')) ? url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
-            const actualUrl = resolveUrl(fileUrl);
-            const filename = item.name || `product-${index}`;
-            const proxyUrl = `/api/download?url=${encodeURIComponent(actualUrl)}&filename=${encodeURIComponent(filename)}`;
+            const proxyUrl = `/api/download?id=${item.id}`;
 
             // Trigger download with a delay to prevent browser blocking multiple popups
             setTimeout(() => {

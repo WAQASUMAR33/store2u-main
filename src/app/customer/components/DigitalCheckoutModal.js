@@ -114,8 +114,7 @@ const DigitalCheckoutModal = ({ isOpen, onRequestClose, product, onSuccess }) =>
     const handleDownloadComplete = () => {
         setIsDownloading(false);
         const filename = product.name || 'download';
-        const proxyUrl = `/api/download?url=${encodeURIComponent(activeUrl)}&filename=${encodeURIComponent(filename)}`;
-
+        const proxyUrl = `/api/download?id=${product.id}`;
         window.location.assign(proxyUrl);
 
         // Optionally close the checkout modal after some time

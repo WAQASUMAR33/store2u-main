@@ -108,9 +108,7 @@ const ProductPage = ({ productData }) => {
 
     // Trigger actual download via the proxy
     const filename = product?.name || 'download';
-    const proxyUrl = `/api/download?url=${encodeURIComponent(activeDownloadUrl)}&filename=${encodeURIComponent(filename)}`;
-
-    // Using window.location.assign for better reliability with timer-based triggers
+    const proxyUrl = `/api/download?id=${product.id}`;
     window.location.assign(proxyUrl);
   };
 
