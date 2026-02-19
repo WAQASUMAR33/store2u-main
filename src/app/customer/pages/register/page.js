@@ -100,7 +100,7 @@ const Register = () => {
     try {
       const uploadedImageUrl = formData.base64 ? await uploadImage(formData.base64) : '';
 
-      const response = await fetch('https://store2u.ca/api/users', {
+      const response = await fetch('/api/users', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

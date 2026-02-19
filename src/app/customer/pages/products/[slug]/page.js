@@ -39,7 +39,7 @@ async function getProductData(slug) {
     let baseUrl = `${protocol}://${host}`;
 
     // Fallback or override if specifically configured and not localhost in production
-    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('store2u.ca')) {
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('store2u.ca') && !host.includes('vercel.app')) {
       baseUrl = process.env.NEXT_PUBLIC_API_URL;
     }
 
