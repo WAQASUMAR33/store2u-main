@@ -90,6 +90,7 @@ const FlashSale = () => {
                 alt={product.name}
                 className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                 unoptimized
+                loading="lazy"
               />
               <div className="absolute top-2 left-2 bg-orange-500 text-white text-[8px] font-black px-2 py-0.5 rounded-full">
                 {product.discount}

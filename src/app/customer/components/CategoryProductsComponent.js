@@ -112,10 +112,13 @@ const SubcategoryProductsComponent = () => {
                     {product.images && product.images.length > 0 ? (
                       <Image
                         fill
-                        src={product.images[0].url.startsWith('http') ? product.images[0].url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                        src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:')
+                          ? product.images[0].url
+                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
                         alt={product.name}
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                         unoptimized
+                        loading="lazy"
                         onError={(e) => {
                           e.target.onerror = null;
                           e.target.src = '/fallback-image.jpg';

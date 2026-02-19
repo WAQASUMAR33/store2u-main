@@ -347,10 +347,13 @@ const Header = () => {
             <Image
               width={130}
               height={40}
-              src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${companyHeaderImage}`}
+              src={companyHeaderImage?.startsWith('http') || companyHeaderImage?.startsWith('data:')
+                ? companyHeaderImage
+                : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${companyHeaderImage}`}
               alt="Logo"
               className="h-8 md:h-9 w-auto cursor-pointer object-contain"
               unoptimized
+              priority={true}
             />
           </Link>
         </div>
@@ -385,7 +388,9 @@ const Header = () => {
                           <Image
                             width={24}
                             height={24}
-                            src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                            src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
+                              ? category.imageUrl
+                              : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
                             alt={category.name}
                             className="w-6 h-6 object-cover rounded-full border border-gray-50"
                             unoptimized
@@ -485,12 +490,15 @@ const Header = () => {
                                   {category.imageUrl && (
                                     <div className="w-8 h-8 rounded-full bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                                       <Image
-                                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                                        src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
+                                          ? category.imageUrl
+                                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
                                         alt={category.name}
                                         width={32}
                                         height={32}
                                         className="w-full h-full object-cover"
                                         unoptimized
+                                        loading="lazy"
                                       />
                                     </div>
                                   )}
@@ -518,12 +526,15 @@ const Header = () => {
                               <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                                 {product.images && JSON.parse(product.images)[0] ? (
                                   <Image
-                                    src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                    src={JSON.parse(product.images)[0]?.startsWith('http') || JSON.parse(product.images)[0]?.startsWith('data:')
+                                      ? JSON.parse(product.images)[0]
+                                      : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
                                     alt={product.name}
                                     width={48}
                                     height={48}
                                     className="w-full h-full object-cover"
                                     unoptimized
+                                    loading="lazy"
                                   />
                                 ) : (
                                   <div className="w-full h-full flex items-center justify-center text-gray-300 text-xs">No Img</div>
@@ -752,7 +763,9 @@ const Header = () => {
                                 {category.imageUrl && (
                                   <div className="w-6 h-6 rounded-full bg-gray-100 overflow-hidden flex-shrink-0">
                                     <Image
-                                      src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                                      src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
+                                        ? category.imageUrl
+                                        : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
                                       alt={category.name}
                                       width={24}
                                       height={24}
@@ -783,7 +796,9 @@ const Header = () => {
                             <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
                               {product.images && JSON.parse(product.images)[0] ? (
                                 <Image
-                                  src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                  src={JSON.parse(product.images)[0]?.startsWith('http') || JSON.parse(product.images)[0]?.startsWith('data:')
+                                    ? JSON.parse(product.images)[0]
+                                    : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
                                   alt={product.name}
                                   width={40}
                                   height={40}
@@ -835,7 +850,9 @@ const Header = () => {
                           <Image
                             width={32}
                             height={32}
-                            src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                            src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
+                              ? category.imageUrl
+                              : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
                             alt={category.name}
                             className="w-full h-full object-cover"
                             unoptimized

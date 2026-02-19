@@ -122,7 +122,7 @@ const Footer = () => {
   // Helper for image URL
   const getImageUrl = (url) => {
     if (!url) return '';
-    if (url.startsWith('http')) return url;
+    if (url.startsWith('http') || url.startsWith('data:')) return url;
     return `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
   };
 
@@ -156,10 +156,10 @@ const Footer = () => {
           </p>
           <div className="flex gap-2 mt-2">
             <Link href='/'>
-              <img src="/footericon/appstore.png" className="w-32 h-10 object-contain border border-gray-300 rounded-lg" alt="App Store" />
+              <img src="/footericon/appstore.png" className="w-32 h-10 object-contain border border-gray-300 rounded-lg" alt="App Store" loading="lazy" />
             </Link>
             <Link href='/'>
-              <img src="/footericon/playstore.png" className="w-32 h-10 object-contain border border-gray-300 rounded-lg" alt="Play Store" />
+              <img src="/footericon/playstore.png" className="w-32 h-10 object-contain border border-gray-300 rounded-lg" alt="Play Store" loading="lazy" />
             </Link>
           </div>
         </motion.div>

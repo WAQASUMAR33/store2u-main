@@ -236,10 +236,13 @@ const CategoryPage = () => {
                       {product.images?.[0] && (
                         <Image
                           fill
-                          src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
+                          src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:')
+                            ? product.images[0].url
+                            : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
                           alt={product.name}
                           className="object-contain p-4 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                           unoptimized
+                          loading="lazy"
                         />
                       )}  {product.discount > 0 && (
                         <div className="absolute top-3 right-3 bg-orange-500 text-white text-[9px] font-black px-2.5 py-1 rounded-full uppercase tracking-tighter shadow-lg">
@@ -347,10 +350,13 @@ const CategoryPage = () => {
                 {p.images?.[0] && (
                   <Image
                     fill
-                    src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${p.images[0].url || p.images[0]}`}
+                    src={p.images[0].url?.startsWith('http') || p.images[0].url?.startsWith('data:')
+                      ? p.images[0].url
+                      : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${p.images[0].url || p.images[0]}`}
                     alt={p.name}
                     className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                     unoptimized
+                    loading="lazy"
                   />
                 )}
               </div>
@@ -431,8 +437,8 @@ const CategoryPage = () => {
                         key={opt.id}
                         onClick={() => setTempSortOption(opt.id)}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempSortOption === opt.id
-                            ? "bg-[#1A1A2E] text-white shadow-lg"
-                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
                           }`}
                       >
                         {opt.label}
@@ -455,8 +461,8 @@ const CategoryPage = () => {
                         key={status.id}
                         onClick={() => setTempStatusFilter(status.id)}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempStatusFilter === status.id
-                            ? "bg-[#1A1A2E] text-white shadow-lg"
-                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
                           }`}
                       >
                         {status.label}

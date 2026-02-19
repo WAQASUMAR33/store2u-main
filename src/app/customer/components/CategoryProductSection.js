@@ -24,6 +24,7 @@ const CategoryProductSection = ({ categoryImage, products }) => {
                 alt="Category Image"
                 className="object-cover transition-transform duration-1000 group-hover:scale-110"
                 unoptimized
+                loading="lazy"
               />
               <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-8">
                 <span className="text-white text-lg font-black uppercase tracking-widest">Featured Collection</span>
@@ -50,6 +51,7 @@ const CategoryProductSection = ({ categoryImage, products }) => {
                     alt={product.name}
                     className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                     unoptimized
+                    loading="lazy"
                   />
                   <button className="absolute bottom-2 right-2 bg-teal-600 text-white h-7 w-7 rounded-full flex justify-center items-center shadow-lg z-10 hover:scale-110 transition-transform">
                     <span className="font-bold text-lg leading-none">+</span>

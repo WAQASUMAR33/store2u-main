@@ -304,10 +304,13 @@ const TopRatedProducts = () => {
                 {product.images?.[0] && (
                   <Image
                     fill
-                    src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
+                    src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:') || product.images[0]?.startsWith('http') || product.images[0]?.startsWith('data:')
+                      ? (product.images[0].url || product.images[0])
+                      : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
                     alt={product.name}
                     className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                     unoptimized
+                    loading="lazy"
                   />
                 )}
               </div>

@@ -139,6 +139,7 @@ export default function Blog() {
                         fill
                         className="object-cover"
                         unoptimized
+                        loading="lazy"
                       />
                     </div>
                   </div>
@@ -204,6 +205,7 @@ function BlogPosts({ blogs, calculateReadingTime, formatDate }) {
               alt={post.title}
               className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
               unoptimized
+              loading="lazy"
             />
             <div className="absolute top-4 right-4 bg-white/90 backdrop-blur rounded-full px-3 py-1">
               <span className="text-xs font-bold text-orange-500">🔥</span>

@@ -189,7 +189,9 @@ const SubcategoryPage = () => {
                       <Image
                         width={300}
                         height={220}
-                        src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                        src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:')
+                          ? product.images[0].url
+                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
                         alt={product.name}
                         className="h-[220px] w-full object-contain"
                         loading="lazy"
@@ -291,8 +293,8 @@ const SubcategoryPage = () => {
                         key={opt.id}
                         onClick={() => setTempSortOption(opt.id)}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempSortOption === opt.id
-                            ? "bg-[#1A1A2E] text-white shadow-lg"
-                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
                           }`}
                       >
                         {opt.label}
@@ -315,8 +317,8 @@ const SubcategoryPage = () => {
                         key={status.id}
                         onClick={() => setTempStatusFilter(status.id)}
                         className={`flex items-center gap-2.5 px-5 py-3 rounded-full text-[10px] font-black uppercase tracking-widest transition-all ${tempStatusFilter === status.id
-                            ? "bg-[#1A1A2E] text-white shadow-lg"
-                            : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
+                          ? "bg-[#1A1A2E] text-white shadow-lg"
+                          : "bg-white border border-gray-100 text-gray-500 hover:border-gray-300"
                           }`}
                       >
                         {status.label}

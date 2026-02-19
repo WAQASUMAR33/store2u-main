@@ -261,6 +261,7 @@ const DigitalCheckoutModal = ({ isOpen, onRequestClose, product, onSuccess }) =>
                                         src={product.images[0].url.startsWith('http') ? product.images[0].url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
                                         className="w-full h-full object-contain"
                                         alt={product.name}
+                                        loading="lazy"
                                     />
                                 </div>
                             )}

@@ -356,6 +356,7 @@ const ProductPage = ({ productData }) => {
                   className="w-full h-full object-cover"
                   alt={`Product view ${idx + 1}`}
                   unoptimized={shouldUnoptimize(img?.url)}
+                  loading="lazy"
                 />
               </button>
             ))}

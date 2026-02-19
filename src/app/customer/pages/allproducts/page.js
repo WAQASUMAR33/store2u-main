@@ -230,6 +230,7 @@ const AllProducts = () => {
                         alt={product.name}
                         className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                         unoptimized
+                        loading="lazy"
                       />
                     )}
                   </div>

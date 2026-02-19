@@ -112,7 +112,7 @@ export async function generateMetadata({ params }) {
       type: 'website',
       images: product.images?.[0]?.url ? [
         {
-          url: product.images[0].url.startsWith('http')
+          url: product.images[0].url.startsWith('http') || product.images[0].url.startsWith('data:')
             ? product.images[0].url
             : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`,
           alt: product.name,
@@ -153,7 +153,7 @@ const ProductDetailsPage = async ({ params }) => {
       '@type': 'Product',
       name: product.name,
       image: product.images?.[0]?.url ? (
-        product.images[0].url.startsWith('http')
+        product.images[0].url.startsWith('http') || product.images[0].url.startsWith('data:')
           ? product.images[0].url
           : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`
       ) : [],

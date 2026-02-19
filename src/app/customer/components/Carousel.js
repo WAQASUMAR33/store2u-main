@@ -15,7 +15,9 @@ function Slider() {
       }
       const data = await response.json();
       const formattedSlides = data.map(slide => ({
-        image: `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${slide.imgurl}`,
+        image: slide.imgurl?.startsWith('http') || slide.imgurl?.startsWith('data:')
+          ? slide.imgurl
+          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${slide.imgurl}`,
         link: slide.link,
       }));
       setSlides(formattedSlides);
@@ -68,6 +70,8 @@ function Slider() {
                 src={slide.image}
                 className="w-full h-[350px] md:h-[450px] lg:h-[600px] object-cover"
                 alt={`Slide ${index}`}
+                priority={index === 0}
+                loading={index === 0 ? 'eager' : 'lazy'}
               />
               <div className="absolute inset-0 flex flex-col items-center justify-center z-10 pointer-events-none bg-gradient-to-t from-orange-900/40 to-transparent">
                 <h1 className='text-2xl md:text-4xl lg:text-5xl font-bold text-white pb-3 text-center px-2'>

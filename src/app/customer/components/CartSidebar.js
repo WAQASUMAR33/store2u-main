@@ -93,6 +93,7 @@ const CartSidebar = ({ isOpen, onClose }) => {
                                                 alt={item.name}
                                                 fill
                                                 className="object-contain p-1"
+                                                loading="lazy"
                                             />
                                         </div>
 

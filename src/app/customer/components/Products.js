@@ -177,10 +177,13 @@ const Products = () => {
                       <div className="relative h-[400px] rounded-[2.5rem] overflow-hidden shadow-2xl group">
                         <Image
                           fill
-                          src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                          src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
+                            ? category.imageUrl
+                            : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
                           alt={category.name}
                           className="object-cover transition-transform duration-1000 group-hover:scale-110"
                           unoptimized
+                          loading="lazy"
                         />
                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent flex flex-col justify-end p-10">
                           <h4 className="text-white text-2xl font-black uppercase mb-3 leading-tight">{category.name}</h4>
@@ -242,13 +245,16 @@ const Products = () => {
                             </div>
 
                             {/* Image */}
-                            {product.images?.[0] ? (
+                            {product.images && product.images.length > 0 ? (
                               <Image
                                 fill
-                                src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
+                                src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:') || product.images[0]?.startsWith('http') || product.images[0]?.startsWith('data:')
+                                  ? (product.images[0].url || product.images[0])
+                                  : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
                                 alt={product.name}
                                 className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                                 unoptimized
+                                loading="lazy"
                               />
                             ) : (
                               <div className="text-gray-400 text-xs">No Image</div>
