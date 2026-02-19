@@ -501,7 +501,7 @@ const ProductPage = ({ productData }) => {
             {/* Size Selector */}
             <div>
               <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">
-                Size {selectedSize && <span className="text-gray-400 font-medium ml-2">— {selectedSize}</span>}
+                {isDigital ? 'Product Size / Pages' : 'Size'} {selectedSize && <span className="text-gray-400 font-medium ml-2">— {selectedSize}</span>}
               </label>
               {sizes.length > 0 ? (
                 <div className="relative group">
