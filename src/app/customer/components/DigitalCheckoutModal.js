@@ -68,6 +68,7 @@ const DigitalCheckoutModal = ({ isOpen, onRequestClose, product, onSuccess }) =>
         container.innerHTML = '';
 
         window.paypal.Buttons({
+            fundingSource: window.paypal.FUNDING.CARD,
             createOrder: (data, actions) => {
                 const price = product.discount
                     ? product.price - (product.price * product.discount / 100)

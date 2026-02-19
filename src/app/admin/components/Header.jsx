@@ -168,7 +168,7 @@ const Header = () => {
               },
             }}
           >
-            <MenuItem onClick={handleMenuClose}>
+            <MenuItem onClick={() => { handleMenuClose(); router.push('/admin/pages/adminuser/profile'); }}>
               <ListItemIcon><PersonIcon fontSize="small" /></ListItemIcon>
               My Profile
             </MenuItem>

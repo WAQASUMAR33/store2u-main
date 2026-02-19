@@ -496,7 +496,16 @@ const ProductPage = ({ productData }) => {
                 </div>
               ) : (
                 <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
-                  One Size fits all
+                  {isDigital ? (
+                    (() => {
+                      try {
+                        const data = typeof product?.digitalData === 'string' ? JSON.parse(product.digitalData) : product?.digitalData;
+                        return data?.size || 'Digital Standard';
+                      } catch (e) {
+                        return 'Digital Standard';
+                      }
+                    })()
+                  ) : 'One Size fits all'}
                 </div>
               )}
             </div>

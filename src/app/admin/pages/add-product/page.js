@@ -290,7 +290,9 @@ const AddProductPageContent = () => {
         materials: digitalMaterials,
         personalization: personalization,
         settings: settings,
-        colorsMeta: colorsMeta
+        size: newProduct.digitalData?.size || '',
+        format: newProduct.digitalData?.format || '',
+        resolution: newProduct.digitalData?.resolution || ''
       };
 
       const productToSubmit = {
@@ -815,51 +817,70 @@ const AddProductPageContent = () => {
                   <Typography variant="h6" sx={{ fontWeight: 700, color: '#111827', fontSize: '1rem' }}>Attributes</Typography>
                 </Box>
                 <Stack spacing={4}>
-                  {/* Colors */}
+                  {/* Digital Attribute: Size */}
+                  <Grid container spacing={2}>
+                    <Grid item xs={12}>
+                      <TextField
+                        fullWidth
+                        label="Product Size (e.g. 1920x1080, A4, 5MB)"
+                        value={digitalData?.size || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          // If digitalData doesn't exist yet, initialize it
+                          setNewProduct(prev => ({
+                            ...prev,
+                            digitalData: {
+                              ...(prev.digitalData || {}),
+                              size: val
+                            }
+                          }));
+                        }}
+                        placeholder="Mention the size of this digital product"
+                        sx={inputStyles}
+                        helperText="This size will be displayed on the product detail page."
+                      />
+                    </Grid>
+                  </Grid>
+
+                  {/* Attributes Section (Generic Text Fields) */}
                   <Grid container spacing={2}>
                     <Grid item xs={12} md={6}>
-                      <FormControl fullWidth sx={inputStyles}>
-                        <InputLabel id="primary-color-label">Primary color</InputLabel>
-                        <Select
-                          labelId="primary-color-label"
-                          value={colorsMeta.primary}
-                          onChange={(e) => setColorsMeta({ ...colorsMeta, primary: e.target.value })}
-                          label="Primary color"
-                          MenuProps={selectMenuProps}
-                        >
-                          <MenuItem value="">Select color</MenuItem>
-                          {colors.map((color) => (
-                            <MenuItem key={color.value} value={color.label}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color.hex }}></Box>
-                                {color.label}
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        fullWidth
+                        label="File Type / Format"
+                        value={digitalData?.format || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNewProduct(prev => ({
+                            ...prev,
+                            digitalData: {
+                              ...(prev.digitalData || {}),
+                              format: val
+                            }
+                          }));
+                        }}
+                        placeholder="e.g. PNG, PDF, MP4"
+                        sx={inputStyles}
+                      />
                     </Grid>
                     <Grid item xs={12} md={6}>
-                      <FormControl fullWidth sx={inputStyles}>
-                        <InputLabel id="secondary-color-label">Secondary color</InputLabel>
-                        <Select
-                          labelId="secondary-color-label"
-                          value={colorsMeta.secondary}
-                          onChange={(e) => setColorsMeta({ ...colorsMeta, secondary: e.target.value })}
-                          label="Secondary color"
-                          MenuProps={selectMenuProps}
-                        >
-                          <MenuItem value="">Select color</MenuItem>
-                          {colors.map((color) => (
-                            <MenuItem key={color.value} value={color.label}>
-                              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <Box sx={{ width: 12, height: 12, borderRadius: '50%', bgcolor: color.hex }}></Box>
-                                {color.label}
-                              </Box>
-                            </MenuItem>
-                          ))}
-                        </Select>
-                      </FormControl>
+                      <TextField
+                        fullWidth
+                        label="Resolution / Quality"
+                        value={digitalData?.resolution || ''}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setNewProduct(prev => ({
+                            ...prev,
+                            digitalData: {
+                              ...(prev.digitalData || {}),
+                              resolution: val
+                            }
+                          }));
+                        }}
+                        placeholder="e.g. 300 DPI, 4K"
+                        sx={inputStyles}
+                      />
                     </Grid>
                   </Grid>
 
