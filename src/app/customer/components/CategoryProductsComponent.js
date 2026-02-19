@@ -105,16 +105,22 @@ const SubcategoryProductsComponent = () => {
               filteredProducts.map((product) => (
                 <motion.div
                   key={product.id}
-                  className="group flex flex-col bg-white border border-gray-100 rounded-2xl overflow-hidden hover:shadow-xl transition-all duration-300 relative cursor-pointer"
+                  className="group flex flex-col bg-white border border-gray-100 rounded-2em overflow-hidden hover:shadow-xl transition-all duration-300 relative cursor-pointer"
                   onClick={() => handleProductClick(product.slug)}
                 >
                   <div className="relative aspect-square bg-[#F3F4FB] overflow-hidden">
                     {product.images && product.images.length > 0 ? (
                       <Image
-                        fill
-                        src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:')
-                          ? product.images[0].url
-                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                        width={300}
+                        height={220}
+                        src={(() => {
+                          const img = product.images[0];
+                          const url = typeof img === 'string' ? img : img?.url;
+                          if (!url) return '/placeholder.png';
+                          return (url.startsWith('http') || url.startsWith('data:'))
+                            ? url
+                            : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                        })()}
                         alt={product.name}
                         className="object-contain p-4 transition-transform duration-700 group-hover:scale-110"
                         unoptimized

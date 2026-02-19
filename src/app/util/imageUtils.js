@@ -7,7 +7,7 @@
  */
 export const getSafeImageUrl = (url) => {
     if (!url) return '';
-    if (url.startsWith('http') || url.startsWith('data:')) {
+    if (typeof url === 'string' && (url.startsWith('http') || url.startsWith('data:'))) {
         return url;
     }
     const baseUrl = process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL || '';

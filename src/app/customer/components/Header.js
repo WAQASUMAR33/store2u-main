@@ -526,9 +526,19 @@ const Header = () => {
                               <div className="w-12 h-12 rounded-lg bg-gray-100 overflow-hidden flex-shrink-0 border border-gray-200">
                                 {product.images && JSON.parse(product.images)[0] ? (
                                   <Image
-                                    src={JSON.parse(product.images)[0]?.startsWith('http') || JSON.parse(product.images)[0]?.startsWith('data:')
-                                      ? JSON.parse(product.images)[0]
-                                      : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                    src={(() => {
+                                      try {
+                                        const parsed = JSON.parse(product.images);
+                                        const img = parsed[0];
+                                        const url = typeof img === 'string' ? img : img?.url;
+                                        if (!url) return '/placeholder.png';
+                                        return (url.startsWith('http') || url.startsWith('data:'))
+                                          ? url
+                                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                                      } catch (e) {
+                                        return '/placeholder.png';
+                                      }
+                                    })()}
                                     alt={product.name}
                                     width={48}
                                     height={48}
@@ -796,9 +806,19 @@ const Header = () => {
                             <div className="w-10 h-10 rounded bg-gray-100 overflow-hidden flex-shrink-0">
                               {product.images && JSON.parse(product.images)[0] ? (
                                 <Image
-                                  src={JSON.parse(product.images)[0]?.startsWith('http') || JSON.parse(product.images)[0]?.startsWith('data:')
-                                    ? JSON.parse(product.images)[0]
-                                    : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${JSON.parse(product.images)[0]}`}
+                                  src={(() => {
+                                    try {
+                                      const parsed = JSON.parse(product.images);
+                                      const img = parsed[0];
+                                      const url = typeof img === 'string' ? img : img?.url;
+                                      if (!url) return '/placeholder.png';
+                                      return (url.startsWith('http') || url.startsWith('data:'))
+                                        ? url
+                                        : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                                    } catch (e) {
+                                      return '/placeholder.png';
+                                    }
+                                  })()}
                                   alt={product.name}
                                   width={40}
                                   height={40}

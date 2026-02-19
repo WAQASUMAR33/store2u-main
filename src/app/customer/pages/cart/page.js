@@ -208,7 +208,7 @@ const CartPage = () => {
           const data = typeof item.digitalData === 'string' ? JSON.parse(item.digitalData) : item.digitalData;
           const fileUrl = data.files?.[0]?.url;
           if (fileUrl) {
-            const resolveUrl = (url) => url.startsWith('http') ? url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+            const resolveUrl = (url) => (typeof url === 'string' && url.startsWith('http')) ? url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
             const actualUrl = resolveUrl(fileUrl);
             const filename = item.name || `product-${index}`;
             const proxyUrl = `/api/download?url=${encodeURIComponent(actualUrl)}&filename=${encodeURIComponent(filename)}`;
@@ -792,7 +792,14 @@ const CartPage = () => {
                     <Link href={`/customer/pages/products/${item.slug || ''}`} className="w-16 h-16 bg-gray-50 rounded-2xl flex-shrink-0 relative overflow-hidden border border-gray-100 p-2 hover:opacity-80 transition-opacity">
                       {item.images?.[0] ? (
                         <Image
-                          src={`${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${item.images[0].url || item.images[0]}`}
+                          src={(() => {
+                            const img = item.images[0];
+                            const url = typeof img === 'string' ? img : img?.url;
+                            if (!url) return '/placeholder.png';
+                            return (url.startsWith('http') || url.startsWith('data:'))
+                              ? url
+                              : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                          })()}
                           fill
                           className="object-contain mix-blend-multiply"
                           unoptimized

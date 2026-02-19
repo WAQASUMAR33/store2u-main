@@ -189,9 +189,14 @@ const SubcategoryPage = () => {
                       <Image
                         width={300}
                         height={220}
-                        src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:')
-                          ? product.images[0].url
-                          : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                        src={(() => {
+                          const img = product.images[0];
+                          const url = typeof img === 'string' ? img : img?.url;
+                          if (!url) return '/placeholder.png';
+                          return (url.startsWith('http') || url.startsWith('data:'))
+                            ? url
+                            : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                        })()}
                         alt={product.name}
                         className="h-[220px] w-full object-contain"
                         loading="lazy"

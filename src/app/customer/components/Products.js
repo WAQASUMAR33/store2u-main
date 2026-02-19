@@ -248,9 +248,14 @@ const Products = () => {
                             {product.images && product.images.length > 0 ? (
                               <Image
                                 fill
-                                src={product.images[0].url?.startsWith('http') || product.images[0].url?.startsWith('data:') || product.images[0]?.startsWith('http') || product.images[0]?.startsWith('data:')
-                                  ? (product.images[0].url || product.images[0])
-                                  : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url || product.images[0]}`}
+                                src={(() => {
+                                  const img = product.images[0];
+                                  const url = typeof img === 'string' ? img : img?.url;
+                                  if (!url) return '/placeholder.png'; // Fallback
+                                  return (url.startsWith('http') || url.startsWith('data:'))
+                                    ? url
+                                    : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                                })()}
                                 alt={product.name}
                                 className="object-contain p-8 mix-blend-multiply transition-transform duration-700 group-hover:scale-110"
                                 unoptimized

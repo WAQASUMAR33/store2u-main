@@ -86,9 +86,13 @@ const TopCategories = () => {
                   <Image
                     width={200}
                     height={200}
-                    src={category.imageUrl?.startsWith('http') || category.imageUrl?.startsWith('data:')
-                      ? category.imageUrl
-                      : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${category.imageUrl}`}
+                    src={(() => {
+                      const url = category.imageUrl;
+                      if (!url) return '/placeholder.png';
+                      return (url.startsWith('http') || url.startsWith('data:'))
+                        ? url
+                        : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                    })()}
                     alt={category.name}
                     className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-500"
                     unoptimized

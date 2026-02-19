@@ -258,7 +258,14 @@ const DigitalCheckoutModal = ({ isOpen, onRequestClose, product, onSuccess }) =>
                             {product.images?.[0] && (
                                 <div className="w-16 h-16 bg-white rounded-xl p-2 border border-gray-100 relative">
                                     <img
-                                        src={product.images[0].url.startsWith('http') ? product.images[0].url : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${product.images[0].url}`}
+                                        src={(() => {
+                                            const img = product.images[0];
+                                            const url = typeof img === 'string' ? img : img?.url;
+                                            if (!url) return '/placeholder.png';
+                                            return url.startsWith('http')
+                                                ? url
+                                                : `${process.env.NEXT_PUBLIC_UPLOADED_IMAGE_URL}/${url}`;
+                                        })()}
                                         className="w-full h-full object-contain"
                                         alt={product.name}
                                         loading="lazy"
