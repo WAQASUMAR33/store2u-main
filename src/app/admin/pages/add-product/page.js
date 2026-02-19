@@ -820,7 +820,7 @@ const AddProductPageContent = () => {
                     <Grid item xs={12}>
                       <TextField
                         fullWidth
-                        label="Product Size (e.g. 1920x1080, A4, 5MB)"
+                        label="Product Size / No. of Pages (e.g. 1920x1080, A4, 5MB, 50 Pages)"
                         value={newProduct.digitalData?.size || ''}
                         onChange={(e) => {
                           const val = e.target.value;
