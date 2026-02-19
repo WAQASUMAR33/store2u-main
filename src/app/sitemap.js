@@ -1,4 +1,4 @@
-import prisma from '../util/prisma';
+import prisma from './util/prisma';
 
 export default async function sitemap() {
     const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u-main.vercel.app';
