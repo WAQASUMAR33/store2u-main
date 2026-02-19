@@ -7,7 +7,8 @@
 export const wrapEmailBody = (title, bodyContent) => {
   const currentYear = new Date().getFullYear();
   const brandColor = '#F25C2C';
-  const logoUrl = 'https://store2u-main.vercel.app/store2ulogo.png'; // Using Vercel deployment for logo
+  const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u.ca';
+  const logoUrl = `${baseUrl}/store2ulogo.png`; // Using Vercel deployment for logo
 
   return `
     <!DOCTYPE html>
@@ -51,7 +52,7 @@ export const wrapEmailBody = (title, bodyContent) => {
           <div class="footer">
             <p>&copy; ${currentYear} Store2U. All rights reserved.</p>
             <p>You are receiving this email because you signed up on our website.</p>
-            <p><a href="https://store2u-main.vercel.app">Visit Store2U</a></p>
+            <p><a href="https://store2u.ca/customer/pages/orders" class="button">View Order Details</a></p>
           </div>
         </div>
       </div>

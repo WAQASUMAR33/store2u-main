@@ -27,7 +27,7 @@ export async function sendStatusUpdateEmail({ email, name, orderId, status }) {
 
       <p>You can check the latest details in your account dashboard.</p>
       <div style="text-align: center;">
-        <a href="https://store2u-main.vercel.app/customer/pages/orders" class="button">View Order Details</a>
+        <a href="https://store2u.ca/customer/pages/orders" class="button">View Order Details</a>
       </div>
     `;
 

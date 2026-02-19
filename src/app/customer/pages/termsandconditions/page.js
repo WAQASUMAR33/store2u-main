@@ -32,7 +32,7 @@ const Terms = () => {
   return (
     <>
       <Head>
-        <title>Terms and Conditions - store2u-main.vercel.app</title>
+        <title>Terms and Conditions - store2u.ca</title>
       </Head>
       <div className="max-w-4xl mx-auto px-6 py-12">
         {termsData ? (

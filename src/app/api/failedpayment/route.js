@@ -18,7 +18,7 @@ export async function POST(request) {
 
         // if (status === "") {
         //     // return NextResponse.json(order, { status: 200 });
-        //     return NextResponse.redirect(`https://store2u-main.vercel.app/paymentfailed`);
+        //     return NextResponse.redirect(`https://store2u.ca/paymentfailed`);
         // }
 
         return NextResponse.json(order, { status: 200 });

@@ -69,7 +69,7 @@ const Contact = () => {
       {contactUsData ? (
         <>
           <Head>
-            <title>{contactUsData.Title} - store2u-main.vercel.app</title>
+            <title>{contactUsData.Title} - store2u.ca</title>
             <meta name="description" content={contactUsData.description} />
           </Head>
           <div className="py-12 px-10 max-w-7xl mx-auto">

@@ -32,7 +32,7 @@ const ShippingPolicy = () => {
   return (
     <>
       <Head>
-        <title>Shipping Policy - store2u-main.vercel.app</title>
+        <title>Shipping Policy - store2u.ca</title>
       </Head>
       <div className="max-w-4xl mx-auto px-6 py-12">
         {policyData ? (

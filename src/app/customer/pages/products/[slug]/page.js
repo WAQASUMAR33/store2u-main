@@ -39,7 +39,7 @@ async function getProductData(slug) {
     let baseUrl = `${protocol}://${host}`;
 
     // Fallback or override if specifically configured and not localhost in production
-    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app')) {
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('store2u.ca')) {
       baseUrl = process.env.NEXT_PUBLIC_API_URL;
     }
 
@@ -145,7 +145,7 @@ const ProductDetailsPage = async ({ params }) => {
     const productData = await getProductData(slug);
 
     const { product } = productData;
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u-main.vercel.app';
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u.ca';
 
     // Construct Product Schema
     const jsonLd = {

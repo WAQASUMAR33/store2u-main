@@ -7,7 +7,7 @@ export async function sendResetPasswordEmail(email, token) {
     if (!transporter) throw new Error('SMTP Configuration Error');
 
     const mailUser = getMailUser();
-    const baseUrl = process.env.BASE_URL || 'https://store2u-main.vercel.app';
+    const baseUrl = process.env.BASE_URL || 'https://store2u.ca';
     const resetUrl = `${baseUrl}/customer/pages/reset?token=${token}`;
 
     const emailContent = `

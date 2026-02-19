@@ -32,7 +32,7 @@ const PrivacyPolicy = () => {
   return (
     <>
       <Head>
-        <title>Privacy Policy - store2u-main.vercel.app</title>
+        <title>Privacy Policy - store2u.ca</title>
       </Head>
       <div className="max-w-4xl mx-auto px-6 py-12">
         {policyData ? (

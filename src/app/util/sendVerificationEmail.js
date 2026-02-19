@@ -3,7 +3,7 @@ import { wrapEmailBody } from './emailTemplate';
 
 export async function sendVerificationEmail(email, token) {
   const mailUser = getMailUser();
-  const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u-main.vercel.app';
+  const baseUrl = process.env.BASE_URL || process.env.NEXT_PUBLIC_BASE_URL || 'https://store2u.ca';
 
   const transporter = getTransporter();
   if (!transporter) {
