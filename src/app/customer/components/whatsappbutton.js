@@ -6,7 +6,7 @@ export default function WhatsAppButton() {
   const phoneNumber = '92310356111';
 
   const handleClick = () => {
-    const url = `https://wa.me/${phoneNumber}?text=Hello%Store2u.ca`;
+    const url = `https://wa.me/${phoneNumber}?text=Hello%store2u-main.vercel.app`;
     window.open(url, '_blank');
   };
 

@@ -30,7 +30,7 @@ async function getProductData(slug) {
     let protocol = 'http';
     if (forwardedProto) {
       protocol = forwardedProto.split(',')[0].trim(); // Take first protocol if multiple
-    } else if (process.env.NODE_ENV === 'production' || host.includes('store2u.ca')) {
+    } else if (process.env.NODE_ENV === 'production') {
       protocol = 'https';
     }
 
@@ -39,7 +39,7 @@ async function getProductData(slug) {
     let baseUrl = `${protocol}://${host}`;
 
     // Fallback or override if specifically configured and not localhost in production
-    if (process.env.NEXT_PUBLIC_API_URL && (!host.includes('vercel.app') && !host.includes('store2u.ca'))) {
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app')) {
       baseUrl = process.env.NEXT_PUBLIC_API_URL;
     }
 

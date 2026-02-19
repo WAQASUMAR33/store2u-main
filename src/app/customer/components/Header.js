@@ -907,7 +907,7 @@ const Header = () => {
                       </>
                     )}
                   </div>
-                  <p className="text-[10px] text-gray-400 mt-4 font-medium uppercase tracking-widest">Store2u.ca © 2026</p>
+                  <p className="text-[10px] text-gray-400 mt-4 font-medium uppercase tracking-widest">Store2U © 2026</p>
                 </div>
               </nav>
             </div>

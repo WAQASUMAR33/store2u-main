@@ -27,7 +27,7 @@ const About = () => {
     <>
       {(aboutData) ? (<>
         <Head>
-          <title>{aboutData.Title} - Store2u.ca</title>
+          <title>{aboutData.Title} - store2u-main.vercel.app</title>
           <meta name="description" content={`${aboutData.description}`} />
 
         </Head>

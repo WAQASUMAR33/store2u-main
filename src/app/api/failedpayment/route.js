@@ -2,9 +2,9 @@ import { NextResponse } from "next/server";
 import prisma from "../../util/prisma";
 
 export async function POST(request) {
-    const data = await request.json(); 
-    console.log("Payload is :",data);
-    const {orderId, status} = data;
+    const data = await request.json();
+    console.log("Payload is :", data);
+    const { orderId, status } = data;
 
     try {
         const order = await prisma.order.update({
@@ -18,7 +18,7 @@ export async function POST(request) {
 
         // if (status === "") {
         //     // return NextResponse.json(order, { status: 200 });
-        //     return NextResponse.redirect(`https://www.store2u.ca/paymentfailed`);
+        //     return NextResponse.redirect(`https://store2u-main.vercel.app/paymentfailed`);
         // }
 
         return NextResponse.json(order, { status: 200 });

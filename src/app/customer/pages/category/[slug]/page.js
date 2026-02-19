@@ -21,7 +21,7 @@ async function getCategoryData(slug) {
     let baseUrl = `${protocol}://${host}`;
 
     // Fallback or override if specifically configured
-    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app') && !host.includes('store2u.ca')) {
+    if (process.env.NEXT_PUBLIC_API_URL && !host.includes('vercel.app')) {
       baseUrl = process.env.NEXT_PUBLIC_API_URL;
     }
 

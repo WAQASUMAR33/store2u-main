@@ -3,13 +3,14 @@ import BlogDetailPage from "./mainpage"; // Ensure you are importing the correct
 import { headers } from "next/headers";
 
 export async function generateMetadata({ params }) {
+  const { id } = await params;
   try {
     const headersList = await headers();
     const host = headersList.get('host') || 'localhost:3000';
     const protocol = headersList.get('x-forwarded-proto') || 'http';
     const baseUrl = `${protocol}://${host}`;
 
-    const res = await fetch(`${baseUrl}/api/blog/${params.id}`);
+    const res = await fetch(`${baseUrl}/api/blog/${id}`);
 
     if (!res.ok) {
       console.error(`Error: ${res.status} ${res.statusText}`);
@@ -24,7 +25,7 @@ export async function generateMetadata({ params }) {
       description: blog.description || 'Best website',
       keywords: blog.meta_focusKeyword || "SolveAndWins blogs keyword",
       alternates: {
-        canonical: `/customer/pages/blog/${params.id}`,
+        canonical: `/customer/pages/blog/${id}`,
       },
     };
   } catch (error) {
