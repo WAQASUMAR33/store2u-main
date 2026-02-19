@@ -290,9 +290,7 @@ const AddProductPageContent = () => {
         materials: digitalMaterials,
         personalization: personalization,
         settings: settings,
-        size: newProduct.digitalData?.size || '',
-        format: newProduct.digitalData?.format || '',
-        resolution: newProduct.digitalData?.resolution || ''
+        size: newProduct.digitalData?.size || ''
       };
 
       const productToSubmit = {
@@ -842,47 +840,6 @@ const AddProductPageContent = () => {
                     </Grid>
                   </Grid>
 
-                  {/* Attributes Section (Generic Text Fields) */}
-                  <Grid container spacing={2}>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="File Type / Format"
-                        value={newProduct.digitalData?.format || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setNewProduct(prev => ({
-                            ...prev,
-                            digitalData: {
-                              ...(prev.digitalData || {}),
-                              format: val
-                            }
-                          }));
-                        }}
-                        placeholder="e.g. PNG, PDF, MP4"
-                        sx={inputStyles}
-                      />
-                    </Grid>
-                    <Grid item xs={12} md={6}>
-                      <TextField
-                        fullWidth
-                        label="Resolution / Quality"
-                        value={newProduct.digitalData?.resolution || ''}
-                        onChange={(e) => {
-                          const val = e.target.value;
-                          setNewProduct(prev => ({
-                            ...prev,
-                            digitalData: {
-                              ...(prev.digitalData || {}),
-                              resolution: val
-                            }
-                          }));
-                        }}
-                        placeholder="e.g. 300 DPI, 4K"
-                        sx={inputStyles}
-                      />
-                    </Grid>
-                  </Grid>
 
                   {/* Dimensions */}
                   <Grid container spacing={2}>

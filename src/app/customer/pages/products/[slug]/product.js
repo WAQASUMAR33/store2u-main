@@ -449,24 +449,24 @@ const ProductPage = ({ productData }) => {
             {isDigital ? (
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Format</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Height</label>
                   <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
                     {(() => {
                       try {
                         const data = typeof product?.digitalData === 'string' ? JSON.parse(product.digitalData) : product?.digitalData;
-                        return data?.format || 'Standard';
-                      } catch (e) { return 'Standard'; }
+                        return `${data?.dimensions?.height?.value || 'N/A'} ${data?.dimensions?.height?.unit || ''}`;
+                      } catch (e) { return 'N/A'; }
                     })()}
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Resolution</label>
+                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Width</label>
                   <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
                     {(() => {
                       try {
                         const data = typeof product?.digitalData === 'string' ? JSON.parse(product.digitalData) : product?.digitalData;
-                        return data?.resolution || 'High';
-                      } catch (e) { return 'High'; }
+                        return `${data?.dimensions?.width?.value || 'N/A'} ${data?.dimensions?.width?.unit || ''}`;
+                      } catch (e) { return 'N/A'; }
                     })()}
                   </div>
                 </div>
