@@ -1,25 +1,13 @@
 // src/util/prisma.js
 import { PrismaClient } from '@prisma/client';
 
-let prisma;
+const prismaClientSingleton = () => {
+    return new PrismaClient();
+};
 
-if (process.env.NODE_ENV === 'production') {
-    prisma = new PrismaClient();
-} else {
-    // Ensure that DATABASE_URL is available
-    if (!process.env.DATABASE_URL) {
-        console.warn("DATABASE_URL is not set in environment variables.");
-    }
-
-    if (!global.prisma) {
-        global.prisma = new PrismaClient();
-    }
-    prisma = global.prisma;
-
-    // Test connection immediately
-    prisma.$connect()
-        .then(() => console.log('[PRISMA] Database connected successfully'))
-        .catch((e) => console.error('[PRISMA] Database connection failed:', e.message));
-}
+const globalForPrisma = global;
+const prisma = globalForPrisma.prisma ?? prismaClientSingleton();
 
 export default prisma;
+
+if (process.env.NODE_ENV !== 'production') globalForPrisma.prisma = prisma;
