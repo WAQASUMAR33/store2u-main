@@ -446,30 +446,57 @@ const ProductPage = ({ productData }) => {
           {/* Selection Area */}
           <div className="space-y-6 mb-8">
             {/* Color Selector */}
-            <div>
-              <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">
-                Color {selectedColor && <span className="text-gray-400 font-medium ml-2">— {selectedColor}</span>}
-              </label>
-              {colors.length > 0 ? (
-                <div className="relative group">
-                  <select
-                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
-                    onChange={(e) => setSelectedColor(e.target.value)}
-                    value={selectedColor || ''}
-                  >
-                    <option value="" disabled>Select a color</option>
-                    {colors.map((c, i) => (
-                      <option key={i} value={c.name}>{c.name}</option>
-                    ))}
-                  </select>
-                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+            {isDigital ? (
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Format</label>
+                  <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
+                    {(() => {
+                      try {
+                        const data = typeof product?.digitalData === 'string' ? JSON.parse(product.digitalData) : product?.digitalData;
+                        return data?.format || 'Standard';
+                      } catch (e) { return 'Standard'; }
+                    })()}
+                  </div>
                 </div>
-              ) : (
-                <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center gap-2 text-sm font-bold text-gray-500 ring-1 ring-orange-50/50">
-                  <div className="w-3 h-3 rounded-full bg-orange-400" /> Neutral (Standard)
+                <div>
+                  <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Resolution</label>
+                  <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
+                    {(() => {
+                      try {
+                        const data = typeof product?.digitalData === 'string' ? JSON.parse(product.digitalData) : product?.digitalData;
+                        return data?.resolution || 'High';
+                      } catch (e) { return 'High'; }
+                    })()}
+                  </div>
                 </div>
-              )}
-            </div>
+              </div>
+            ) : (
+              <div>
+                <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">
+                  Color {selectedColor && <span className="text-gray-400 font-medium ml-2">— {selectedColor}</span>}
+                </label>
+                {colors.length > 0 ? (
+                  <div className="relative group">
+                    <select
+                      className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
+                      onChange={(e) => setSelectedColor(e.target.value)}
+                      value={selectedColor || ''}
+                    >
+                      <option value="" disabled>Select a color</option>
+                      {colors.map((c, i) => (
+                        <option key={i} value={c.name}>{c.name}</option>
+                      ))}
+                    </select>
+                    <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                  </div>
+                ) : (
+                  <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center gap-2 text-sm font-bold text-gray-500 ring-1 ring-orange-50/50">
+                    <div className="w-3 h-3 rounded-full bg-orange-400" /> Neutral (Standard)
+                  </div>
+                )}
+              </div>
+            )}
 
             {/* Size Selector */}
             <div>
