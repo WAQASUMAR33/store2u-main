@@ -823,7 +823,7 @@ const AddProductPageContent = () => {
                       <TextField
                         fullWidth
                         label="Product Size (e.g. 1920x1080, A4, 5MB)"
-                        value={digitalData?.size || ''}
+                        value={newProduct.digitalData?.size || ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           // If digitalData doesn't exist yet, initialize it
@@ -848,7 +848,7 @@ const AddProductPageContent = () => {
                       <TextField
                         fullWidth
                         label="File Type / Format"
-                        value={digitalData?.format || ''}
+                        value={newProduct.digitalData?.format || ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           setNewProduct(prev => ({
@@ -867,7 +867,7 @@ const AddProductPageContent = () => {
                       <TextField
                         fullWidth
                         label="Resolution / Quality"
-                        value={digitalData?.resolution || ''}
+                        value={newProduct.digitalData?.resolution || ''}
                         onChange={(e) => {
                           const val = e.target.value;
                           setNewProduct(prev => ({
