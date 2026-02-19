@@ -4,7 +4,7 @@ const bcrypt = require('bcryptjs');
 const prisma = new PrismaClient();
 
 async function main() {
-  const email = 'admin@store2u.ca';
+  const email = 'admin@store2u-main.vercel.app';
   const password = 'admin123';
   const hashedPassword = bcrypt.hashSync(password, 10);
 
