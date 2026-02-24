@@ -293,17 +293,18 @@ const ProductPage = ({ productData }) => {
 
     setReviewLoading(true);
     try {
-      // Assuming a generic endpoint, can be adjusted if API differs
-      const response = await axios.post('/api/addreview', {
+      const response = await axios.post('/api/reviews', {
         productId: product.id,
         rating,
         comment,
         reviewer: userName || 'Anonymous'
       });
 
-      if (response.data && response.data.status) {
-        toast.success("Review submitted successfully!");
-        setReviews([response.data.data, ...reviews]);
+      if (response.data && response.data.status === 201) {
+        toast.success(response.data.message || "Review submitted successfully!");
+        // Note: The review is pending approval, so we might not want to show it immediately 
+        // unless the API returns it and the UI should show pending reviews.
+        // For now, let's keep it consistent with the API's 'pending' behavior.
         setComment('');
         setRating(0);
       } else {
@@ -538,21 +539,28 @@ const ProductPage = ({ productData }) => {
               )}
             </div>
 
-            {/* Quantity Selector - Etsy Style Row */}
+            {/* Quantity Selector - Plus/Minus Buttons */}
             {!isDigital && (
               <div>
                 <label className="text-xs font-black uppercase tracking-widest text-gray-900 block mb-3">Quantity</label>
-                <div className="relative group w-32">
-                  <select
-                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
-                    value={quantity}
-                    onChange={(e) => setQuantity(parseInt(e.target.value))}
+                <div className="flex items-center w-32 h-12 border border-gray-200 rounded-xl overflow-hidden">
+                  <button
+                    onClick={handleQuantityDecrease}
+                    className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors border-r border-gray-200"
+                    aria-label="Decrease quantity"
                   >
-                    {[...Array(Math.min(10, product?.stock || 10))].map((_, i) => (
-                      <option key={i + 1} value={i + 1}>{i + 1}</option>
-                    ))}
-                  </select>
-                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                    <FiMinus size={14} />
+                  </button>
+                  <div className="flex-1 h-full flex items-center justify-center text-sm font-bold text-gray-900 bg-white">
+                    {quantity}
+                  </div>
+                  <button
+                    onClick={handleQuantityIncrease}
+                    className="flex-1 h-full flex items-center justify-center hover:bg-gray-50 transition-colors border-l border-gray-200"
+                    aria-label="Increase quantity"
+                  >
+                    <FiPlus size={14} />
+                  </button>
                 </div>
               </div>
             )}
