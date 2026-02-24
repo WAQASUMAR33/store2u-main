@@ -477,18 +477,21 @@ const ProductPage = ({ productData }) => {
                   Color {selectedColor && <span className="text-gray-400 font-medium ml-2">— {selectedColor}</span>}
                 </label>
                 {colors.length > 0 ? (
-                  <div className="relative group">
-                    <select
-                      className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
-                      onChange={(e) => setSelectedColor(e.target.value)}
-                      value={selectedColor || ''}
-                    >
-                      <option value="" disabled>Select a color</option>
-                      {colors.map((c, i) => (
-                        <option key={i} value={c.name}>{c.name}</option>
-                      ))}
-                    </select>
-                    <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                  <div className="flex flex-wrap gap-4 items-center">
+                    {colors.map((c, i) => (
+                      <div key={i} className="flex flex-col items-center gap-1.5">
+                        <button
+                          onClick={() => setSelectedColor(c.name)}
+                          className={`w-8 h-8 rounded-full border border-gray-200 transition-all duration-200 hover:scale-110 active:scale-95 ${selectedColor === c.name ? 'ring-2 ring-offset-2 ring-black' : ''
+                            }`}
+                          style={{ backgroundColor: c.hex || '#ccc' }}
+                          title={c.name}
+                        />
+                        {selectedColor === c.name && (
+                          <div className="w-4 h-0.5 bg-black rounded-full" />
+                        )}
+                      </div>
+                    ))}
                   </div>
                 ) : (
                   <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center gap-2 text-sm font-bold text-gray-500 ring-1 ring-orange-50/50">
@@ -504,20 +507,20 @@ const ProductPage = ({ productData }) => {
                 {isDigital ? 'Product Size / Pages' : 'Size'} {selectedSize && <span className="text-gray-400 font-medium ml-2">— {selectedSize}</span>}
               </label>
               {sizes.length > 0 ? (
-                <div className="relative group">
-                  <select
-                    className="w-full h-12 bg-white border border-gray-200 rounded-xl px-4 appearance-none text-sm font-bold text-gray-900 focus:border-black focus:ring-1 focus:ring-black outline-none cursor-pointer transition-all"
-                    onChange={(e) => setSelectedSize(e.target.value)}
-                    value={selectedSize || ''}
-                  >
-                    <option value="" disabled>Select a size</option>
-                    {sizes.map((s, i) => (
-                      <option key={i} value={s.name} disabled={s.stock === 0}>
-                        {s.name} {s.stock === 0 ? '(Out of Stock)' : ''}
-                      </option>
-                    ))}
-                  </select>
-                  <FiChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 pointer-events-none group-hover:text-black transition-colors" size={16} />
+                <div className="flex flex-wrap gap-2">
+                  {sizes.map((s, i) => (
+                    <button
+                      key={i}
+                      disabled={s.stock === 0}
+                      onClick={() => setSelectedSize(s.name)}
+                      className={`min-w-[50px] h-10 px-4 flex items-center justify-center text-xs font-bold border rounded transition-all duration-200 ${selectedSize === s.name
+                        ? 'bg-black text-white border-black'
+                        : 'bg-white text-black border-gray-200 hover:border-black'
+                        } ${s.stock === 0 ? 'opacity-30 cursor-not-allowed line-through' : 'active:scale-95'}`}
+                    >
+                      {s.name}
+                    </button>
+                  ))}
                 </div>
               ) : (
                 <div className="w-full h-12 bg-gray-50 border border-gray-100 rounded-xl px-4 flex items-center text-sm font-bold text-gray-500">
