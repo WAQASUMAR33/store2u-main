@@ -19,7 +19,7 @@ export async function POST(request) {
         reviewer,
         rating: Number(rating),
         comment,
-        status: 'pending', // Set the default status as 'pending'
+        status: 'approved', // Set the default status as 'approved' for testing
       },
     });
 

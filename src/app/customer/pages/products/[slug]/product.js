@@ -231,6 +231,12 @@ const ProductPage = ({ productData }) => {
   const handleQuantityDecrease = () => setQuantity(q => Math.max(1, q - 1));
   const handleQuantityIncrease = () => setQuantity(q => (product?.stock ? Math.min(product.stock, q + 1) : q + 1));
 
+  const averageRating = useMemo(() => {
+    if (!reviews || reviews.length === 0) return 0;
+    const sum = reviews.reduce((acc, curr) => acc + (curr.rating || 0), 0);
+    return (sum / reviews.length).toFixed(1);
+  }, [reviews]);
+
   // Add to Cart Logic
   const createCartItem = () => ({
     id: `${product.id}-${selectedSize || 'def'}-${selectedColor || 'def'}`,
@@ -418,7 +424,7 @@ const ProductPage = ({ productData }) => {
             <div className="flex items-center gap-3">
               <div className="flex items-center gap-1 bg-[#2D2D2D] text-white px-2 py-0.5 rounded text-[10px] font-bold">
                 <GoStarFill className="text-orange-400" />
-                <span>4.9</span>
+                <span>{averageRating}</span>
               </div>
               <span className="text-xs text-gray-500 underline underline-offset-4 decoration-gray-300 pointer-events-none">
                 {reviews.length} Shop reviews
@@ -617,7 +623,7 @@ const ProductPage = ({ productData }) => {
                   <div className="flex flex-col items-center">
                     <div className="flex items-center gap-2 text-3xl font-bold text-gray-900">
                       <GoStarFill className="text-gray-900" size={24} />
-                      <span>4.9</span>
+                      <span>{averageRating}</span>
                       <span className="text-gray-300 text-xl font-normal">/5</span>
                     </div>
                     <span className="text-[10px] font-bold text-gray-400 uppercase tracking-widest mt-1">Item average</span>

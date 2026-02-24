@@ -22,7 +22,6 @@ export async function GET(request) {
     const reviews = await prisma.review.findMany({
       where: {
         productId: Number(productId),
-        status: 'approved', // Only fetch active reviews
       },
       include: {
         product: true,
