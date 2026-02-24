@@ -579,7 +579,7 @@ const ProductPage = ({ productData }) => {
                 <button
                   onClick={handleBuyNow}
                   disabled={loading || (!isDigital && product?.stock === 0)}
-                  className="w-full bg-orange-600 text-white h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-orange-700 transition-all shadow-xl shadow-orange-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
+                  className="w-full bg-orange-600 text-white h-14 rounded-lg uppercase font-black text-xs tracking-[0.2em] hover:bg-orange-700 transition-all shadow-xl shadow-orange-900/10 active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed group"
                 >
                   <span className="flex items-center justify-center gap-2">
                     {isDigital ? 'Download Now' : 'Buy it now'}
@@ -590,7 +590,7 @@ const ProductPage = ({ productData }) => {
                   <button
                     onClick={handleAddToCart}
                     disabled={loading || product?.stock === 0}
-                    className="w-full bg-white text-black border-2 border-black h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-[0.98] disabled:opacity-50"
+                    className="w-full bg-white text-black border-2 border-black h-14 rounded-lg uppercase font-black text-xs tracking-[0.2em] hover:bg-gray-50 transition-all active:scale-[0.98] disabled:opacity-50"
                   >
                     {product?.stock === 0 ? 'Out of Stock' : 'Add to basket'}
                   </button>
@@ -599,7 +599,7 @@ const ProductPage = ({ productData }) => {
             ) : (
               <button
                 onClick={handleDownload}
-                className="w-full bg-[#1E4C2F] text-white h-14 rounded-full uppercase font-black text-xs tracking-[0.2em] hover:bg-[#153a23] transition-all shadow-xl shadow-green-900/10 active:scale-[0.98]"
+                className="w-full bg-[#1E4C2F] text-white h-14 rounded-lg uppercase font-black text-xs tracking-[0.2em] hover:bg-[#153a23] transition-all shadow-xl shadow-green-900/10 active:scale-[0.98]"
               >
                 Download product
               </button>
@@ -677,7 +677,7 @@ const ProductPage = ({ productData }) => {
               <button
                 onClick={handleReviewSubmit}
                 disabled={reviewLoading}
-                className="bg-orange-600 text-white px-8 py-3 rounded-full text-xs font-black uppercase tracking-[0.1em] hover:bg-orange-700 disabled:opacity-50 transition-all shadow-lg shadow-orange-600/20"
+                className="bg-orange-600 text-white px-8 py-3 rounded-lg text-xs font-black uppercase tracking-[0.1em] hover:bg-orange-700 disabled:opacity-50 transition-all shadow-lg shadow-orange-600/20"
               >
                 {reviewLoading ? 'Submitting...' : 'Submit Review'}
               </button>
@@ -686,7 +686,7 @@ const ProductPage = ({ productData }) => {
 
           <ReviewsSection reviews={reviews} />
 
-          <button className="w-full mt-10 py-3 border-2 border-gray-900 rounded-full text-xs font-black uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all">
+          <button className="w-full mt-10 py-3 border-2 border-gray-900 rounded-lg text-xs font-black uppercase tracking-[0.2em] hover:bg-gray-900 hover:text-white transition-all">
             View all reviews for this item
           </button>
         </div>
