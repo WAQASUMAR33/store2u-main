@@ -18,7 +18,14 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
     const itemsList = items
       .map(item => `
         <tr style="border-bottom: 1px solid #eee;">
-          <td style="padding: 10px; color: #333;">${item.product.name} <span style="color: #888; font-size: 12px;">x${item.quantity}</span></td>
+          <td style="padding: 10px; color: #333;">
+            <div style="font-weight: bold;">${item.product.name}</div>
+            <div style="color: #666; font-size: 12px; margin-top: 4px;">
+              ${item.selectedSize ? `<span>Size: ${item.selectedSize}</span>` : ''}
+              ${item.selectedColor ? `<span style="margin-left: 10px;">Color: ${item.selectedColor}</span>` : ''}
+            </div>
+          </td>
+          <td style="padding: 10px; text-align: center; color: #333;">x${item.quantity}</td>
           <td style="padding: 10px; text-align: right; color: #333;">Rs.${item.price.toLocaleString()}</td>
         </tr>`
       )
@@ -28,13 +35,24 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
       <p style="text-align: center;">Transaction ID: <strong>#${orderId}</strong></p>
       
       <div style="background-color: #f9f9f9; padding: 15px; border-radius: 6px; margin: 20px 0;">
-        <p style="margin: 0; font-weight: bold;">Order Summary</p>
+        <p style="margin: 0; font-weight: bold; padding-bottom: 10px; border-bottom: 2px solid #eee;">Order Summary</p>
         <table style="width: 100%; border-collapse: collapse; margin-top: 10px;">
-          ${itemsList}
-          <tr>
-            <td style="padding: 15px 10px; font-weight: bold; font-size: 16px;">Total</td>
-            <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; color: #F25C2C;">Rs.${total.toLocaleString()}</td>
-          </tr>
+          <thead>
+            <tr style="text-align: left; font-size: 13px; color: #888;">
+              <th style="padding: 10px; font-weight: normal;">Product</th>
+              <th style="padding: 10px; font-weight: normal; text-align: center;">Qty</th>
+              <th style="padding: 10px; font-weight: normal; text-align: right;">Price</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${itemsList}
+          </tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="padding: 15px 10px; font-weight: bold; font-size: 16px;">Total</td>
+              <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; color: #F25C2C;">Rs.${total.toLocaleString()}</td>
+            </tr>
+          </tfoot>
         </table>
       </div>
 
