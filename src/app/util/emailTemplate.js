@@ -52,7 +52,6 @@ export const wrapEmailBody = (title, bodyContent) => {
           <div class="footer">
             <p>&copy; ${currentYear} Store2U. All rights reserved.</p>
             <p>You are receiving this email because you signed up on our website.</p>
-            <p><a href="https://store2u.ca/customer/pages/orders" class="button">View Order Details</a></p>
           </div>
         </div>
       </div>

@@ -31,8 +31,8 @@ export async function POST(request) {
     }
 
     // Use the utility function to send the email
-    // Note: The utility expects (email, orderId, total, items)
-    await sendOrderConfirmation(email, orderId, order.netTotal, items);
+    // Note: Passing the full order object for detailed breakdown
+    await sendOrderConfirmation(email, orderId, order);
 
     return NextResponse.json({ message: 'Order confirmation email sent successfully' });
 

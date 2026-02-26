@@ -1,8 +1,9 @@
 import { getTransporter, getMailUser } from './smtp';
 import { wrapEmailBody } from './emailTemplate';
 
-export async function sendOrderConfirmation(email, orderId, total, items) {
+export async function sendOrderConfirmation(email, orderId, order) {
   const mailUser = getMailUser();
+  const { netTotal, total: subtotal, deliveryCharge, extraDeliveryCharge, orderItems: items } = order;
 
   const transporter = getTransporter();
   if (!transporter) {
@@ -47,10 +48,36 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
           <tbody>
             ${itemsList}
           </tbody>
-          <tfoot>
+          <tfoot style="color: #444;">
             <tr>
-              <td colspan="2" style="padding: 15px 10px; font-weight: bold; font-size: 16px;">Total</td>
-              <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 16px; color: #F25C2C;">Rs.${total.toLocaleString()}</td>
+              <td colspan="2" style="padding: 10px 10px 5px 10px; text-align: right; font-size: 14px;">Order Amount</td>
+              <td style="padding: 10px 10px 5px 10px; text-align: right; font-size: 14px;">Rs.${subtotal.toLocaleString()}</td>
+            </tr>
+            ${order.discount > 0 ? `
+            <tr>
+              <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Discount</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px; color: #d9534f;">-Rs.${order.discount.toLocaleString()}</td>
+            </tr>
+            ` : ''}
+            ${order.tax > 0 ? `
+            <tr>
+              <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Tax</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${order.tax.toLocaleString()}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Shipping</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${deliveryCharge.toLocaleString()}</td>
+            </tr>
+            ${extraDeliveryCharge > 0 ? `
+            <tr>
+              <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">COD Surcharge</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${extraDeliveryCharge.toLocaleString()}</td>
+            </tr>
+            ` : ''}
+            <tr>
+              <td colspan="2" style="padding: 15px 10px; font-weight: bold; font-size: 18px; color: #000;">Total</td>
+              <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #F25C2C;">Rs.${netTotal.toLocaleString()}</td>
             </tr>
           </tfoot>
         </table>
@@ -59,7 +86,7 @@ export async function sendOrderConfirmation(email, orderId, total, items) {
       <p style="text-align: center; color: #666; font-size: 13px;">
         We've received your order and will notify you once it ships. You can view your order details in your dashboard.
       </p>
-      <div style="text-align: center;">
+      <div style="text-align: center; margin-top: 20px;">
         <a href="https://store2u.ca/customer/pages/orders" class="button">View My Orders</a>
       </div>
     `;
