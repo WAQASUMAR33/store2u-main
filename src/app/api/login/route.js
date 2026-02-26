@@ -40,11 +40,14 @@ export async function POST(request) {
       expiresIn: '1h' // token will expire in 1 hour
     });
 
+    // Extract all user data except sensitive fields
+    const { password: userPassword, verificationToken, verificationTokenExpires, resetToken, resetTokenExpires, ...userData } = user;
+
     return NextResponse.json({
       success: true,
       message: "Login Successfully",
       token,
-      user: { email: user.email, id: user.id, name: user.name, role: user.role }, // Return the user details
+      user: userData, // Return all user details
     });
   } catch (error) {
     console.error('Error during login:', error);
