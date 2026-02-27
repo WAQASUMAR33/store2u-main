@@ -3,7 +3,20 @@ import { wrapEmailBody } from './emailTemplate';
 
 export async function sendOrderConfirmation(email, orderId, order) {
   const mailUser = getMailUser();
-  const { netTotal, total: subtotal, deliveryCharge, extraDeliveryCharge, orderItems: items } = order;
+
+  // Safety check to prevent destructuring from null/undefined
+  if (!order) {
+    console.error('[SMTP] Order object is missing.');
+    return null;
+  }
+
+  const {
+    netTotal = 0,
+    total: subtotal = 0,
+    deliveryCharge = 0,
+    extraDeliveryCharge = 0,
+    orderItems: items = []
+  } = order;
 
   const transporter = getTransporter();
   if (!transporter) {
@@ -16,18 +29,19 @@ export async function sendOrderConfirmation(email, orderId, order) {
     await transporter.verify();
 
     // Create order items list for the email
-    const itemsList = items
+    // Ensure items is an array before calling map
+    const itemsList = (Array.isArray(items) ? items : [])
       .map(item => `
         <tr style="border-bottom: 1px solid #eee;">
           <td style="padding: 10px; color: #333;">
-            <div style="font-weight: bold;">${item.product.name}</div>
+            <div style="font-weight: bold;">${item?.product?.name || 'Product'}</div>
             <div style="color: #666; font-size: 12px; margin-top: 4px;">
-              ${item.selectedSize ? `<span>Size: ${item.selectedSize}</span>` : ''}
-              ${item.selectedColor ? `<span style="margin-left: 10px;">Color: ${item.selectedColor}</span>` : ''}
+              ${item?.selectedSize ? `<span>Size: ${item.selectedSize}</span>` : ''}
+              ${item?.selectedColor ? `<span style="margin-left: 10px;">Color: ${item.selectedColor}</span>` : ''}
             </div>
           </td>
-          <td style="padding: 10px; text-align: center; color: #333;">x${item.quantity}</td>
-          <td style="padding: 10px; text-align: right; color: #333;">Rs.${item.price.toLocaleString()}</td>
+          <td style="padding: 10px; text-align: center; color: #333;">x${item?.quantity || 1}</td>
+          <td style="padding: 10px; text-align: right; color: #333;">Rs.${(item?.price || 0).toLocaleString()}</td>
         </tr>`
       )
       .join('');
@@ -46,38 +60,38 @@ export async function sendOrderConfirmation(email, orderId, order) {
             </tr>
           </thead>
           <tbody>
-            ${itemsList}
+            ${itemsList || '<tr><td colspan="3" style="padding: 10px; text-align: center;">Order details not available</td></tr>'}
           </tbody>
           <tfoot style="color: #444;">
             <tr>
               <td colspan="2" style="padding: 10px 10px 5px 10px; text-align: right; font-size: 14px;">Order Amount</td>
-              <td style="padding: 10px 10px 5px 10px; text-align: right; font-size: 14px;">Rs.${subtotal.toLocaleString()}</td>
+              <td style="padding: 10px 10px 5px 10px; text-align: right; font-size: 14px;">Rs.${(subtotal || 0).toLocaleString()}</td>
             </tr>
-            ${order.discount > 0 ? `
+            ${(order.discount || 0) > 0 ? `
             <tr>
               <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Discount</td>
-              <td style="padding: 5px 10px; text-align: right; font-size: 14px; color: #d9534f;">-Rs.${order.discount.toLocaleString()}</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px; color: #d9534f;">-Rs.${(order.discount || 0).toLocaleString()}</td>
             </tr>
             ` : ''}
-            ${order.tax > 0 ? `
+            ${(order.tax || 0) > 0 ? `
             <tr>
               <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Tax</td>
-              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${order.tax.toLocaleString()}</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${(order.tax || 0).toLocaleString()}</td>
             </tr>
             ` : ''}
             <tr>
               <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">Shipping</td>
-              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${deliveryCharge.toLocaleString()}</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${(deliveryCharge || 0).toLocaleString()}</td>
             </tr>
-            ${extraDeliveryCharge > 0 ? `
+            ${(extraDeliveryCharge || 0) > 0 ? `
             <tr>
               <td colspan="2" style="padding: 5px 10px; text-align: right; font-size: 14px;">COD Surcharge</td>
-              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${extraDeliveryCharge.toLocaleString()}</td>
+              <td style="padding: 5px 10px; text-align: right; font-size: 14px;">Rs.${(extraDeliveryCharge || 0).toLocaleString()}</td>
             </tr>
             ` : ''}
             <tr>
               <td colspan="2" style="padding: 15px 10px; font-weight: bold; font-size: 18px; color: #000;">Total</td>
-              <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #F25C2C;">Rs.${netTotal.toLocaleString()}</td>
+              <td style="padding: 15px 10px; text-align: right; font-weight: bold; font-size: 18px; color: #F25C2C;">Rs.${(netTotal || 0).toLocaleString()}</td>
             </tr>
           </tfoot>
         </table>

@@ -128,8 +128,7 @@ export async function POST(request) {
                 await sendOrderConfirmation(
                     shippingAddress.email,
                     order.id,
-                    order.netTotal,
-                    order.orderItems
+                    order
                 );
             } catch (emailErr) {
                 console.warn('Suppressing email error to save order:', emailErr);
